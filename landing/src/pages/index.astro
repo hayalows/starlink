@@ -102,7 +102,7 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
 
         <section class="how-panel" id="how-it-works"><div><div class="eyebrow">LOCAL-FIRST · NO STARLINK LOGIN</div><h2>Your data stays yours.</h2><p>The web app is hosted publicly, but it only reads household readings from the local collector address you provide. Nothing is sent to a Starlink account or synced to our servers.</p></div><div class="how-steps"><div><b>01</b><span>Run the monitor on a computer connected to your Starlink network.</span></div><div><b>02</b><span>Enter its private collector address here. The browser connects directly.</span></div><div><b>03</b><span>Install this dashboard on your phone for quick access.</span></div></div></section>
 
-        <section class="connect-section" id="connection"><div><div class="eyebrow">LIVE READINGS</div><h2>Connect your home monitor</h2><p>Pair this dashboard with the Dishylink monitor running on a computer at home. Your readings remain local to your network.</p></div><button class="connect-button light" data-open-connect>Set up connection <span>→</span></button></section>
+        <section class="connect-section" id="connection"><div><div class="eyebrow">LIVE READINGS</div><h2>Connect your home monitor</h2><p>Pair this dashboard with the local Starlink monitor running on your home computer. Your readings remain local to your network.</p></div><button class="connect-button light" data-open-connect>Set up connection <span>→</span></button></section>
         <footer class="app-footer"><span>STARLINK GHANA · INDEPENDENT TOOL</span><span>Not affiliated with or endorsed by SpaceX or Starlink.</span><a href="https://github.com/hayalows/starlink" target="_blank" rel="noreferrer">Open source ↗</a></footer>
       </div>
     </main>
@@ -140,7 +140,8 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
         var days = settings.period === "day" ? 1 : settings.period === "week" ? 7 : 30;
         var actualRange = readings && readings.energyByRange && readings.energyByRange[settings.period];
         var measuredKwh = actualRange && actualRange.coverage && actualRange.coverage.fraction >= 0.5 ? actualRange.totalKWh : null;
-        var kwh = measuredKwh !== null ? measuredKwh : dayKwh * days;
+        var usingMeasuredEnergy = measuredKwh !== null;
+        var kwh = usingMeasuredEnergy ? measuredKwh : dayKwh * days;
         var cost = marginalCost(kwh);
         $("watts-now").textContent = readings && Number.isFinite(readings.powerW) ? readings.powerW.toFixed(1) : m.watts.toFixed(1);
         $("watts-mode").textContent = readings ? "live draw" : "W average";
@@ -152,11 +153,11 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
         $("rate-label").textContent = settings.tariff === "lifeline" ? "ECG lifeline" : "ECG residential";
         $("selected-cost").textContent = currency(cost);
         $("selected-kwh").textContent = kwh.toFixed(2) + " kWh";
-        $("selected-period").textContent = "per " + settings.period + " · " + (readings ? "using measured energy" : "based on your setup");
-        $("chart-caption").textContent = readings ? "measured · collector" : "modelled · not measured";
-        $("cost-range").textContent = readings ? "Live energy" : "Estimate";
-        $("cost-range").classList.toggle("live", !!readings);
-        $("estimate-explain").textContent = readings ? "Energy uses samples recorded by your local monitor. The cedi amount applies your selected ECG rate and is an estimate of the dish’s incremental energy charge." : "Estimate uses the selected dish’s typical wattage and your ECG tariff. The cost is incremental and can reflect your home’s selected residential tariff band.";
+        $("selected-period").textContent = "per " + settings.period + " · " + (usingMeasuredEnergy ? "using measured energy" : "based on your setup");
+        $("chart-caption").textContent = "illustration · modelled, not historical";
+        $("cost-range").textContent = usingMeasuredEnergy ? "Live energy" : "Estimate";
+        $("cost-range").classList.toggle("live", usingMeasuredEnergy);
+        $("estimate-explain").textContent = usingMeasuredEnergy ? "Energy uses sufficiently complete samples recorded by your local monitor. The cedi amount applies your selected ECG rate and is an estimate of the dish’s incremental energy charge." : "Estimate uses the selected dish’s typical wattage and your ECG tariff. The cost is incremental and can reflect your home’s selected residential tariff band.";
         $("hours-value").textContent = settings.hours + (settings.hours === 1 ? " hour" : " hours");
         $("hours").value = settings.hours;
         $("dish-model").value = settings.model;
