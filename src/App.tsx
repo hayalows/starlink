@@ -185,7 +185,7 @@ export default function App() {
       {/* Data usage modal */}
       {openPanel === "datausage" && (
         <DetailsModal title='Data usage' onClose={() => setOpenPanel(null)} size='wide'>
-          <DataUsagePanel />
+          <DataUsagePanel status={status} />
         </DetailsModal>
       )}
       {/* Account modal */}

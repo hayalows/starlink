@@ -4,6 +4,7 @@
 // (Starlink's own billing meter is cloud-side and not exposed locally).
 
 import { useState } from "react";
+import type { DishStatusJson } from "@core/dishClient";
 import { useDataUsage, type UsageBucket } from "../../hooks/useDataUsage";
 import type { EnergyRange } from "../../hooks/useEnergyHistory";
 import { formatGigabytes } from "../../lib/format";
@@ -15,10 +16,12 @@ import { Explainer } from "../ui/explainer";
 import { FigureRow } from "../ui/figure-row";
 import { DeviceUsageList } from "./DeviceUsageList";
 import { CloudDataUsage } from "./CloudDataUsage";
+import { GhanaCostPanel } from "./GhanaCostPanel";
 
-type UsageSource = "local" | "cloud";
+type UsageSource = "cost" | "local" | "cloud";
 
 const SOURCE_TABS = [
+  { label: "Cost & usage", value: "cost" as const },
   { label: "Local session", value: "local" as const },
   { label: "Starlink billing", value: "cloud" as const },
 ];
@@ -72,8 +75,8 @@ function UsageBars({ buckets, range }: { buckets: UsageBucket[]; range: EnergyRa
   );
 }
 
-export function DataUsagePanel() {
-  const [source, setSource] = useState<UsageSource>("local");
+export function DataUsagePanel({ status }: { status: DishStatusJson | null }) {
+  const [source, setSource] = useState<UsageSource>("cost");
 
   return (
     <div>
@@ -85,7 +88,13 @@ export function DataUsagePanel() {
         variant='glider'
         className='mb-1'
       />
-      {source === "local" ? <LocalDataUsage /> : <CloudDataUsage active={source === "cloud"} />}
+      {source === "cost" ? (
+        <GhanaCostPanel status={status} />
+      ) : source === "local" ? (
+        <LocalDataUsage />
+      ) : (
+        <CloudDataUsage active={source === "cloud"} />
+      )}
     </div>
   );
 }

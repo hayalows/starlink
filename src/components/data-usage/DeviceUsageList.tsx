@@ -35,6 +35,10 @@ function monthKey(atMs: number): number {
   return date.getFullYear() * 12 + date.getMonth();
 }
 
+function formatShare(percent: number): string {
+  return percent > 0 && percent < 1 ? "<1%" : Math.round(percent) + "%";
+}
+
 export function DeviceUsageList() {
   const {
     totals,
@@ -74,6 +78,12 @@ export function DeviceUsageList() {
   const sorted = [...(totals ?? [])].sort(
     (a, b) => b.rxBytes + b.txBytes - (a.rxBytes + a.txBytes),
   );
+  const currentMonth = monthKey(nowMs);
+  const currentMonthBytes = sorted.reduce(
+    (sum, total) =>
+      monthKey(total.sinceMs) === currentMonth ? sum + total.rxBytes + total.txBytes : sum,
+    0,
+  );
 
   return (
     <div className='mt-6'>
@@ -81,7 +91,7 @@ export function DeviceUsageList() {
         <span className='text-[17px] font-bold tracking-[-0.01em] text-foreground'>
           Devices Usage
         </span>
-        <InfoDot tip='How much data each device has used this month. The total keeps adding up even if a device leaves and rejoins your network, and it starts over at the beginning of each month.' />
+        <InfoDot tip='How much data each device has used this month. The total keeps adding up even if a device leaves and rejoins your network, and it starts over at the beginning of each month. The percentage is this device’s share of all current-month router-reported data.' />
         {unavailable ? null : confirmingClear ? (
           <span className='ml-auto flex items-center gap-2'>
             <button
@@ -109,7 +119,10 @@ export function DeviceUsageList() {
           </button>
         )}
       </div>
-      <div className='mb-1 text-[11.5px] font-medium text-muted-foreground'>{monthLabel}</div>
+      <div className='mb-1 flex flex-wrap items-center justify-between gap-1 text-[11.5px] font-medium text-muted-foreground'>
+        <span>{monthLabel}</span>
+        {currentMonthBytes > 0 && <span>{formatBytes(currentMonthBytes)} across tracked devices</span>}
+      </div>
       {unavailable && (
         <div className='py-2.5 text-[12.5px] text-muted-foreground'>
           Usage unavailable — historian not reachable.
@@ -130,6 +143,11 @@ export function DeviceUsageList() {
               key={key}
               total={total}
               nowMs={nowMs}
+              sharePercent={
+                monthKey(total.sinceMs) === currentMonth && currentMonthBytes > 0
+                  ? ((total.rxBytes + total.txBytes) / currentMonthBytes) * 100
+                  : null
+              }
               onReset={() => void reset(key)}
               onRemove={() => void remove(key)}
             />
@@ -165,12 +183,14 @@ export function DeviceUsageList() {
 function DeviceUsageRow({
   total,
   nowMs,
+  sharePercent,
   onReset,
   onRemove,
 }: {
   total: ClientUsageTotal;
   /** The list's clock, so every row judges "now" against the same moment. */
   nowMs: number;
+  sharePercent: number | null;
   onReset: () => void;
   onRemove: () => void;
 }) {
@@ -203,6 +223,23 @@ function DeviceUsageRow({
           {name}
         </span>
         <span className='text-[11.5px] text-muted-foreground'>{subParts.join(" · ")}</span>
+        {sharePercent !== null && (
+          <span className='mt-1 flex items-center gap-2'>
+            <span
+              className='h-1 w-16 overflow-hidden rounded-full bg-fill-raised'
+              role='img'
+              aria-label={formatShare(sharePercent) + " of tracked device data"}
+            >
+              <span
+                className='block h-full rounded-full bg-chart-warm'
+                style={{ width: Math.min(100, sharePercent) + "%" }}
+              />
+            </span>
+            <span className='font-mono text-[10px] tabular-nums text-muted-foreground'>
+              {formatShare(sharePercent)} of data
+            </span>
+          </span>
+        )}
       </span>
       <span className='flex flex-none flex-col items-end'>
         <span className='font-mono text-[14px] font-semibold tabular-nums text-foreground'>
