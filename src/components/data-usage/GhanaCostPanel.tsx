@@ -98,6 +98,7 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
   const a = useGhanaAnalysis(status, period);
   const month = useGhanaAnalysis(status, "month");
   const { settings: s, update } = a;
+  const [setupOpen, setSetupOpen] = useState(s.planFee === 0);
   const [exported, setExported] = useState(false);
   const numberField = (key: keyof GhanaSettings, label: string, max = 100000) => (
     <label className='block text-[12px] font-medium'>
@@ -312,7 +313,11 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
             )}
         </Section>
       </div>
-      <details className={card} open={s.planFee === 0}>
+      <details
+        className={card}
+        open={setupOpen}
+        onToggle={(event) => setSetupOpen(event.currentTarget.open)}
+      >
         <summary className='cursor-pointer text-[14px] font-bold'>
           Your setup & monthly targets
         </summary>

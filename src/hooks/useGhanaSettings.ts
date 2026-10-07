@@ -83,9 +83,9 @@ export function useGhanaSettings() {
 }
 
 if (typeof window !== "undefined") {
-  window.addEventListener("storage", event => {
+  window.addEventListener("storage", (event) => {
     if (event.key !== KEY) return;
     settings = read();
-    listeners.forEach(listener => listener());
+    listeners.forEach((listener) => listener());
   });
 }

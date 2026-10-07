@@ -1,24 +1,50 @@
 const CACHE = "starlink-ghana-shell-v2";
-const SHELL = ["/", "/manifest.webmanifest", "/starlink-mark.svg", "/icon-192.png", "/icon-512.png"];
+const SHELL = [
+  "/",
+  "/manifest.webmanifest",
+  "/starlink-mark.svg",
+  "/icon-192.png",
+  "/icon-512.png",
+];
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(SHELL))
+      .then(() => self.skipWaiting()),
+  );
 });
 self.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))),
+      )
+      .then(() => self.clients.claim()),
+  );
 });
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
   if (new URL(request.url).pathname === "/version.json") return;
   if (request.mode === "navigate") {
-    event.respondWith(fetch(request).then((response) => {
-      if (response.ok) caches.open(CACHE).then((cache) => cache.put("/", response.clone()));
-      return response;
-    }).catch(() => caches.match("/")));
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) caches.open(CACHE).then((cache) => cache.put("/", response.clone()));
+          return response;
+        })
+        .catch(() => caches.match("/")),
+    );
     return;
   }
-  event.respondWith(fetch(request).then((response) => {
-    if (response.ok) caches.open(CACHE).then((cache) => cache.put(request, response.clone()));
-    return response;
-  }).catch(() => caches.match(request)));
+  event.respondWith(
+    fetch(request)
+      .then((response) => {
+        if (response.ok) caches.open(CACHE).then((cache) => cache.put(request, response.clone()));
+        return response;
+      })
+      .catch(() => caches.match(request)),
+  );
 });

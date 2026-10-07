@@ -1570,8 +1570,12 @@ function summarizeLatencyRange(range: Range, now: Date) {
 function isLocalHost(host?: string): boolean {
   if (!host) return false;
   const hostname = host.replace(/:\d+$/, "").replace(/^\[|\]$/g, "");
-  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" ||
-    (ALLOWED_HOST !== "" && hostname.toLowerCase() === ALLOWED_HOST.toLowerCase());
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "::1" ||
+    (ALLOWED_HOST !== "" && hostname.toLowerCase() === ALLOWED_HOST.toLowerCase())
+  );
 }
 
 export function handleRequest(request: IncomingMessage, response: ServerResponse): void {
@@ -1588,21 +1592,31 @@ export function handleRequest(request: IncomingMessage, response: ServerResponse
     response.end("origin not allowed");
     return;
   }
-  if (origin && (localOrigin || appOrigin)) response.setHeader("Access-Control-Allow-Origin", origin);
+  if (origin && (localOrigin || appOrigin))
+    response.setHeader("Access-Control-Allow-Origin", origin);
   response.setHeader("Vary", "Origin");
-  response.setHeader("Access-Control-Allow-Methods", localOrigin ? "GET, POST, DELETE, OPTIONS" : "GET, OPTIONS");
+  response.setHeader(
+    "Access-Control-Allow-Methods",
+    localOrigin ? "GET, POST, DELETE, OPTIONS" : "GET, OPTIONS",
+  );
   response.setHeader("Access-Control-Allow-Headers", "Authorization");
   if (request.method === "OPTIONS") {
     response.statusCode = 204;
     response.end();
     return;
   }
-  const requestHost = (request.headers.host ?? "").replace(/:\d+$/, "").replace(/^\[|\]$/g, "").toLowerCase();
-  const isLoopbackHost = requestHost === "localhost" || requestHost === "127.0.0.1" || requestHost === "::1";
+  const requestHost = (request.headers.host ?? "")
+    .replace(/:\d+$/, "")
+    .replace(/^\[|\]$/g, "")
+    .toLowerCase();
+  const isLoopbackHost =
+    requestHost === "localhost" || requestHost === "127.0.0.1" || requestHost === "::1";
   if (appOrigin && !ACCESS_TOKEN && !isLoopbackHost) {
     response.statusCode = 503;
     response.setHeader("Content-Type", "application/json");
-    response.end(JSON.stringify({ error: "private cross-device access requires HISTORIAN_ACCESS_TOKEN" }));
+    response.end(
+      JSON.stringify({ error: "private cross-device access requires HISTORIAN_ACCESS_TOKEN" }),
+    );
     return;
   }
   if (ACCESS_TOKEN && request.headers.authorization !== `Bearer ${ACCESS_TOKEN}`) {

@@ -224,13 +224,22 @@ function recalc() {
   text("router-status", connected ? "Router totals" : "Not connected");
   text("connection-label", connected ? "COLLECTOR CONNECTED" : "CALCULATOR MODE");
   el("connection-strip").classList.toggle("connected", connected);
-  if (connected && lastRead) {
+  {
     const copy = el("connection-strip").querySelector(".strip-copy")!;
     copy.replaceChildren();
     const strong = document.createElement("strong");
-    strong.textContent = "Collector connected · last read " + lastRead.toLocaleTimeString("en-GH");
+    strong.textContent =
+      connected && lastRead
+        ? "Collector connected · last read " + lastRead.toLocaleTimeString("en-GH")
+        : lastRead
+          ? "Collector unavailable · previous readings may be stale"
+          : "Your dashboard is ready.";
     const span = document.createElement("span");
-    span.textContent = "Local readings refresh every 30 seconds while this page is open.";
+    span.textContent = connected
+      ? "Local readings refresh every 30 seconds while this page is open."
+      : lastRead
+        ? "Check your monitor connection. Effective cost uses manual monthly GB until readings recover."
+        : "Use the calculator below, or open the extension for live readings, budgets and device cost shares.";
     copy.append(strong, span);
   }
   const bars = el("cost-bars");
@@ -327,15 +336,13 @@ const dialog = el("connect-dialog") as HTMLDialogElement;
 document
   .querySelectorAll("[data-open-connect]")
   .forEach((b) => b.addEventListener("click", () => dialog.showModal()));
-document
-  .querySelectorAll<HTMLElement>("[data-scroll]")
-  .forEach((b) =>
-    b.addEventListener("click", () =>
-      el(b.dataset.scroll!).scrollIntoView({
-        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
-      }),
-    ),
-  );
+document.querySelectorAll<HTMLElement>("[data-scroll]").forEach((b) =>
+  b.addEventListener("click", () =>
+    el(b.dataset.scroll!).scrollIntoView({
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+    }),
+  ),
+);
 async function getJson(base: string, path: string) {
   const response = await fetch(base + path, {
     headers: token ? { Authorization: "Bearer " + token } : {},

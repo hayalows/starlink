@@ -107,7 +107,8 @@ function LocalDataUsage() {
   if (unavailable) {
     return (
       <Callout className='mt-2.5'>
-        No local history is available. Keep the browser running on your Starlink network to record traffic, or check your desktop recorder.
+        No local history is available. Keep the browser running on your Starlink network to record
+        traffic, or check your desktop recorder.
       </Callout>
     );
   }

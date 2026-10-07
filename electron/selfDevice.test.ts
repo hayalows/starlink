@@ -14,7 +14,11 @@ vi.mock("./preferences", () => ({
 }));
 
 // These tests exercise stored client identity, not the machine running Vitest.
-vi.mock("node:os", () => ({ networkInterfaces: () => ({ eth0: [{ internal: false, mac: "10:20:30:40:50:60", address: "192.168.1.8" }] }) }));
+vi.mock("node:os", () => ({
+  networkInterfaces: () => ({
+    eth0: [{ internal: false, mac: "10:20:30:40:50:60", address: "192.168.1.8" }],
+  }),
+}));
 
 const { hostIdentity, rememberSelfDevice } = await import("./selfDevice");
 
