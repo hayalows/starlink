@@ -7,7 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 // at runtime and no request-time env for a secret to leak into. Cloudflare serves
 // the ./dist directory as static assets (see wrangler.jsonc).
 export default defineConfig({
-  site: "https://dishylink.com",
+  site: "https://starlink-ghana.vercel.app",
   output: "static",
   integrations: [sitemap()],
   vite: { plugins: [tailwindcss()] },
