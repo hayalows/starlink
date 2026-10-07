@@ -3,6 +3,7 @@ on:
   push:
     branches: [master]
     paths:
+      - ".github/workflows/extension-release.yml"
       - "package.json"
       - "wxt.config.ts"
       - "extension/**"
