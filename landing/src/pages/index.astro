@@ -70,7 +70,7 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
         <section class="section-grid" id="power">
           <article class="panel power-panel">
             <div class="panel-heading"><div><div class="eyebrow">GHANA · ECG · GH₵</div><h2>What it costs to run</h2></div><div class="mode-toggle" role="group" aria-label="Cost period"><button class="period active" data-period="day">Day</button><button class="period" data-period="week">Week</button><button class="period" data-period="month">Month</button></div></div>
-            <div class="cost-summary"><div><span class="muted-label">ESTIMATED DISH COST</span><div class="big-cost"><span>GH₵</span><strong id="selected-cost">0.00</strong></div><div class="muted-label" id="selected-period">per day · based on your setup</div></div><div class="energy-stat"><span class="energy-orb">ϟ</span><div><strong id="selected-kwh">0.78 kWh</strong><small>energy used per day</small></div></div></div>
+            <div class="cost-summary"><div><span class="muted-label">ESTIMATED DISH COST</span><div class="big-cost"><span>GH₵</span><strong id="selected-cost">0.00</strong></div><div class="muted-label" id="selected-period">per day · based on your setup</div></div><div class="energy-stat"><span class="energy-orb">ϟ</span><div><strong id="selected-kwh">0.78 kWh</strong><small id="selected-energy-label">energy used per day</small></div></div></div>
             <div class="bar-visual"><div class="bar-top"><span>Daily cost breakdown</span><span id="chart-caption">modelled · not measured</span></div><div class="bars" id="cost-bars" aria-label="Estimated cost comparison"></div><div class="bar-labels"><span>Dish electricity</span><span>30-day estimate</span></div></div>
             <div class="estimate-caption"><span class="info-dot">i</span><span id="estimate-explain">Estimate based on the selected dish’s typical wattage and your ECG tariff. Connect a local collector to replace the model with measured energy.</span></div>
           </article>
@@ -153,6 +153,7 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
         $("rate-label").textContent = settings.tariff === "lifeline" ? "ECG lifeline" : "ECG residential";
         $("selected-cost").textContent = currency(cost);
         $("selected-kwh").textContent = kwh.toFixed(2) + " kWh";
+        $("selected-energy-label").textContent = "energy used per " + settings.period;
         $("selected-period").textContent = "per " + settings.period + " · " + (usingMeasuredEnergy ? "using measured energy" : "based on your setup");
         $("chart-caption").textContent = "illustration · modelled, not historical";
         $("cost-range").textContent = usingMeasuredEnergy ? "Live energy" : "Estimate";
@@ -249,7 +250,7 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
           line.append(name,size,meta,track); list.appendChild(line);
         });
       }
-      document.querySelectorAll("[data-period]").forEach(function (b) { b.addEventListener("click", function () { settings.period=b.dataset.period; document.querySelectorAll("[data-period]").forEach(function(x){x.classList.toggle("active",x===b)}); recalc(); }); });
+      document.querySelectorAll("[data-period]").forEach(function (b) { b.addEventListener("click", function () { settings.period=b.dataset.period; document.querySelectorAll("[data-period]").forEach(function(x){x.classList.toggle("active",x===b)}); save(); }); });
       ["dish-model","hours","tariff","home-use","custom-watts"].forEach(function(id){ $(id).addEventListener("input",function(){ if(id==="dish-model") settings.model=this.value; if(id==="hours") settings.hours=Number(this.value); if(id==="tariff") settings.tariff=this.value; if(id==="home-use") settings.homeKwh=Number(this.value)||0; if(id==="custom-watts") settings.customWatts=Number(this.value)||50; save(); }); });
       document.querySelectorAll("[data-open-connect]").forEach(function(b){b.addEventListener("click",function(){ $("connect-dialog").showModal(); });});
       document.querySelectorAll("[data-scroll]").forEach(function(b){b.addEventListener("click",function(){document.getElementById(b.dataset.scroll).scrollIntoView({behavior:"smooth"});});});
