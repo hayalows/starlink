@@ -1,8 +1,11 @@
 name: Build Starlink Ghana Chrome extension
 on:
   push:
-    tags:
-      - "monitor-v*"
+    branches: [master]
+    paths:
+      - "package.json"
+      - "wxt.config.ts"
+      - "extension/**"
 permissions:
   contents: write
 jobs:
@@ -16,13 +19,13 @@ jobs:
           cache: npm
       - run: npm install --no-audit --no-fund
       - run: npm run zip:extension
-      - name: Prepare release package
-        run: |
-          cp .output/dishylink-1.2.0-chrome.zip starlink-ghana-monitor-chrome.zip
-      - name: Publish extension package
+      - name: Prepare package
+        run: cp .output/dishylink-1.2.0-chrome.zip starlink-ghana-monitor-chrome.zip
+      - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" starlink-ghana-monitor-chrome.zip \
-            --title "Starlink Ghana Monitor $GITHUB_REF_NAME" \
+          gh release create "monitor-v1.2.0" starlink-ghana-monitor-chrome.zip \
+            --target "$GITHUB_SHA" \
+            --title "Starlink Ghana Monitor 1.2.0" \
             --notes "Starlink Ghana Monitor browser extension. Unzip and load through chrome://extensions using Developer mode."
