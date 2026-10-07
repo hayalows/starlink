@@ -54,4 +54,37 @@ the Node version changes.
   `{ range, totalKWh, coverage: { sampledSeconds, expectedSeconds, fraction }, buckets: [{ t, kWh, sampledSeconds }] }`
   Ranges are aligned to **local midnight** (system timezone). `day` returns
   hourly buckets; `week`/`month` return daily buckets.
-- `GET /api/health` → `{ ok, lastWrittenMinute }`
+- `GET /api/health` → `{ ok, lastWrittenMinute }`\n
+## Private phone access (optional)
+
+The historian stays bound to `127.0.0.1:8088` by default. To read its data from
+the Starlink Ghana PWA on your phone, keep it on loopback and expose it only
+through your private Tailscale network. Do not port-forward the historian to the
+public internet.
+
+1. Install and sign in to Tailscale on the monitor computer and phone.
+2. Start the historian with a long random token and the deployed site origin:
+
+```sh
+HISTORIAN_ACCESS_TOKEN="$(openssl rand -hex 32)" \
+HISTORIAN_ALLOWED_ORIGIN="https://starlink-ghana.vercel.app" \
+HISTORIAN_ALLOWED_HOST="your-computer.tailnet-name.ts.net" \
+npm run historian
+```
+
+Keep the generated token in a password manager. In a second terminal, enable
+Tailscale Serve for the local historian:
+
+```sh
+tailscale serve --bg 8088
+```
+
+Open the HTTPS `.ts.net` address shown by Tailscale Serve in Starlink Ghana,
+paste the token, and connect. The collector accepts read-only requests from the
+configured website origin and checks the bearer token on every request. The
+token stays in that browser's local storage. Tailscale Serve is private to your
+tailnet; do not replace it with a public funnel.
+
+To stop sharing, run `tailscale serve off` and stop the historian. Without
+these opt-in settings, the collector keeps its original loopback-only behavior
+and the public app cannot read household data.

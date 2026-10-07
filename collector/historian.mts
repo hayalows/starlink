@@ -127,7 +127,7 @@ const DEVICE_GROUPS_FILE = join(DATA_DIR, "device-groups.json");
 const ALERTS_FILE = join(DATA_DIR, "alerts.ndjson");
 const OBSTRUCTION_FILE = join(DATA_DIR, "obstruction.ndjson");
 const LOCK_FILE = join(DATA_DIR, "historian.lock");
-const PORT = Number(process.env.HISTORIAN_PORT ?? 8088);
+const PORT = Number(process.env.HISTORIAN_PORT ?? 8088);\n// Cross-device web access is opt-in. Keep the collector local and expose it only\n// through an owner-controlled HTTPS tunnel such as Tailscale Serve.\nconst ACCESS_TOKEN = process.env.HISTORIAN_ACCESS_TOKEN ?? "";\nconst ALLOWED_ORIGIN = process.env.HISTORIAN_ALLOWED_ORIGIN ?? "https://starlink-ghana.vercel.app";\nconst ALLOWED_HOST = process.env.HISTORIAN_ALLOWED_HOST ?? "";
 const POLL_MS = 5_000;
 /**
  * Faster than the router's ~1005 ms stats refresh, so every counter step is
@@ -1565,24 +1565,48 @@ function summarizeLatencyRange(range: Range, now: Date) {
 function isLocalHost(host?: string): boolean {
   if (!host) return false;
   const hostname = host.replace(/:\d+$/, "").replace(/^\[|\]$/g, "");
-  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" ||\n    (ALLOWED_HOST !== "" && hostname.toLowerCase() === ALLOWED_HOST.toLowerCase());
 }
 
 export function handleRequest(request: IncomingMessage, response: ServerResponse): void {
   const url = new URL(request.url ?? "/", `http://localhost:${PORT}`);
   const origin = request.headers.origin;
-  const local = isLocalOrigin(origin);
-  // The recording names every device on the network, its MAC and its traffic, so
-  // only a local origin may read it. The dashboard reaches /api through its own
-  // server, so nothing legitimate is cross-origin.
-  if (local && origin) response.setHeader("Access-Control-Allow-Origin", origin);
+  const localOrigin = isLocalOrigin(origin);
+  const appOrigin = origin === ALLOWED_ORIGIN;
+  const acceptedOrigin = !origin || localOrigin || appOrigin;
+  // The monitor can include private device names, addresses and traffic totals.
+  // Cross-device reads are opt-in: require an access token and allow only the
+  // explicitly configured Starlink Ghana site origin.
+  if (!acceptedOrigin) {
+    response.statusCode = 403;
+    response.end("origin not allowed");
+    return;
+  }
+  if (origin && (localOrigin || appOrigin)) response.setHeader("Access-Control-Allow-Origin", origin);
   response.setHeader("Vary", "Origin");
-  // The usage list can reset (POST) and delete (DELETE) records — allow both,
-  // plus answer the preflight.
-  response.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
+  response.setHeader("Access-Control-Allow-Methods", localOrigin ? "GET, POST, DELETE, OPTIONS" : "GET, OPTIONS");
+  response.setHeader("Access-Control-Allow-Headers", "Authorization");
   if (request.method === "OPTIONS") {
     response.statusCode = 204;
     response.end();
+    return;
+  }
+  if (appOrigin && !ACCESS_TOKEN) {
+    response.statusCode = 503;
+    response.setHeader("Content-Type", "application/json");
+    response.end(JSON.stringify({ error: "cross-device access requires HISTORIAN_ACCESS_TOKEN" }));
+    return;
+  }
+  if (ACCESS_TOKEN && request.headers.authorization !== `Bearer ${ACCESS_TOKEN}`) {
+    response.statusCode = 401;
+    response.setHeader("Content-Type", "application/json");
+    response.end(JSON.stringify({ error: "access token required" }));
+    return;
+  }
+  if (appOrigin && request.method !== "GET") {
+    response.statusCode = 403;
+    response.setHeader("Content-Type", "application/json");
+    response.end(JSON.stringify({ error: "cross-origin writes are disabled" }));
     return;
   }
   // A browser honours the missing header above; curl does not, and DELETE
