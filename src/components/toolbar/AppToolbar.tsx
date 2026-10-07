@@ -28,7 +28,7 @@ export interface ToolbarItem {
 const TOOLBAR_ITEMS: ToolbarItem[] = [
   { id: "speedtest", label: "Speed test", Icon: SpeedometerIcon },
   { id: "alignment", label: "Alignment", Icon: CrosshairIcon },
-  { id: "datausage", label: "Data usage", Icon: ChartLineIcon },
+  { id: "datausage", label: "Cost & usage", Icon: ChartLineIcon },
   { id: "network", label: "Network", Icon: NetworkIcon },
   { id: "account", label: "Account", Icon: UserIcon },
   { id: "satellite", label: "Satellite view", Icon: PlanetIcon },

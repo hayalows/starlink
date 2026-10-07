@@ -35,6 +35,8 @@ import { useLiveReadings } from "./hooks/useLiveReadings";
 import { formatThroughput } from "./lib/format";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { useTheme } from "./hooks/useTheme";
+import { GhanaOverview } from "./components/data-usage/GhanaOverview";
+import { MonitorUpdates } from "./components/data-usage/MonitorUpdates";
 import { dishModelFor } from "./lib/dishMesh";
 
 export default function App() {
@@ -131,6 +133,8 @@ export default function App() {
               notificationsBlockedReason={notificationsBlockedReason}
               onToggleNotifications={() => void toggleNotifications()}
             />
+            <MonitorUpdates />
+            <GhanaOverview status={status} onOpen={() => openNav("datausage")} />
             <AppToolbar activeId={openPanel} onSelect={openNav} />
 
             <DashboardView
@@ -184,7 +188,7 @@ export default function App() {
       )}
       {/* Data usage modal */}
       {openPanel === "datausage" && (
-        <DetailsModal title='Data usage' onClose={() => setOpenPanel(null)} size='wide'>
+        <DetailsModal title='Cost & usage' onClose={() => setOpenPanel(null)} size='wide'>
           <DataUsagePanel status={status} />
         </DetailsModal>
       )}

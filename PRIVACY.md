@@ -1,3 +1,15 @@
+# Starlink Ghana Monitor privacy
+
+This Ghana extension builds on Dishylink. Local network readings, history, device totals and cost preferences stay on your computer. CSV reports download only when you request them.
+
+The **Check for updates** button sends a normal HTTPS request to `starlink-ghana.vercel.app/version.json`. It sends no readings, device names, cost settings, account cookies or Starlink session. Standard hosting request metadata, such as an IP address, may be processed by the hosting provider. The check is manual and optional.
+
+The public calculator stores your inputs in that website's local storage. The extension's history lives separately in IndexedDB. A configured local collector may be read from the website only when you explicitly connect it; collector tokens remain in that browser's local storage and are sent only to the collector address you enter. Forecasts and CSV calculations are made on your device.
+
+For questions about this Ghana fork, [open a repository issue](https://github.com/hayalows/starlink/issues). The upstream Dishylink privacy policy below describes its original local monitor, optional account connection and speed tests.
+
+---
+
 # Privacy Policy
 
 Dishylink is an open-source app that monitors the performance and health of

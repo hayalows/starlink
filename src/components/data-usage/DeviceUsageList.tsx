@@ -39,7 +39,9 @@ function formatShare(percent: number): string {
   return percent > 0 && percent < 1 ? "<1%" : Math.round(percent) + "%";
 }
 
-export function DeviceUsageList() {
+export function DeviceUsageList({ allocatedCost }: { allocatedCost?: number | null } = {}) {
+  const [search, setSearch] = useState("");
+  const [order, setOrder] = useState("usage");
   const {
     totals,
     mergeCandidates,
@@ -75,8 +77,16 @@ export function DeviceUsageList() {
     month: "long",
     year: "numeric",
   });
-  const sorted = [...(totals ?? [])].sort(
-    (a, b) => b.rxBytes + b.txBytes - (a.rxBytes + a.txBytes),
+  const sorted = [...(totals ?? [])].sort((a, b) =>
+    order === "name"
+      ? (a.name || a.macAddress).localeCompare(b.name || b.macAddress)
+      : b.rxBytes + b.txBytes - (a.rxBytes + a.txBytes),
+  );
+  const visible = sorted.filter((t) =>
+    [t.name, t.macAddress, vendorForMac(t.macAddress)]
+      .join(" ")
+      .toLowerCase()
+      .includes(search.toLowerCase()),
   );
   const currentMonth = monthKey(nowMs);
   const currentMonthBytes = sorted.reduce(
@@ -121,8 +131,32 @@ export function DeviceUsageList() {
       </div>
       <div className='mb-1 flex flex-wrap items-center justify-between gap-1 text-[11.5px] font-medium text-muted-foreground'>
         <span>{monthLabel}</span>
-        {currentMonthBytes > 0 && <span>{formatBytes(currentMonthBytes)} across tracked devices</span>}
+        {currentMonthBytes > 0 && (
+          <span>{formatBytes(currentMonthBytes)} across tracked devices</span>
+        )}
       </div>
+      <div className='my-3 flex flex-wrap gap-2'>
+        <input
+          aria-label='Search devices'
+          type='search'
+          placeholder='Find a device by name or vendor'
+          value={search}
+          onChange={(e) => setSearch(e.currentTarget.value)}
+          className='min-h-11 min-w-0 flex-1 rounded-lg border border-hairline bg-surface px-3 text-[12px] focus-visible:ring-2 focus-visible:ring-ring'
+        />
+        <select
+          aria-label='Sort devices'
+          value={order}
+          onChange={(e) => setOrder(e.currentTarget.value)}
+          className='min-h-11 rounded-lg border border-hairline bg-surface px-3 text-[12px] focus-visible:ring-2 focus-visible:ring-ring'
+        >
+          <option value='usage'>Most data first</option>
+          <option value='name'>Name A–Z</option>
+        </select>
+      </div>
+      {visible.length === 0 && search && (
+        <p className='py-2 text-[12px] text-muted-foreground'>No devices match “{search}”.</p>
+      )}
       {unavailable && (
         <div className='py-2.5 text-[12.5px] text-muted-foreground'>
           Usage unavailable — historian not reachable.
@@ -134,7 +168,7 @@ export function DeviceUsageList() {
       <div
         className={`flex flex-col ${sorted.length > 5 ? "thin-scroll max-h-[300px] overflow-y-auto" : ""}`}
       >
-        {sorted.map((total) => {
+        {visible.map((total) => {
           // clientId, not MAC: same-vendor devices share a masked MAC, so a
           // MAC key would collide and one row's action would hit its sibling.
           const key = usageKey(total.clientId, total.macAddress);
@@ -148,6 +182,7 @@ export function DeviceUsageList() {
                   ? ((total.rxBytes + total.txBytes) / currentMonthBytes) * 100
                   : null
               }
+              allocatedCost={allocatedCost}
               onReset={() => void reset(key)}
               onRemove={() => void remove(key)}
             />
@@ -184,6 +219,7 @@ function DeviceUsageRow({
   total,
   nowMs,
   sharePercent,
+  allocatedCost,
   onReset,
   onRemove,
 }: {
@@ -191,6 +227,7 @@ function DeviceUsageRow({
   /** The list's clock, so every row judges "now" against the same moment. */
   nowMs: number;
   sharePercent: number | null;
+  allocatedCost?: number | null;
   onReset: () => void;
   onRemove: () => void;
 }) {
@@ -245,6 +282,11 @@ function DeviceUsageRow({
         <span className='font-mono text-[14px] font-semibold tabular-nums text-foreground'>
           {formatBytes(totalBytes)}
         </span>
+        {sharePercent !== null && allocatedCost != null && (
+          <span className='mt-1 text-[10.5px] text-muted-foreground'>
+            GH₵{((allocatedCost * sharePercent) / 100).toFixed(2)} cost share
+          </span>
+        )}
         {/* Arrows carry the dashboard's series colours — the same blue down and
             green up the throughput charts use — so the split reads at a glance
             without the numbers themselves competing with the total above. */}

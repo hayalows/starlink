@@ -107,8 +107,7 @@ function LocalDataUsage() {
   if (unavailable) {
     return (
       <Callout className='mt-2.5'>
-        Data usage needs the history recorder running. Start it with <code>npm run historian</code>{" "}
-        and Dishylink will meter traffic from now on.
+        No local history is available. Keep the browser running on your Starlink network to record traffic, or check your desktop recorder.
       </Callout>
     );
   }

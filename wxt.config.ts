@@ -76,6 +76,7 @@ export default defineConfig({
       "http://192.168.1.1/*",
       "https://*.starlink.com/*",
       "https://celestrak.org/*",
+      "https://starlink-ghana.vercel.app/*",
     ],
     // A kit moved off its default subnet, or in bypass mode, sits at an address no
     // static manifest can name, and MV3 host permissions are fixed at build time —
@@ -98,7 +99,7 @@ export default defineConfig({
     // the full dashboard page — a chart-heavy dashboard wants room, not a dropdown.
     // default_icon is set explicitly rather than left to the icons fallback.
     action: {
-      default_title: "Dishylink",
+      default_title: "Starlink Ghana Monitor",
       default_icon: {
         "16": "icon/16.png",
         "32": "icon/32.png",

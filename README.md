@@ -1,3 +1,47 @@
+# Starlink Ghana Monitor
+
+A Ghana-focused extension and calculator built on [Dishylink](https://github.com/DaveyHert/dishylink), by DaveyHert, under its MIT license.
+
+**[Open the Ghana calculator](https://starlink-ghana.vercel.app)** · **[Download the latest Chrome extension](https://github.com/hayalows/starlink/releases/latest/download/starlink-ghana-monitor-chrome.zip)** · [Release notes and update instructions](docs/ghana-release-notes.md)
+
+## What Ghana Monitor adds
+
+- Electricity in cedis, PURC residential tiers, household usage and an editable custom rate.
+- Plan allocation plus electricity, effective cost per recorded GB, honest coverage and correct calendar periods.
+- Month overview, usage and spending targets, forecasts, device cost shares, device search/sorting and equal bill splitting.
+- Your own mobile-bundle comparison, a night-time power scenario and CSV exports.
+- Version checking and a repeatable extension release workflow.
+
+The public website is a calculator and optional local-collector viewer. It cannot directly read your dish or the extension's private history. For live readings, open the Chrome extension on a computer connected to the Starlink LAN. Keep Chrome running to record. The extension writes history to local IndexedDB. Its manual version check contacts the public website, without sending readings or account details.
+
+## Install or update
+
+Download the ZIP above, unzip it, and load the folder using Chrome's Developer mode at `chrome://extensions`. Chrome 144+ is required. To update an existing installation, close its dashboard, **replace the files in the same loaded folder**, press **Reload** on the existing extension card, and reopen it. Keep the same folder and extension ID; do not remove the extension, as that can erase history. Unpacked installations do not update automatically. Future shared-app changes require a package version bump to show a newer version in the in-app check.
+
+## Cost methodology
+
+Calendar-month views use the recorder computer's timezone, normally Africa/Accra in Ghana. Recorded kWh and GB never fill missing hours. Full-month forecasts use sampled averages only after 24 recorded hours; otherwise electricity uses the selected model and powered hours. Effective cedis/GB requires a plan fee, positive traffic and >=80% coverage. Device allocations split the full-month forecast by router traffic shares, not measured electrical draw. Starlink billing usage is a separate authoritative source and its billing cycle may differ.
+
+PURC Q4 rates effective 1 October 2026: lifeline GHS 0.899315/kWh, residential up to 300 kWh GHS 2.037509/kWh, above 300 kWh GHS 2.692235/kWh. [Official schedule, page 3](https://www.purc.com.gh/attachment/545028-20260924090934.pdf). Lifeline requires whole-household usage <=30 kWh. Fixed charges, levies and separate router/mesh power are excluded. Subscription is fixed: using more GB changes effective cost, not the bill itself.
+
+## Development
+
+```sh
+npm ci
+npm run dev:extension
+npm run typecheck
+npm run typecheck:extension
+npm test -- --project node
+npm run zip:extension
+cd landing
+npm ci
+npm run build
+```
+
+The original Dishylink documentation follows for desktop, collector and hardware details. Its original store/desktop links install upstream Dishylink, not this Ghana extension.
+
+---
+
 # <img src="docs/logo.svg" alt="" width="34" height="34" align="top"> Dishylink
 
 [![Downloads](https://img.shields.io/github/downloads/DaveyHert/dishylink/total.svg)](https://github.com/DaveyHert/dishylink/releases)

@@ -1619,7 +1619,7 @@ export function handleRequest(request: IncomingMessage, response: ServerResponse
   }
   // A browser honours the missing header above; curl does not, and DELETE
   // /api/clients/totals wipes the usage history outright.
-  if (request.method !== "GET" && !local) {
+  if (request.method !== "GET" && !localOrigin) {
     response.statusCode = 403;
     response.setHeader("Content-Type", "application/json");
     response.end(JSON.stringify({ error: "cross-origin write refused" }));

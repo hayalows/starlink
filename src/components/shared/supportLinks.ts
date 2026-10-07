@@ -5,7 +5,7 @@
 // and mail actually went. Gathered here so the whole set can be read, and
 // guarded, in one place.
 
-const REPO = "https://github.com/DaveyHert/dishylink";
+const REPO = "https://github.com/hayalows/starlink";
 
 export const SUPPORT_LINKS = {
   starRepo: REPO,

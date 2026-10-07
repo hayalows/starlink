@@ -1,14 +1,23 @@
 name: Build Starlink Ghana Chrome extension
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:
       - ".github/workflows/extension-release.yml"
-      - "package.json"
+      - "package*.json"
       - "wxt.config.ts"
       - "extension/**"
+      - "src/**"
+      - "core/**"
+      - "cloud/**"
+      - "public/**"
+      - "tsconfig*.json"
 permissions:
   contents: write
+concurrency:
+  group: starlink-extension-release
+  cancel-in-progress: false
 jobs:
   package:
     runs-on: ubuntu-latest
@@ -18,15 +27,23 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm run typecheck:extension
+      - run: npm test -- --project node core/ghanaCost.test.ts
       - run: npm run zip:extension
       - name: Prepare package
-        run: cp .output/dishylink-1.2.0-chrome.zip starlink-ghana-monitor-chrome.zip
-      - name: Create release
+        run: |
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")
+          cp ".output/dishylink-${VERSION}-chrome.zip" starlink-ghana-monitor-chrome.zip
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "TAG=monitor-v${VERSION}-${GITHUB_SHA:0:7}" >> "$GITHUB_ENV"
+      - name: Publish update
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "monitor-v1.2.0" starlink-ghana-monitor-chrome.zip \
-            --target "$GITHUB_SHA" \
-            --title "Starlink Ghana Monitor 1.2.0" \
-            --notes "Starlink Ghana Monitor browser extension. Unzip and load through chrome://extensions using Developer mode."
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --target "$GITHUB_SHA" --latest \
+              --title "Starlink Ghana Monitor $VERSION" --notes-file docs/ghana-release-notes.md
+          fi
+          gh release upload "$TAG" starlink-ghana-monitor-chrome.zip --clobber

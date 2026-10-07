@@ -2,9 +2,8 @@
 // buckets as energy, integrating the dish's throughput telemetry).
 // Kept separate from useEnergyHistory so the two panels stay independent.
 
-import { useEffect, useState } from "react";
 import type { EnergyRange } from "./useEnergyHistory";
-import { apiRequest } from "../lib/apiHost";
+import { usePersistedHistory } from "./usePersistedHistory";
 
 export interface UsageBucket {
   t: number;
@@ -22,36 +21,6 @@ export interface UsageSummary {
   buckets: UsageBucket[];
 }
 
-const REFRESH_MS = 30_000;
-
 export function useDataUsage(range: EnergyRange, active: boolean) {
-  const [data, setData] = useState<UsageSummary | null>(null);
-  const [unavailable, setUnavailable] = useState(false);
-
-  useEffect(() => {
-    if (!active) return;
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        const response = await apiRequest(`/api/usage?range=${range}`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const summary = (await response.json()) as UsageSummary;
-        if (cancelled) return;
-        setData(summary);
-        setUnavailable(false);
-      } catch {
-        if (!cancelled) setUnavailable(true);
-      }
-    };
-
-    void load();
-    const timerId = window.setInterval(load, REFRESH_MS);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timerId);
-    };
-  }, [range, active]);
-
-  return { data, unavailable };
+  return usePersistedHistory<UsageSummary>(`/api/usage?range=${range}`, active);
 }
