@@ -1591,10 +1591,12 @@ export function handleRequest(request: IncomingMessage, response: ServerResponse
     response.end();
     return;
   }
-  if (appOrigin && !ACCESS_TOKEN) {
+  const requestHost = (request.headers.host ?? "").replace(/:\d+$/, "").replace(/^\[|\]$/g, "").toLowerCase();
+  const isLoopbackHost = requestHost === "localhost" || requestHost === "127.0.0.1" || requestHost === "::1";
+  if (appOrigin && !ACCESS_TOKEN && !isLoopbackHost) {
     response.statusCode = 503;
     response.setHeader("Content-Type", "application/json");
-    response.end(JSON.stringify({ error: "cross-device access requires HISTORIAN_ACCESS_TOKEN" }));
+    response.end(JSON.stringify({ error: "private cross-device access requires HISTORIAN_ACCESS_TOKEN" }));
     return;
   }
   if (ACCESS_TOKEN && request.headers.authorization !== `Bearer ${ACCESS_TOKEN}`) {
