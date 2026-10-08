@@ -1,7 +1,9 @@
 // Invoked by GitHub Actions against the deployed free PostgreSQL Edge service.
 import { randomBytes, randomUUID } from "node:crypto";
 import assert from "node:assert/strict";
-const endpoint = "https://hdvkmpotagbigcmyozaf.supabase.co/functions/v1/starlink-ghana-monitor";
+const endpoint =
+  process.env.PHONE_SYNC_ENDPOINT ||
+  "https://hdvkmpotagbigcmyozaf.supabase.co/functions/v1/starlink-ghana-monitor";
 const token = () => randomBytes(32).toString("base64url");
 const viewToken = token(),
   writeToken = token(),
