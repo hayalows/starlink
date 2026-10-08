@@ -1,3 +1,4 @@
+import { effectiveObservedPricePerGb } from "@core/ghanaDataValue";
 import type { DishStatusJson } from "@core/dishClient";
 import { electricityCost, forecastUsage } from "@core/ghanaCost";
 import { analyzePeriodCost, modeledWatts } from "@core/ghanaPeriodCosts";
@@ -80,10 +81,7 @@ export function useGhanaAnalysis(status: DishStatusJson | null, period: ViewPeri
     period === "month"
       ? usage.gb
       : (history.data ?? buildInsights([], now, settings.billingDay)).periods.month.current.gb;
-  const perGb =
-    projectedTotal !== null && monthlyObservedGb !== null && monthlyObservedGb > 0
-      ? projectedTotal / monthlyObservedGb
-      : null;
+  const perGb = effectiveObservedPricePerGb(projectedTotal, monthlyObservedGb);
   const dataValueCoverage = (history.data ?? buildInsights([], now, settings.billingDay)).periods.month.current.trafficCoverage;
   return {
     settings,
