@@ -69,3 +69,11 @@ explicit opt-in.
 ## Contact
 
 Questions about this policy: hello@dishylink.com
+
+### Ghana monitor preferences and backups (v1.4)
+
+Device display names/groups and cost settings stay on this computer. Optional budget notifications read existing saved telemetry; they do not add router requests. Quiet hours use Ghana time. Alert thresholds and delivery timestamps are saved locally to suppress repeat alerts.
+
+Backups are user-downloaded JSON files containing aggregate minute/month energy and data readings, cost preferences and local device profiles. They exclude account credentials, router controls, automation rules and per-device traffic counters. Restore is previewed and merges missing records; it does not overwrite existing readings or the most recent 30 minutes. Only restore history from the same dish.
+
+Opt-in daily version checks run while Overview is open and contact the public website without telemetry or account details. Update helpers download release files and checksums from GitHub. They operate on the installation folder and retain a copy of previous extension files; they do not read browser history databases.

@@ -1,3 +1,5 @@
+import { validateHistory, type GhanaHistoryBackup } from "@core/ghanaBackup";
+import { monthKeyOf } from "@core/energyBuckets";
 // The extension's history store: per-minute buckets plus the drain cursor, the
 // second storage engine behind the collector's ndjson files. Both persist the
 // same MinuteBucket shape; only the medium differs, so the store is an interface
@@ -312,8 +314,54 @@ function openDatabase(name: string): Promise<IDBDatabase> {
 export class IndexedDbHistory implements HistoryStore {
   private constructor(private readonly db: IDBDatabase) {}
 
+  close(): void {
+    this.db.close();
+  }
+
   static async open(name: string = DB_NAME): Promise<IndexedDbHistory> {
     return new IndexedDbHistory(await openDatabase(name));
+  }
+
+  async exportGhanaHistory(): Promise<GhanaHistoryBackup> {
+    const tx = this.db.transaction([MINUTES, MONTHS], "readonly");
+    const [minutes, months] = await Promise.all([
+      request<MinuteBucket[]>(tx.objectStore(MINUTES).getAll()),
+      request<MonthBucket[]>(tx.objectStore(MONTHS).getAll()),
+    ]);
+    return { minutes, months };
+  }
+
+  async mergeGhanaHistory(value: GhanaHistoryBackup): Promise<number> {
+    const data = validateHistory(value);
+    const tx = this.db.transaction([MINUTES, MONTHS], "readwrite");
+    const done = transactionDone(tx);
+    const minuteStore = tx.objectStore(MINUTES),
+      monthStore = tx.objectStore(MONTHS);
+    const [existingMinutes, existingMonths] = await Promise.all([
+      request<MinuteBucket[]>(minuteStore.getAll()),
+      request<MonthBucket[]>(monthStore.getAll()),
+    ]);
+    const minutes = new Set(existingMinutes.map((b) => b.minute));
+    const months = new Set(existingMonths.map((b) => b.month));
+    const detailedMonths = new Set(existingMinutes.map((b) => monthKeyOf(b.minute)));
+    // Leave the live drain window untouched. Its cursor owns recent samples.
+    const cutoff = Date.now() / 1000 - 30 * 60;
+    let added = 0;
+    for (const b of data.minutes) {
+      if (b.minute < cutoff && !minutes.has(b.minute) && !months.has(monthKeyOf(b.minute))) {
+        minuteStore.put(b);
+        detailedMonths.add(monthKeyOf(b.minute));
+        added++;
+      }
+    }
+    for (const b of data.months) {
+      if (!months.has(b.month) && !detailedMonths.has(b.month)) {
+        monthStore.put(b);
+        added++;
+      }
+    }
+    await done;
+    return added;
   }
 
   async readCursor(): Promise<SampleCursor> {

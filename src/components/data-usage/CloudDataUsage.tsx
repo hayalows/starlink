@@ -1,3 +1,4 @@
+import { useGhanaSettings } from "../../hooks/useGhanaSettings";
 // Starlink's own billing meter (the authoritative usage the portal shows),
 // read from the account session via /cloud/usage. Monthly cycles + daily bars,
 // laid out like the portal's Total Data Usage card. Distinct from the local
@@ -58,6 +59,8 @@ function CycleBars({ cycle }: { cycle: UsageCycle }) {
 const NO_CYCLES: UsageCycle[] = [];
 
 export function CloudDataUsage({ active }: { active: boolean }) {
+  const [, updateGhana] = useGhanaSettings();
+  const [cycleSaved, setCycleSaved] = useState("");
   const { data, status, reload } = useCloudUsage(active);
   // `content` is optional-chained too: this is unvalidated upstream JSON, and an
   // envelope without it would otherwise throw and take the whole panel down
@@ -114,6 +117,23 @@ export function CloudDataUsage({ active }: { active: boolean }) {
 
   return (
     <div>
+      <button
+        className='ghana-button'
+        onClick={() => {
+          try {
+            updateGhana({ billingDay: new Date(cycle.startDate).getUTCDate() });
+            setCycleSaved(cycle.startDate);
+          } catch {
+            setCycleSaved("Could not save. Please retry.");
+          }
+        }}
+      >
+        {cycleSaved === cycle.startDate
+          ? "Billing start day saved"
+          : cycleSaved.startsWith("Could")
+            ? cycleSaved
+            : "Use this billing start day in Costs"}
+      </button>
       <div className='mt-3 mb-3.5'>
         <div className='text-[34px] leading-[1.05] font-bold tracking-[-0.01em]'>
           {formatGB(cycle.totalAmountGB)}

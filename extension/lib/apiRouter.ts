@@ -1,3 +1,4 @@
+import { buildInsights } from "@core/ghanaInsights";
 // Answers /api/* for the extension, reading from the IndexedDB history store —
 // the counterpart to the historian's HTTP handler and the desktop app's app://
 // handler. The renderer reaches this over runtime messaging (it has no origin
@@ -54,6 +55,14 @@ export async function routeApiRequest(
   host: MeterHost = NO_METER_HOST,
 ): Promise<ApiReply> {
   const url = new URL(path, "http://extension.invalid");
+
+  if (url.pathname === "/api/ghana/insights") {
+    const rows = await store.readMinutes(now.getTime() / 1000 - 95 * 86400, now.getTime() / 1000);
+    return {
+      status: 200,
+      body: buildInsights(rows, now, Number(url.searchParams.get("billingDay")) || 1),
+    };
+  }
 
   if (url.pathname === "/api/energy" || url.pathname === "/api/usage") {
     const requested = url.searchParams.get("range") as Range | null;

@@ -1,17 +1,19 @@
-Understand your Starlink spending and data use in Ghana.
+Starlink Ghana Monitor 1.4 — clearer daily checks and safer updates.
 
-- Fixed month-to-date and seven-day ranges; old annual totals are no longer presented as this month.
-- Added the month overview, effective cedis per GB, full-month cost and usage forecasts, spending/data targets and coverage explanations.
-- Added device cost allocations, search and sorting, equal bill splitting, mobile-bundle comparisons and a night-time power saving scenario.
-- Added CSV reports, saved setup, custom electricity rates and PURC household tier handling.
-- Added version checks and the latest download link. The release workflow now watches all shared app code and publishes repeatable packages.
+- Four everyday screens: Overview, Costs, Devices and Connection. Technical tools remain under Advanced.
+- Resumable three-step setup, Ghana dates/currency, readable controls and explicit loading, missing-history and stale-reading states.
+- Your billing start day, including 29th–31st handling for short months. Import the start day from an already-connected Starlink account.
+- Equal-elapsed-period comparisons with coverage safeguards, hourly today charts and an explanation of plan allocation versus electricity cost.
+- Local device names and household groups, search, stable ordering and estimated group shares. No router configuration is changed by naming devices here.
+- Optional 80%/100% calendar-month budget notifications, Ghana quiet hours and persistent repeat suppression. Uses saved recorder data; no new router polling.
+- Downloadable history/settings backups, validation and a restore preview. Restore merges missing readings, preserves existing data and excludes the most recent 30 minutes. Credentials, controls and per-device traffic counters are not backed up.
+- Optional daily update checks while Overview is open, release notes and one-click reload/reopen after files have been replaced.
+- Windows PowerShell and macOS Terminal update helpers verify the published SHA-256 checksum, back up old extension files and replace files in the same installation folder.
 
 ## Update your existing unpacked extension
 
-1. Close the monitor dashboard.
-2. Download and unzip `starlink-ghana-monitor-chrome.zip`.
-3. Replace the files inside the same extension folder you originally loaded. Keep that folder path.
-4. Open `chrome://extensions` and press Reload on Starlink Ghana Monitor's existing card.
-5. Open the dashboard again. Do not remove/reinstall the extension; the same folder and extension ID keep its IndexedDB history and saved setup.
+Export a backup in Overview. Download the ZIP, close the dashboard and replace files in the same folder you originally loaded. Reload the existing card at `chrome://extensions`, or reopen the dashboard and use “Reload monitor & reopen”. Keep the same folder and extension ID; do not remove the extension.
 
-The website updates on refresh. Unpacked extensions update manually; automatic installed updates require a Chrome Web Store release. These views use calendar months, which may differ from your Starlink billing cycle. Cedis per GB is an effective cost comparison, not a usage charge. Forecasts and device cost shares are planning estimates.
+After this release is installed, future updates can use the helper in that folder: `Update-Starlink.ps1` in PowerShell on Windows, or `bash Update-Starlink.command` in Terminal on macOS. The helper keeps the old extension files in a sibling backup folder. Browser history remains in Chrome, so export a history backup separately.
+
+The website updates on refresh. Chrome Web Store publication is still required for fully automatic installed extension updates. Cost shares and forecasts are estimates, not Starlink invoices or per-GB charges. Device totals and budget targets remain calendar-month based; Costs also supports your billing cycle. Comparisons may be unavailable across archived years or recording gaps.

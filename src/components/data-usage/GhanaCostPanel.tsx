@@ -1,13 +1,8 @@
+import type { ViewPeriod } from "@core/ghanaInsights";
 import { ghs } from "../../lib/ghanaFormat";
 import { useState, type ReactNode } from "react";
 import type { DishStatusJson } from "@core/dishClient";
-import {
-  csvRows,
-  GHANA_TARIFFS,
-  TARIFF_SOURCE,
-  type GhanaPeriod,
-  type GhanaTariff,
-} from "@core/ghanaCost";
+import { csvRows, GHANA_TARIFFS, TARIFF_SOURCE, type GhanaTariff } from "@core/ghanaCost";
 import { useGhanaAnalysis } from "../../hooks/useGhanaAnalysis";
 import type { GhanaSettings } from "../../hooks/useGhanaSettings";
 import { SegmentedControl } from "../ui/segmented-control";
@@ -20,15 +15,15 @@ import { bucketLabel } from "../shared/rangeTabs";
 const gb = (n: number | null) => (n === null ? "—" : n.toFixed(2) + " GB");
 const card = "rounded-2xl border border-hairline bg-card p-4 sm:p-5";
 const field =
-  "mt-1 min-h-11 w-full rounded-lg border border-hairline bg-surface px-3 py-2 text-[13px] text-foreground focus-visible:ring-2 focus-visible:ring-ring";
+  "mt-1 min-h-11 w-full rounded-lg border border-hairline bg-surface px-3 py-2 text-[16px] text-foreground focus-visible:ring-2 focus-visible:ring-ring";
 const button =
   "inline-flex min-h-10 items-center justify-center rounded-lg border border-hairline bg-card px-3 text-[12px] font-semibold text-foreground hover:bg-fill-raised focus-visible:ring-2 focus-visible:ring-ring";
 function Metric({ label, value, note }: { label: string; value: string; note: string }) {
   return (
     <div className={card}>
-      <div className='text-[11px] font-semibold text-muted-foreground'>{label}</div>
+      <div className='text-[13px] font-semibold text-muted-foreground'>{label}</div>
       <div className='mt-2 text-[27px] font-bold tracking-tight tabular-nums'>{value}</div>
-      <p className='mt-2 text-[11px] leading-relaxed text-muted-foreground'>{note}</p>
+      <p className='mt-2 text-[13px] leading-relaxed text-muted-foreground'>{note}</p>
     </div>
   );
 }
@@ -84,7 +79,7 @@ function Budget({
         />
       </div>
       {target > 0 && value !== null && (
-        <p className='mt-1 text-[11px] text-muted-foreground'>
+        <p className='mt-1 text-[13px] text-muted-foreground'>
           {ratio >= 1
             ? "Target passed. This is a planning alert; it does not stop devices."
             : Math.round(ratio * 100) + "% of your target used"}
@@ -94,10 +89,19 @@ function Budget({
   );
 }
 export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
-  const [period, setPeriod] = useState<GhanaPeriod>("month");
+  const [period, setPeriod] = useState<ViewPeriod>("month");
   const a = useGhanaAnalysis(status, period);
   const month = useGhanaAnalysis(status, "month");
-  const { settings: s, update } = a;
+  const { settings: s } = a;
+  const [saveMessage, setSaveMessage] = useState("");
+  const update = (patch: Partial<GhanaSettings>) => {
+    try {
+      a.update(patch);
+      setSaveMessage("Settings saved on this device.");
+    } catch {
+      setSaveMessage("Could not save settings. Check browser storage and retry.");
+    }
+  };
   const [setupOpen, setSetupOpen] = useState(s.planFee === 0);
   const [exported, setExported] = useState(false);
   const numberField = (key: keyof GhanaSettings, label: string, max = 100000) => (
@@ -110,7 +114,7 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
         min={key === "people" ? 1 : 0}
         max={max}
         step={key === "people" ? 1 : "any"}
-        value={s[key]}
+        value={typeof s[key] === "number" ? (s[key] as number) : ""}
         onChange={(e) =>
           update({
             [key]: Math.max(
@@ -123,7 +127,7 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
     </label>
   );
   const energyMeasured = a.energy.kWh !== null;
-  const offline = a.energyState.unavailable || a.usageState.unavailable;
+  const offline = a.stale;
   const savingsKwh =
     a.watts === null ? null : (a.watts * Math.min(s.sleepHours, s.hours) * a.days) / 1000;
   const savings =
@@ -163,6 +167,7 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
   };
   return (
     <div className='space-y-4 pb-2'>
+      <p role='status'>{saveMessage}</p>
       <div className='mt-4 flex flex-wrap items-center justify-between gap-3'>
         <div>
           <h2 className='text-[18px] font-bold'>Your internet, in cedis</h2>
@@ -179,6 +184,7 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
           { label: "Today", value: "today" },
           { label: "Last 7 days", value: "week" },
           { label: "This month", value: "month" },
+          { label: "Billing cycle", value: "cycle" },
         ]}
         value={period}
         onChange={setPeriod}
@@ -193,6 +199,19 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
               "% of this period. Missing time is excluded from recorded totals."
             : "No energy recorded yet. Choose your dish model below for an estimate. Keep Chrome running on your Starlink Wi-Fi to collect history."}
       </Callout>
+      <p className='text-sm text-muted-foreground'>
+        {new Date(a.window.start * 1000).toLocaleDateString("en-GH", { timeZone: "Africa/Accra" })}{" "}
+        to {a.now.toLocaleDateString("en-GH", { timeZone: "Africa/Accra" })} · Ghana time
+      </p>
+      <details className={card}>
+        <summary className='cursor-pointer font-semibold'>How these costs are calculated</summary>
+        <p className='mt-3 text-sm leading-relaxed'>
+          Plan allocation {ghs(a.planAllocation)} + electricity estimate {ghs(a.electricity)} ={" "}
+          {ghs(a.total)} so far. Your full plan fee is {ghs(s.planFee)}. It does not increase as you
+          use more GB. Electricity uses {a.kwh?.toFixed(3) ?? "unknown"} kWh and your saved tariff.
+          This is a planning estimate, not an ECG or Starlink invoice.
+        </p>
+      </details>
       <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-4'>
         <Metric
           label='Combined cost so far'
@@ -237,11 +256,11 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
             </p>
           ) : (
             <RangeBars
-              range={period === "week" ? "day" : period}
+              range={period === "today" ? "today" : "day"}
               heightPx={125}
               columns={a.usage.buckets.map((b) => {
                 const total = (b.downGB ?? 0) + (b.upGB ?? 0),
-                  label = bucketLabel(b.t, period === "week" ? "day" : period);
+                  label = bucketLabel(b.t, "day");
                 return {
                   key: b.t,
                   label,
@@ -257,7 +276,7 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
               yAxis={{ max: maxUsage, format: (n) => n.toFixed(1) + " GB" }}
             />
           )}
-          <p className='mt-3 text-[11px] text-muted-foreground'>
+          <p className='mt-3 text-[13px] text-muted-foreground'>
             The local WAN meter may differ from Starlink billing and router device counters. Use
             “Starlink billing” for your account’s authoritative usage.
           </p>
@@ -265,15 +284,15 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
         <Section title='Plan ahead'>
           <div className='grid grid-cols-2 gap-3'>
             <div>
-              <p className='text-[11px] text-muted-foreground'>Full month cost forecast</p>
+              <p className='text-[13px] text-muted-foreground'>Full month cost forecast</p>
               <strong className='mt-1 block text-[22px]'>{ghs(month.projectedTotal)}</strong>
             </div>
             <div>
-              <p className='text-[11px] text-muted-foreground'>Full month data projection</p>
+              <p className='text-[13px] text-muted-foreground'>Full month data projection</p>
               <strong className='mt-1 block text-[22px]'>{gb(month.dataForecast)}</strong>
             </div>
           </div>
-          <p className='mt-2 text-[11px] text-muted-foreground'>
+          <p className='mt-2 text-[13px] text-muted-foreground'>
             Cost uses sampled average power after 24 recorded hours, otherwise your model settings.
             Data needs 24 recorded hours and assumes the sampled rate continues.
           </p>
@@ -361,48 +380,52 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
             ? numberField("customRate", "Your electricity rate · GH₵/kWh", 100)
             : numberField("homeKwh", "Other household electricity · kWh/month", 10000)}
           {numberField("planFee", "Monthly Starlink plan · GH₵")}
+          {numberField("billingDay", "Billing starts on day (1–31)", 31)}
           {numberField("costBudget", "Monthly spending target · GH₵ (0 = off)")}
           {numberField("dataBudget", "Monthly data target · GB (0 = off)")}
           {numberField("people", "People sharing the bill", 100)}
         </div>
       </details>
-      <div className='grid gap-3 lg:grid-cols-2'>
-        <Section title='Could switching off at night help?'>
-          {numberField("sleepHours", "Hours off each day · what-if only", 24)}
-          <p className='mt-3 text-[22px] font-bold'>
-            {ghs(savings)}{" "}
-            <span className='text-[12px] font-normal text-muted-foreground'>
-              possible electricity saving / month
-            </span>
-          </p>
-          <p className='mt-2 text-[11px] text-muted-foreground'>
-            Model scenario, capped at your powered hours. Your subscription stays the same, and you
-            lose internet while the dish is off. No schedule is changed by this calculator.
-          </p>
-        </Section>
-        <Section title='Compare a mobile data bundle'>
-          <div className='grid grid-cols-2 gap-3'>
-            {numberField("bundlePrice", "Bundle price · GH₵")}
-            {numberField("bundleGb", "Bundle size · GB")}
-          </div>
-          <p className='mt-3 text-[22px] font-bold'>
-            {ghs(bundleRate)}{" "}
-            <span className='text-[12px] font-normal text-muted-foreground'>
-              per GB for your entered bundle
-            </span>
-          </p>
-          <p className='mt-2 text-[11px] text-muted-foreground'>
-            {bundleRate !== null && a.perGb !== null
-              ? "Your recorded Starlink effective rate is " +
-                ghs(Math.abs(bundleRate - a.perGb)) +
-                "/GB " +
-                (a.perGb < bundleRate ? "lower" : "higher") +
-                "."
-              : "Enter a current bundle offer to compare it with Starlink’s effective cost."}{" "}
-            Bundle expiry, network coverage and speed also matter.
-          </p>
-        </Section>
-      </div>
+      <details className={card}>
+        <summary className='cursor-pointer font-semibold'>Explore savings & mobile bundles</summary>
+        <div className='mt-4 grid gap-3 lg:grid-cols-2'>
+          <Section title='Could switching off at night help?'>
+            {numberField("sleepHours", "Hours off each day · what-if only", 24)}
+            <p className='mt-3 text-[22px] font-bold'>
+              {ghs(savings)}{" "}
+              <span className='text-[12px] font-normal text-muted-foreground'>
+                possible electricity saving / month
+              </span>
+            </p>
+            <p className='mt-2 text-[13px] text-muted-foreground'>
+              Model scenario, capped at your powered hours. Your subscription stays the same, and
+              you lose internet while the dish is off. No schedule is changed by this calculator.
+            </p>
+          </Section>
+          <Section title='Compare a mobile data bundle'>
+            <div className='grid grid-cols-2 gap-3'>
+              {numberField("bundlePrice", "Bundle price · GH₵")}
+              {numberField("bundleGb", "Bundle size · GB")}
+            </div>
+            <p className='mt-3 text-[22px] font-bold'>
+              {ghs(bundleRate)}{" "}
+              <span className='text-[12px] font-normal text-muted-foreground'>
+                per GB for your entered bundle
+              </span>
+            </p>
+            <p className='mt-2 text-[13px] text-muted-foreground'>
+              {bundleRate !== null && a.perGb !== null
+                ? "Your recorded Starlink effective rate is " +
+                  ghs(Math.abs(bundleRate - a.perGb)) +
+                  "/GB " +
+                  (a.perGb < bundleRate ? "lower" : "higher") +
+                  "."
+                : "Enter a current bundle offer to compare it with Starlink’s effective cost."}{" "}
+              Bundle expiry, network coverage and speed also matter.
+            </p>
+          </Section>
+        </div>
+      </details>
       <Section title='Who uses the data?'>
         <p className='text-[12px] text-muted-foreground'>
           Equal full-month split:{" "}
@@ -421,15 +444,16 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
         Recorded GB and kWh cover sampled time only. Forecasts include assumptions about missing and
         future hours. Effective cost per GB is plan allocation plus electricity divided by recorded
         traffic, shown only with at least 80% coverage. Starlink may use a different billing cycle;
-        these are calendar-month views in your recorder’s timezone. ECG/NEDCo residential energy
-        rates use the same PURC schedule. Fixed charges, taxes, levies, router power and mesh power
-        are excluded. Lifeline applies only if total household usage stays within 30 kWh; tier
+        choose Billing cycle for your saved plan dates. Daily cost views use Ghana time. Device
+        allocations and the monthly targets remain calendar-month estimates. ECG/NEDCo residential
+        energy rates use the same PURC schedule. Fixed charges, taxes, levies, router power and mesh
+        power are excluded. Lifeline applies only if total household usage stays within 30 kWh; tier
         crossings can raise the estimate.
         <a className='ml-1 underline' href={TARIFF_SOURCE} target='_blank' rel='noreferrer'>
           PURC tariff source · effective 1 Oct 2026
         </a>
       </Explainer>
-      <p className='text-[11px] text-muted-foreground' role='status'>
+      <p className='text-[13px] text-muted-foreground' role='status'>
         {exported
           ? "CSV report downloaded. It includes the period and recording coverage."
           : "History refreshes every 30 seconds. Device totals refresh every 10 seconds."}

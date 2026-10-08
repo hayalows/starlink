@@ -1,3 +1,5 @@
+import { useGhanaSettings } from "./hooks/useGhanaSettings";
+import { ghanaHost } from "./lib/ghanaHost";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useDishTelemetry } from "./hooks/useDishTelemetry";
 import { useLanPresence } from "./hooks/useLanPresence";
@@ -35,11 +37,23 @@ import { useLiveReadings } from "./hooks/useLiveReadings";
 import { formatThroughput } from "./lib/format";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { useTheme } from "./hooks/useTheme";
-import { GhanaOverview } from "./components/data-usage/GhanaOverview";
-import { MonitorUpdates } from "./components/data-usage/MonitorUpdates";
+import { GhanaHome } from "./components/ghana/GhanaHome";
+import { HouseholdDevices } from "./components/ghana/HouseholdDevices";
+import "./ghana.css";
+
 import { dishModelFor } from "./lib/dishMesh";
 
 export default function App() {
+  const [ghanaSettings] = useGhanaSettings();
+  const [ghanaSyncError, setGhanaSyncError] = useState("");
+  useEffect(() => {
+    void ghanaHost()
+      ?.syncBudgets(ghanaSettings)
+      .then(() => setGhanaSyncError(""))
+      .catch(() =>
+        setGhanaSyncError("Notification settings could not be saved. Reopen the monitor to retry."),
+      );
+  }, [ghanaSettings]);
   const { theme, cycleTheme } = useTheme();
   const {
     openPanel,
@@ -50,6 +64,7 @@ export default function App() {
     openNav,
     openSkyView,
   } = usePanelRouting();
+  const [workspace, setWorkspace] = useState("overview");
   const [windowMinutes, setWindowMinutes] = useState(15);
   const notificationsOn = useSyncExternalStore(subscribeToNotifications, readNotificationsOn);
   const notificationsBlockedReason = useSyncExternalStore(
@@ -133,32 +148,88 @@ export default function App() {
               notificationsBlockedReason={notificationsBlockedReason}
               onToggleNotifications={() => void toggleNotifications()}
             />
-            <MonitorUpdates />
-            <GhanaOverview status={status} onOpen={() => openNav("datausage")} />
-            <AppToolbar activeId={openPanel} onSelect={openNav} />
-
-            <DashboardView
-              status={status}
-              connectionState={telemetry.connectionState}
-              stale={telemetry.stale}
-              obstructionMap={telemetry.obstructionMap}
-              liveDownlink={liveDownlink}
-              liveUplink={liveUplink}
-              sparklines={sparklines}
-              livePowerW={livePowerW}
-              recentPingSuccessPercent={recentPingSuccessPercent}
-              windowMinutes={windowMinutes}
-              onWindowMinutesChange={setWindowMinutes}
-              chartSamples={chartSamples}
-              powerChartSamples={powerChartSamples}
-              powerWindowEndMs={powerWindowEndMs}
-              averagePowerW={averagePowerW}
-              outageEvents={outageEvents}
-              thermalEvents={thermalEvents}
-              samples={samples}
-              onOpenSatelliteView={openSkyView}
-              onExpandTerminal={() => setOpenPanel("terminal")}
-            />
+            <main className='ghana-workspace'>
+              {ghanaSyncError && <p role='alert'>{ghanaSyncError}</p>}
+              <nav className='ghana-nav' aria-label='Your Starlink'>
+                {[
+                  ["overview", "Overview"],
+                  ["costs", "Costs"],
+                  ["devices", "Devices"],
+                  ["connection", "Connection"],
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    aria-current={workspace === id ? "page" : undefined}
+                    onClick={() => setWorkspace(id)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </nav>
+              {workspace === "overview" && (
+                <GhanaHome
+                  status={status}
+                  connected={telemetry.connectionState === "online" && !telemetry.stale}
+                  onCosts={() => setWorkspace("costs")}
+                  onConnection={() => setWorkspace("connection")}
+                />
+              )}
+              {workspace === "costs" && (
+                <section className='ghana-section'>
+                  <DataUsagePanel status={status} />
+                </section>
+              )}
+              {workspace === "devices" && <HouseholdDevices status={status} />}
+              {workspace === "connection" && (
+                <>
+                  <section className='ghana-section'>
+                    <h2>Your connection</h2>
+                    <p>
+                      {telemetry.connectionState === "online" && !telemetry.stale
+                        ? "Your dish is responding. Explore the measured performance below."
+                        : "We cannot confirm a fresh dish connection. Check that this computer is connected to your Starlink Wi-Fi and the dish has power."}
+                    </p>
+                    <p className='ghana-muted'>
+                      An unavailable monitor does not prove an electricity outage. The timeline
+                      below shows only observed events.
+                    </p>
+                    <button className='ghana-button' onClick={() => openNav("network")}>
+                      Inspect router & network
+                    </button>
+                  </section>
+                  <DashboardView
+                    status={status}
+                    connectionState={telemetry.connectionState}
+                    stale={telemetry.stale}
+                    obstructionMap={telemetry.obstructionMap}
+                    liveDownlink={liveDownlink}
+                    liveUplink={liveUplink}
+                    sparklines={sparklines}
+                    livePowerW={livePowerW}
+                    recentPingSuccessPercent={recentPingSuccessPercent}
+                    windowMinutes={windowMinutes}
+                    onWindowMinutesChange={setWindowMinutes}
+                    chartSamples={chartSamples}
+                    powerChartSamples={powerChartSamples}
+                    powerWindowEndMs={powerWindowEndMs}
+                    averagePowerW={averagePowerW}
+                    outageEvents={outageEvents}
+                    thermalEvents={thermalEvents}
+                    samples={samples}
+                    onOpenSatelliteView={openSkyView}
+                    onExpandTerminal={() => setOpenPanel("terminal")}
+                  />
+                </>
+              )}
+              <details className='ghana-section mt-5'>
+                <summary>Advanced tools & settings</summary>
+                <p className='ghana-muted'>
+                  Speed tests, alignment, Starlink account, network controls, satellite view and app
+                  settings.
+                </p>
+                <AppToolbar activeId={openPanel} onSelect={openNav} />
+              </details>
+            </main>
           </motion.div>
         )}
       </AnimatePresence>

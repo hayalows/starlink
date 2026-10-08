@@ -198,3 +198,51 @@ describe("IndexedDbHistory energy compaction", () => {
     expect(months[0].wattSeconds).toBe(120);
   });
 });
+
+describe("Ghana backup merge", () => {
+  it("keeps existing readings, adds missing old minutes and is idempotent", async () => {
+    const db = await IndexedDbHistory.open(await freshStoreName());
+    const minute = Math.floor((Date.now() - 86400000) / 60000) * 60;
+    const first = { minute, samples: 60, wattSeconds: 600 };
+    expect(await db.mergeGhanaHistory({ minutes: [first], months: [] })).toBe(1);
+    expect(
+      await db.mergeGhanaHistory({
+        minutes: [
+          { ...first, wattSeconds: 9999 },
+          { ...first, minute: minute + 60 },
+        ],
+        months: [],
+      }),
+    ).toBe(1);
+    const backup = await db.exportGhanaHistory();
+    expect(backup.minutes.map((b) => b.wattSeconds)).toEqual([600, 600]);
+    expect(await db.mergeGhanaHistory(backup)).toBe(0);
+    db.close();
+  });
+  it("does not restore recent minutes, automation state or overlapping archives", async () => {
+    const db = await IndexedDbHistory.open(await freshStoreName());
+    const minute = Math.floor((Date.now() - 86400000) / 60000) * 60;
+    const month = new Date(minute * 1000);
+    month.setDate(1);
+    month.setHours(0, 0, 0, 0);
+    expect(
+      await db.mergeGhanaHistory({
+        minutes: [
+          { minute, samples: 60, wattSeconds: 600 },
+          { minute: Math.floor(Date.now() / 60000) * 60, samples: 60, wattSeconds: 600 },
+        ],
+        months: [
+          {
+            month: month.getTime() / 1000,
+            wattSeconds: 9999,
+            samples: 60,
+            downlinkBits: 0,
+            uplinkBits: 0,
+          },
+        ],
+      }),
+    ).toBe(1);
+    expect((await db.exportGhanaHistory()).months).toEqual([]);
+    db.close();
+  });
+});

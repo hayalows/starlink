@@ -30,12 +30,15 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run typecheck:extension
-      - run: npm test -- --project node core/ghanaCost.test.ts
+      - run: npm test -- --project node core/ghanaCost.test.ts core/ghanaInsights.test.ts core/ghanaBackup.test.ts core/ghanaBudgets.test.ts
+      - run: npx playwright install --with-deps chromium
+      - run: npm test -- --project browser extension/lib/history.browser.test.ts src/components/ghana/BackupRestore.test.tsx
       - run: npm run zip:extension
       - name: Prepare package
         run: |
           VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")
           cp ".output/dishylink-${VERSION}-chrome.zip" starlink-ghana-monitor-chrome.zip
+          sha256sum starlink-ghana-monitor-chrome.zip > starlink-ghana-monitor-chrome.zip.sha256
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "TAG=monitor-v${VERSION}-${GITHUB_SHA:0:7}" >> "$GITHUB_ENV"
       - name: Publish update
@@ -46,4 +49,4 @@ jobs:
             gh release create "$TAG" --target "$GITHUB_SHA" --latest \
               --title "Starlink Ghana Monitor $VERSION" --notes-file docs/ghana-release-notes.md
           fi
-          gh release upload "$TAG" starlink-ghana-monitor-chrome.zip --clobber
+          gh release upload "$TAG" starlink-ghana-monitor-chrome.zip starlink-ghana-monitor-chrome.zip.sha256 --clobber

@@ -1,3 +1,4 @@
+import { buildInsights } from "../core/ghanaInsights.ts";
 // Always-on energy historian + HTTP API.
 //
 // Polls the dish's history ring buffer directly (reusing the frontend's
@@ -1640,6 +1641,20 @@ export function handleRequest(request: IncomingMessage, response: ServerResponse
     return;
   }
   // /api/usage shares the same summary (energy + traffic ride the same buckets)
+  if (url.pathname === "/api/ghana/insights") {
+    const now = new Date();
+    response.setHeader("Content-Type", "application/json");
+    response.end(
+      JSON.stringify(
+        buildInsights(
+          store.readRange(now.getTime() / 1000 - 95 * 86400, now.getTime() / 1000),
+          now,
+          Number(url.searchParams.get("billingDay")) || 1,
+        ),
+      ),
+    );
+    return;
+  }
   if (url.pathname === "/api/energy" || url.pathname === "/api/usage") {
     const rangeParam = url.searchParams.get("range") as Range | null;
     const range: Range = rangeParam && RANGES.includes(rangeParam) ? rangeParam : "today";

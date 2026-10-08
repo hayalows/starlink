@@ -1,3 +1,31 @@
+import { browser } from "wxt/browser";
+import { IndexedDbHistory } from "../../lib/history";
+import { setGhanaHost } from "@/lib/ghanaHost";
+setGhanaHost({
+  exportHistory: async () => {
+    const db = await IndexedDbHistory.open();
+    try {
+      return await db.exportGhanaHistory();
+    } finally {
+      db.close();
+    }
+  },
+  restoreHistory: async (data) => {
+    const db = await IndexedDbHistory.open();
+    try {
+      return await db.mergeGhanaHistory(data);
+    } finally {
+      db.close();
+    }
+  },
+  reload: async () => {
+    await browser.storage.local.set({ ghanaReopenAfterUpdate: true });
+    browser.runtime.reload();
+  },
+  syncBudgets: async (settings) => {
+    await browser.storage.local.set({ ghanaBudgetSettings: settings });
+  },
+});
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@/index.css";

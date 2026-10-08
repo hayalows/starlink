@@ -343,3 +343,9 @@ MIT. See [LICENSE](LICENSE).
 
 Dishylink is an unofficial, independent project with no affiliation to SpaceX or
 Starlink. Starlink is a trademark of Space Exploration Technologies Corp.
+
+### Ghana monitor 1.4
+
+Start in **Overview** for guided setup, today's recorded data and estimated spending. **Costs** supports calendar periods and your billing start day, explains plan allocation and electricity charges, and only compares periods with sufficient recording coverage. **Devices** lets you name and group devices locally. **Connection** keeps the detailed monitoring view, with the remaining tools under **Advanced**.
+
+Optional budget notifications require both the Ghana budget toggle and the existing notification bell to be enabled. They use calendar-month targets, Ghana quiet hours, and recorded history rather than extra router polls. Export a backup in Overview before updating. See [release notes](docs/ghana-release-notes.md) for backup exclusions and update instructions. The ZIP contains PowerShell/macOS update helpers and each release publishes its SHA-256 checksum. Keep the same installation folder and extension ID when updating.

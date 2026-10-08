@@ -1,33 +1,42 @@
 import type { DishStatusJson } from "@core/dishClient";
+import { electricityCost, effectiveCostPerGb, forecastUsage } from "@core/ghanaCost";
 import {
-  electricityCost,
-  effectiveCostPerGb,
-  elapsedDays,
-  forecastUsage,
-  monthLength,
-  selectPeriod,
-  type GhanaPeriod,
-} from "@core/ghanaCost";
-import { useEnergyHistory } from "./useEnergyHistory";
-import { useDataUsage } from "./useDataUsage";
+  buildInsights,
+  comparisonPercent,
+  type GhanaInsights,
+  type ViewPeriod,
+} from "@core/ghanaInsights";
+import { usePersistedHistory } from "./usePersistedHistory";
 import { useGhanaSettings } from "./useGhanaSettings";
 import { useNow } from "./useNow";
 import { dishModelFor } from "../lib/dishMesh";
-export function useGhanaAnalysis(status: DishStatusJson | null, period: GhanaPeriod = "month") {
+export function useGhanaAnalysis(status: DishStatusJson | null, period: ViewPeriod = "month") {
   const [settings, update] = useGhanaSettings();
   const now = new Date(useNow(30_000));
-  const sourceRange = period === "week" ? "day" : period;
-  const energyState = useEnergyHistory(sourceRange, true);
-  const usageState = useDataUsage(sourceRange, true);
-  const energy = selectPeriod(
-    energyState.data?.range === sourceRange ? energyState.data.buckets : [],
-    period,
-    now,
+  const history = usePersistedHistory<GhanaInsights>(
+    `/api/ghana/insights?billingDay=${settings.billingDay}`,
+    true,
   );
-  const usage = selectPeriod(
-    usageState.data?.range === sourceRange ? usageState.data.buckets : [],
-    period,
-    now,
+  const selected = (history.data ?? buildInsights([], now, settings.billingDay)).periods[period];
+  const energy = selected.current;
+  const usage = {
+    ...energy,
+    coverage: energy.trafficCoverage,
+    sampledSeconds: energy.trafficSeconds,
+  };
+  const energyState = history,
+    usageState = history;
+  const change = comparisonPercent(
+    selected.comparison.gb,
+    selected.previous.gb,
+    selected.comparison.trafficCoverage,
+    selected.previous.trafficCoverage,
+  );
+  const energyChange = comparisonPercent(
+    selected.comparison.kWh,
+    selected.previous.kWh,
+    selected.comparison.coverage,
+    selected.previous.coverage,
   );
   const detected = dishModelFor(status);
   const model =
@@ -50,8 +59,11 @@ export function useGhanaAnalysis(status: DishStatusJson | null, period: GhanaPer
           : model === "custom"
             ? settings.watts
             : null;
-  const days = monthLength(now),
-    elapsed = elapsedDays(period, now);
+  const days =
+      period === "cycle"
+        ? (selected.window.fullEnd - selected.window.start) / 86400
+        : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate(),
+    elapsed = Math.max(0, (selected.window.end - selected.window.start) / 86400);
   const modeledKwh = watts === null ? null : (watts * settings.hours * elapsed) / 1000;
   const kwh = energy.kWh ?? modeledKwh;
   // Model a full month, then allocate its tiered incremental cost across time.
@@ -87,6 +99,11 @@ export function useGhanaAnalysis(status: DishStatusJson | null, period: GhanaPer
   return {
     settings,
     update,
+    window: selected.window,
+    change,
+    energyChange,
+    loading: history.loading && !history.data,
+    stale: history.unavailable || (energy.latest > 0 && now.getTime() / 1000 - energy.latest > 180),
     now,
     period,
     energy,

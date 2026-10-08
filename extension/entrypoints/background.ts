@@ -1,3 +1,4 @@
+import { checkGhanaBudgetAlerts } from "../lib/ghanaBudgetAlerts";
 import { defineBackground } from "#imports";
 import { browser } from "wxt/browser";
 import { drainOnce, recordPageSelfTraffic } from "../lib/collector";
@@ -235,6 +236,12 @@ async function updateBadge(active: AlertState[]): Promise<void> {
 }
 
 export default defineBackground(() => {
+  void browser.storage.local.get("ghanaReopenAfterUpdate").then(async (data) => {
+    if (data.ghanaReopenAfterUpdate) {
+      await browser.storage.local.remove("ghanaReopenAfterUpdate");
+      await openDashboard();
+    }
+  });
   // The worker is torn down and re-woken constantly, so it re-reads where the
   // boxes are on every wake rather than trusting anything held in memory.
   watchRouterAddress();
@@ -338,6 +345,8 @@ export default defineBackground(() => {
     await rememberActive(active);
     await updateBadge(active);
     await announceAlerts(alerts);
+    if (status.ok && (await notificationsEnabled()))
+      await checkGhanaBudgetAlerts(postNotification).catch(() => {});
   };
   // The tick is half a minute away at worst, which is long enough for a setting
   // that changed nothing on screen to read as broken.
