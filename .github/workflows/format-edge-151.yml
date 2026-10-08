@@ -1,0 +1,28 @@
+name: Format corrected cloud function
+on:
+  push:
+    branches: [fix/phone-cost-mobile-usage-151]
+    paths: [.github/workflows/format-edge-151.yml]
+permissions:
+  contents: write
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/phone-cost-mobile-usage-151
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: |
+          npx prettier --write infra/supabase/starlink-ghana-monitor/index.ts
+          rm .github/workflows/format-edge-151.yml
+          git add -u
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Format cloud sanitizer and retire helper"
+          git pull --rebase origin fix/phone-cost-mobile-usage-151
+          git push origin HEAD:fix/phone-cost-mobile-usage-151
