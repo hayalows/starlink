@@ -17,10 +17,16 @@ export function PhoneConnect() {
   const [message, setMessage] = useState("");
   useEffect(() => {
     let alive = true;
-    void send("status").then((result) => {
-      if (alive) setValue(result);
-    }).catch(() => { if (alive) setMessage("Phone sync is unavailable in this browser."); });
-    return () => { alive = false; };
+    void send("status")
+      .then((result) => {
+        if (alive) setValue(result);
+      })
+      .catch(() => {
+        if (alive) setMessage("Phone sync is unavailable in this browser.");
+      });
+    return () => {
+      alive = false;
+    };
   }, []);
   async function run(action: "create" | "sync" | "disconnect") {
     setBusy(true);
@@ -28,14 +34,20 @@ export function PhoneConnect() {
     try {
       const result = await send(action);
       setValue(result);
-      if (result.error) setMessage(
-        result.error === "sync_not_configured"
-          ? "Cloud storage is not connected yet. The laptop monitor continues working locally."
-          : result.error
-      );
-      else setMessage(action === "create"
-        ? "Paired. Send the private link to your phone."
-        : action === "sync" ? "Latest recorded data sent to your phone." : "Phone access revoked.");
+      if (result.error)
+        setMessage(
+          result.error === "sync_not_configured"
+            ? "Cloud storage is not connected yet. The laptop monitor continues working locally."
+            : result.error,
+        );
+      else
+        setMessage(
+          action === "create"
+            ? "Paired. Send the private link to your phone."
+            : action === "sync"
+              ? "Latest recorded data sent to your phone."
+              : "Phone access revoked.",
+        );
     } catch {
       setMessage("Could not contact the extension's background recorder.");
     } finally {
@@ -61,40 +73,85 @@ export function PhoneConnect() {
       {value?.paired ? (
         <>
           {value.lastSync ? (
-            <p className='ghana-muted'>Last sent {new Date(value.lastSync).toLocaleString("en-GH")}.</p>
-          ) : <p className='ghana-muted'>Waiting for the first sync.</p>}
+            <p className='ghana-muted'>
+              Last sent {new Date(value.lastSync).toLocaleString("en-GH")}.
+            </p>
+          ) : (
+            <p className='ghana-muted'>Waiting for the first sync.</p>
+          )}
           <div className='ghana-actions'>
-            <button type='button' className='ghana-button ghana-primary' disabled={busy || !value.url}
+            <button
+              type='button'
+              className='ghana-button ghana-primary'
+              disabled={busy || !value.url}
               onClick={() => {
                 if (!value.url) return;
-                void navigator.clipboard.writeText(value.url)
+                void navigator.clipboard
+                  .writeText(value.url)
                   .then(() => setMessage("Private link copied. Send it to your phone."))
                   .catch(() => setMessage("Copy unavailable. Open the phone link below."));
-              }}>
+              }}
+            >
               Copy phone link
             </button>
-            <button type='button' className='ghana-button' disabled={busy}
-              onClick={() => void run("sync")}>Sync now</button>
-            <button type='button' className='ghana-button' disabled={busy}
-              onClick={() => void run("disconnect")}>Disconnect phone</button>
+            <button
+              type='button'
+              className='ghana-button'
+              disabled={busy}
+              onClick={() => void run("sync")}
+            >
+              Sync now
+            </button>
+            <button
+              type='button'
+              className='ghana-button'
+              disabled={busy}
+              onClick={() => void run("disconnect")}
+            >
+              Disconnect phone
+            </button>
           </div>
-          {value.url && <a className='text-[12px] underline underline-offset-4' href={value.url}
-            target='_blank' rel='noopener noreferrer'>Open my phone dashboard ↗</a>}
+          {value.url && (
+            <a
+              className='text-[12px] underline underline-offset-4'
+              href={value.url}
+              target='_blank'
+              rel='noopener noreferrer'
+            >
+              Open my phone dashboard ↗
+            </a>
+          )}
         </>
       ) : (
         <div className='ghana-actions'>
-          <button type='button' className='ghana-button ghana-primary' disabled={busy || value === null}
-            onClick={() => void run("create")}>
+          <button
+            type='button'
+            className='ghana-button ghana-primary'
+            disabled={busy || value === null}
+            onClick={() => void run("create")}
+          >
             {busy ? "Connecting…" : "Connect my phone"}
           </button>
-          <a className='ghana-button' href='https://starlink-ghana.vercel.app/live/'
-            target='_blank' rel='noopener noreferrer'>View phone site</a>
+          <a
+            className='ghana-button'
+            href='https://starlink-ghana.vercel.app/live/'
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            View phone site
+          </a>
         </div>
       )}
-      {message && <p role='status' className='ghana-muted'>{message}</p>}
-      <p className='ghana-muted'>Treat the pairing link like a private key. Anyone with a copy can
-        see your uploaded summaries until you disconnect the phone here. No device names,
-        account information or Starlink sign-in credentials are uploaded.</p>
+      {message && (
+        <p role='status' className='ghana-muted'>
+          {message}
+        </p>
+      )}
+      <p className='ghana-muted'>
+        Treat the pairing link like a private key. Anyone with a copy can see your uploaded
+        summaries until you disconnect the phone here. No device names, account information or
+        Starlink sign-in credentials are uploaded.
+      </p>
     </section>
   );
 }

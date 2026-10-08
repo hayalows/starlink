@@ -38,7 +38,8 @@ export async function GET(request: Request) {
   if (!configured()) return respond({ error: "sync_not_configured" }, 503);
   try {
     const sql = neon(process.env.DATABASE_URL!);
-    const rows = await sql`SELECT payload, updated_at FROM monitor_pairs WHERE view_digest = ${digest(token)} LIMIT 1`;
+    const rows =
+      await sql`SELECT payload, updated_at FROM monitor_pairs WHERE view_digest = ${digest(token)} LIMIT 1`;
     if (!rows.length) return respond({ error: "pairing_not_found" }, 404);
     return respond({ snapshot: rows[0].payload, updatedAt: rows[0].updated_at });
   } catch {
@@ -47,7 +48,8 @@ export async function GET(request: Request) {
 }
 export async function POST(request: Request) {
   const action = new URL(request.url).searchParams.get("action");
-  if (!["create", "push", "revoke"].includes(action ?? "")) return respond({ error: "not_found" }, 404);
+  if (!["create", "push", "revoke"].includes(action ?? ""))
+    return respond({ error: "not_found" }, 404);
   if (!configured()) return respond({ error: "sync_not_configured" }, 503);
   if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY)
     return respond({ error: "too_large" }, 413);
@@ -65,7 +67,12 @@ export async function POST(request: Request) {
     const sql = neon(process.env.DATABASE_URL!);
     if (action === "create") {
       const { monitorId, viewToken, writeToken } = body;
-      if (!validId(monitorId) || !validToken(viewToken) || !validToken(writeToken) || viewToken === writeToken)
+      if (
+        !validId(monitorId) ||
+        !validToken(viewToken) ||
+        !validToken(writeToken) ||
+        viewToken === writeToken
+      )
         return respond({ error: "invalid_pairing" }, 400);
       await sql`INSERT INTO monitor_pairs (monitor_id, view_digest, write_digest, payload)
       VALUES (${monitorId}, ${digest(viewToken)}, ${digest(writeToken)}, '{}'::jsonb)`;
@@ -74,19 +81,28 @@ export async function POST(request: Request) {
     const token = tokenFrom(request);
     if (!validToken(token)) return respond({ error: "pairing_required" }, 401);
     if (action === "revoke") {
-      const removed = await sql`DELETE FROM monitor_pairs WHERE write_digest = ${digest(token)} RETURNING monitor_id`;
+      const removed =
+        await sql`DELETE FROM monitor_pairs WHERE write_digest = ${digest(token)} RETURNING monitor_id`;
       return respond({ ok: Boolean(removed.length) }, removed.length ? 200 : 404);
     }
     const snapshot = body.snapshot;
     if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot))
       return respond({ error: "invalid_snapshot" }, 400);
     const record = snapshot as Record<string, unknown>;
-    if (record.version !== 1 || typeof record.recordedAt !== "number" ||
-        !Number.isFinite(record.recordedAt) || !record.periods || typeof record.periods !== "object")
+    if (
+      record.version !== 1 ||
+      typeof record.recordedAt !== "number" ||
+      !Number.isFinite(record.recordedAt) ||
+      !record.periods ||
+      typeof record.periods !== "object"
+    )
       return respond({ error: "invalid_snapshot" }, 400);
     // Disallow uploaded credential containers and excessively large telemetry.
     const serialized = JSON.stringify(record);
-    if (serialized.length > 75_000 || /cloudSession|Starlink\\.Com\\.Sso|access_token|refresh_token|cookie/i.test(serialized))
+    if (
+      serialized.length > 75_000 ||
+      /cloudSession|Starlink\\.Com\\.Sso|access_token|refresh_token|cookie/i.test(serialized)
+    )
       return respond({ error: "unsafe_snapshot" }, 400);
     const changed = await sql`UPDATE monitor_pairs SET payload = ${serialized}::jsonb,
       updated_at = NOW() WHERE write_digest = ${digest(token)} RETURNING monitor_id`;

@@ -43,31 +43,31 @@ User provided `realui.com` and `uselayouts.com`. RealUI.com did not resolve reli
 
 We reviewed ten applicable patterns from each library. This first version uses a small set of **adapted patterns** (not copied package code) so we can keep the Astro website static, avoid upgrading the stack, and prioritize correct metrics. Future exact library installs can be done when needed.
 
-| ReUI reference | Where the pattern helps |
-| --- | --- |
-| Stepper | Pairing steps |
-| Card / Stats | Metric overview |
-| Chart | Gap-aware traffic bars |
-| Badge | Connection freshness |
-| Tabs | Time range selection |
-| Alert | Missing sync and invalid key |
-| Skeleton | Pending readings |
-| Button group | Manual refresh and range actions |
-| Data grid / List | Daily history rows |
-| Empty state | No data after pairing |
+| ReUI reference   | Where the pattern helps          |
+| ---------------- | -------------------------------- |
+| Stepper          | Pairing steps                    |
+| Card / Stats     | Metric overview                  |
+| Chart            | Gap-aware traffic bars           |
+| Badge            | Connection freshness             |
+| Tabs             | Time range selection             |
+| Alert            | Missing sync and invalid key     |
+| Skeleton         | Pending readings                 |
+| Button group     | Manual refresh and range actions |
+| Data grid / List | Daily history rows               |
+| Empty state      | No data after pairing            |
 
-| useLayouts reference | Where the pattern helps |
-| --- | --- |
-| Discrete Tabs | The selected time range |
-| Status Button | Sync/refresh status |
-| Stacked List | Daily history |
-| Multi Step Form | Three-step pairing instructions |
-| AccordionOS | Progressive help/advanced content |
-| Vertical Tabs | Future desktop navigation |
-| Animated Collection | Latest devices with meaningful ordering |
-| Expandable Gallery | Future drill-down chart cards |
-| Fluid Expanding Grid | Mobile to desktop metric reflow |
-| Feature Carousel | Short, focused onboarding hints |
+| useLayouts reference | Where the pattern helps                 |
+| -------------------- | --------------------------------------- |
+| Discrete Tabs        | The selected time range                 |
+| Status Button        | Sync/refresh status                     |
+| Stacked List         | Daily history                           |
+| Multi Step Form      | Three-step pairing instructions         |
+| AccordionOS          | Progressive help/advanced content       |
+| Vertical Tabs        | Future desktop navigation               |
+| Animated Collection  | Latest devices with meaningful ordering |
+| Expandable Gallery   | Future drill-down chart cards           |
+| Fluid Expanding Grid | Mobile to desktop metric reflow         |
+| Feature Carousel     | Short, focused onboarding hints         |
 
 Reference patterns preserve the core interaction, but we deliberately removed unnecessary bounce/auto-play and retained keyboard focus, reduced motion, truthful no-data states, and dark contrast. **These are references, not a claim that all twenty original components were installed unchanged.**
 
