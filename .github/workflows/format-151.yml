@@ -1,0 +1,32 @@
+name: Prepare v1.5.1 source formatting
+on:
+  push:
+    branches: [fix/phone-cost-mobile-usage-151]
+    paths: [.github/workflows/format-151.yml]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/phone-cost-mobile-usage-151
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Format changed source and remove one-time helper
+        run: |
+          npx prettier --write core/ghanaPeriodCosts.ts core/ghanaPeriodCosts.test.ts extension/lib/phoneSync.ts infra/supabase/starlink-ghana-monitor/index.ts landing/public/phone.css landing/public/phone.js scripts/test-phone-sync-backend.mjs src/components/ghana/GhanaHome.tsx src/components/ghana/HouseholdDevices.tsx src/components/ghana/PhoneConnect.tsx src/hooks/useGhanaAnalysis.ts src/lib/ghanaHost.ts src/lib/ghanaProfiles.ts src/App.tsx extension/entrypoints/dashboard/main.tsx
+          rm .github/workflows/format-151.yml
+          git add -u
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "Format tested v1.5.1 mobile data sources"
+            git pull --rebase origin fix/phone-cost-mobile-usage-151
+            git push origin HEAD:fix/phone-cost-mobile-usage-151
+          fi
