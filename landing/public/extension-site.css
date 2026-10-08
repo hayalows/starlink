@@ -1,0 +1,238 @@
+/* Public website: extension-derived interface language.
+   Source references: src/index.css + src/ghana.css. This stylesheet is not loaded by the extension. */
+.ghana-app {
+  --app-bg: #f4f3ee;
+  --app-paper: #ffffff;
+  --app-ink: #111110;
+  --app-muted: #55544f;
+  --app-line: #e1dfd6;
+  --app-green: #111110;
+  --app-green-dark: #30302d;
+  --app-lime: #f0c57e;
+  --app-orange: #c77b39;
+  --app-blue: #487acc;
+  color: var(--app-ink);
+  background: var(--app-bg);
+  font-family: "Barlow", system-ui, sans-serif;
+}
+html, body { background: #f4f3ee !important; }
+.ghana-app .side-rail { background: #151615; color: #f9f7f0; border-right: 1px solid #272824; }
+.ghana-app .brand-mark { color: #f0c57e; }
+.ghana-app .rail-nav a { color: #b9b9b3; }
+.ghana-app .rail-nav a:hover,
+.ghana-app .rail-nav a.active { background: #2a2b28; color: #fff; }
+.ghana-app .rail-nav a.active { box-shadow: inset 2px 0 #e9bb77; }
+.ghana-app .nav-glyph { color: #d0c9b8; }
+.ghana-app .rail-country b { color: #e8e4d9; }
+.ghana-app .rail-download {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; min-height: 46px; padding: 12px 14px;
+  margin-bottom: 15px; background: #f8f5ed; color: #171815;
+  font: 650 13px "Barlow", sans-serif; text-decoration: none;
+  border-radius: 10px; transition: background-color .16s ease, transform .16s ease;
+}
+.ghana-app .rail-download:hover { background: #eecf9d; }
+.ghana-app .rail-download:active { transform: scale(.96); }
+.ghana-app .topbar { background: rgba(244,243,238,.94); backdrop-filter: blur(14px); border-bottom-color: #e4e1d8; }
+.ghana-app .workspace { min-width: 0; }
+.ghana-app .content { max-width: 1440px; padding-top: 26px; }
+.ghana-app .topbar-download {
+  display: inline-flex; gap: 5px; align-items: center; min-height: 40px; 
+  padding: 7px 15px; background: #171815; border-radius: 10px;
+  color: #fff; text-decoration: none; font: 650 13px "Barlow", sans-serif;
+  transition: background-color .16s ease, transform .16s ease;
+}
+.ghana-app .topbar-download:hover { background: #3a3b35; }
+.ghana-app .topbar-download:active { transform: scale(.96); }
+.ghana-app .privacy-dot { background: #8d9a8e; }
+.ghana-app .metric-card, .ghana-app .panel {
+  box-shadow: 0 1px 2px #11111006; border-color: var(--app-line);
+}
+.ghana-app .metric-card strong, .ghana-app .panel h2 { color: #111110; }
+.ghana-app .metric-card, .ghana-app .panel, .ghana-app .connect-dialog { border-radius: 14px; }
+.ghana-app .period.active { color: #151615; }
+.ghana-app .period { min-height: 44px; }
+.ghana-app .metric-label, .ghana-app .muted-label, .ghana-app .range-pill,
+.ghana-app .setup-step { letter-spacing: .035em; }
+.ghana-app :is(button, a, select, input, summary):focus-visible { outline: 3px solid #9e6128; outline-offset: 3px; }
+.ghana-app .field select:focus-visible, .ghana-app .input-wrap:focus-within { border-color: #9e6128; }
+.ghana-app .connect-button, .ghana-app .save-setup { background: #111110; color: #fff; }
+.ghana-app .connect-button:hover { background: #33332f; }
+.ghana-app .metric-icon.amber, .ghana-app .energy-orb { color: #a76d31; }
+.ghana-app .bar.today { background: #bd7e3e; }
+.ghana-app .analysis-values strong, .ghana-app .metric-main strong { font-variant-numeric: tabular-nums; }
+.ghana-app .welcome-row { border-top: 1px solid var(--app-line); padding-top: 30px; margin-top: 28px; }
+.ghana-app .welcome-row h2 {
+  font: 650 clamp(27px, 2.7vw, 36px)/1.1 "Barlow", sans-serif;
+  letter-spacing: -.035em; color: #111110; margin: 9px 0 12px;
+}
+.ghana-app .welcome-row h2 em { font-style: normal; color: #8b623e; }
+.ghana-app .welcome-row .connect-button { background: #fff; color: #171815; border: 1px solid #d9d6cc; box-shadow: none; }
+.ghana-app .welcome-row .connect-button:hover { background: #f4f2ea; }
+.ghana-app .connection-strip { background: #fff; }
+.ghana-app .how-panel { background: #e9e8df; }
+.ghana-app .connect-section { background: #20211d; }
+.ghana-app .connect-button.light { background: #eec78b; color: #111110; }
+.ghana-app .connect-button.light:hover { background: #f9dbaa; }
+.ghana-app #download, .ghana-app #install-guide { scroll-margin-top: 92px; }
+
+/* Product hero: warm ink, hairline structure, and a real extension-shaped example. */
+.download-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+  gap: clamp(24px, 4vw, 55px);
+  align-items: center;
+  padding: clamp(26px, 4.2vw, 58px);
+  min-height: 520px; border-radius: 22px;
+  overflow: hidden; isolation: isolate; position: relative;
+  background: #171816; color: #fff;
+  box-shadow: 0 16px 40px #15161113;
+}
+.download-hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(#f2eee01b .8px, transparent .8px);
+  background-size: 24px 24px; mask-image: linear-gradient(90deg, transparent 20%, #000 100%);
+}
+.download-hero-copy { min-width: 0; }
+.download-kicker { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; color: #d5c6aa; font: 500 10px/1.5 "IBM Plex Mono", monospace; letter-spacing: .11em; }
+.download-pulse { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #e7c37e; box-shadow: 0 0 0 4px #e7c37e1b; }
+.kicker-separator { color: #777a72; }
+.download-hero h1 { max-width: 13ch; margin: 22px 0 20px; color: #fff; font: 650 clamp(36px, 3.7vw, 57px)/1.02 "Manrope", "Barlow", sans-serif; letter-spacing: -.055em; text-wrap: balance; }
+.download-hero h1 span { color: #d8d2c5; }
+.download-intro { max-width: 54ch; font-size: 16px; line-height: 1.68; color: #c0c3ba; }
+.download-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 11px; margin-top: 30px; }
+.download-primary, .download-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 11px; font-size: 15px; font-weight: 650; text-decoration: none; transition: background-color .18s ease, transform .16s ease, color .18s ease; }
+.download-primary { padding: 13px 17px; background: #f5f1e6; color: #141512; }
+.download-primary:hover { background: #e9c78f; }
+.download-arrow { margin-left: 10px; }
+.download-secondary { padding: 12px 10px; color: #f1ebdc; }
+.download-secondary:hover { color: #efc68a; }
+.download-primary:active, .download-secondary:active { transform: scale(.96); }
+.release-summary { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-top: 24px; font-size: 12px; line-height: 1.55; color: #c6c7be; }
+.release-summary strong { color: #fff; font-weight: 700; }
+.release-summary a { color: #ead3ac; text-decoration: underline; text-underline-offset: 4px; }
+.release-check { display: grid; place-items: center; flex: 0 0 auto; border-radius: 50%; width: 20px; height: 20px; background: #334238; color: #d0e4ce; font-size: 13px; }
+.release-dot { color: #83867e; margin-inline: 4px; }
+.release-feedback { font-size: 11px; color: #b5b4a9; line-height: 1.5; margin: 8px 0 0; }
+.download-trust { display: flex; flex-wrap: wrap; gap: 14px 18px; border-top: 1px solid #3c3c37; margin-top: 26px; padding-top: 22px; }
+.download-trust span { color: #b3b8ac; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; line-height: 1.4; }
+.download-trust svg { color: #d0ba94; flex: none; }
+
+/* Preview borrows the same surfaces, typography, tabs and separated metrics as
+   GhanaHome and GhanaOverview; sample values are visibly marked as examples. */
+.extension-showcase { width: 100%; min-width: 0; }
+.showcase-caption, .showcase-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; font: 500 10px/1.5 "IBM Plex Mono", monospace; letter-spacing: .045em; color: #b4b9af; }
+.showcase-caption { margin: 0 0 12px; }
+.showcase-caption span:last-child { margin-left: auto; letter-spacing: normal; }
+.caption-mark { font-size: 16px; color: #e4c383; }
+.showcase-window { background: #f4f3ee; color: #121311; padding: clamp(14px, 2vw, 23px); border-radius: 17px; border: 1px solid #6f7269; box-shadow: 0 26px 52px #0006, 0 0 0 5px #ffffff0b; transition: transform .26s cubic-bezier(.2,.7,.2,1), box-shadow .26s ease; }
+@media (hover:hover) and (pointer:fine) { .showcase-window:hover { transform: translateY(-4px); box-shadow: 0 30px 62px #0008, 0 0 0 5px #ffffff0b; } }
+.showcase-topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid #ddded5; padding-bottom: 15px; }
+.showcase-wordmark { display: flex; gap: 9px; align-items: center; }
+.showcase-logo { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid #d9d5ca; border-radius: 9px; background: #fff; font-size: 21px; }
+.showcase-wordmark strong { display: block; font-size: 14px; line-height: 1.2; }
+.showcase-wordmark small { display: block; font-size: 10px; color: #696e66; }
+.showcase-status { display: inline-flex; align-items: center; gap: 6px; font: 500 10px "IBM Plex Mono", monospace; color: #526659; white-space: nowrap; }
+.showcase-status span, .sample-state i { width: 7px; height: 7px; border-radius: 50%; background: #4d9b63; }
+.showcase-tabs { display: flex; gap: 4px; padding: 5px; margin: 17px 0; background: #fff; border: 1px solid #e4e2d9; border-radius: 10px; }
+.showcase-tabs button { flex: 1; min-height: 40px; padding: 7px; border: 0; border-radius: 7px; font: 650 12px "Barlow", sans-serif; cursor: pointer; color: #696a64; background: transparent; transition: background-color .16s ease, color .16s ease; }
+.showcase-tabs button[aria-selected="true"] { background: #171816; color: #fff; }
+.showcase-tabs button:focus-visible { outline: 2px solid #b97930; outline-offset: 1px; }
+.sample-panel { background: #fff; border-radius: 12px; border: 1px solid #e4e2d9; padding: 19px; min-height: 310px; }
+.sample-panel[hidden] { display: none !important; }
+.sample-panel.sample-enter { animation: sample-enter .26s ease-out both; }
+@keyframes sample-enter { from { opacity: .25; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+.sample-eyebrow { font: 650 10px "IBM Plex Mono", monospace; letter-spacing: .06em; color: #7b7b72; }
+.sample-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 9px; }
+.sample-heading strong { font-size: clamp(18px, 2vw, 23px); font-weight: 700; letter-spacing: -.03em; }
+.sample-state { display: inline-flex; gap: 6px; align-items: center; font-size: 11px; color: #5a7161; }
+.sample-metrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-top: 24px; }
+.sample-metrics>div { border-top: 1px solid #e3e1d9; padding-top: 12px; min-width: 0; }
+.sample-metrics span { display: block; font-size: 10px; line-height: 1.4; color: #66665f; }
+.sample-metrics strong { display: block; margin: 7px 0 4px; color: #161714; font-size: clamp(15px, 1.6vw, 21px); white-space: normal; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+.sample-metrics strong small { font-size: 12px; font-weight: 600; }
+.sample-metrics div>small { font-size: 9px; color: #84847e; line-height: 1.4; display: block; }
+.sample-chart { border-top: 1px solid #e8e6de; margin-top: 20px; padding-top: 14px; }
+.sample-chart-heading { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: #62635e; }
+.sample-bars { display: flex; align-items: flex-end; height: 63px; gap: 7px; margin-top: 8px; border-bottom: 1px solid #e4e2d9; }
+.sample-bars i { flex: 1; height: var(--h); min-width: 0; border-radius: 4px 4px 0 0; background: #8caddf; }
+.sample-bars i:nth-child(3n) { background: #487acc; }
+.sample-note { border-top: 1px solid #e4e2d9; padding-top: 16px; margin-top: 25px; font-size: 12px; color: #65675e; line-height: 1.5; }
+.sample-device { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 12px; margin-top: 18px; font-size: 12px; }
+.sample-device strong { font-size: 13px; font-variant-numeric: tabular-nums; }
+.sample-device div { grid-column: 1/-1; height: 6px; border-radius: 99px; background: #e7e9e9; overflow: hidden; }
+.sample-device i { display: block; height: 100%; background: #4e88c8; border-radius: 99px; }
+.showcase-foot { margin: 13px 0 0; font-size: 10px; letter-spacing: 0; }
+.foot-indicator { border: 1px solid #b6bcb1; border-radius: 50%; width: 8px; height: 8px; }
+
+/* Install guide follows the hero immediately, before the optional calculator. */
+.install-guide { background: #fff; border: 1px solid #e0ddd3; border-radius: 17px; padding: clamp(22px, 3vw, 32px); margin-top: 17px; }
+.install-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.install-kicker { color: #8e7454; margin: 0; font: 600 11px "IBM Plex Mono", monospace; letter-spacing: .08em; }
+.install-heading h2 { font: 700 clamp(24px,2.8vw,32px) "Barlow", sans-serif; margin: 6px 0 8px; letter-spacing: -.035em; }
+.install-heading p:not(.install-kicker) { font-size: 14px; line-height: 1.55; color: #62645d; margin: 0; }
+.install-guide-link { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 10px 15px; background: #1c1d1a; color: #fff; border-radius: 9px; font-weight: 650; font-size: 13px; text-decoration: none; white-space: nowrap; }
+.install-guide-link:hover { background: #393a35; }
+.install-steps { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; margin-top: 27px; padding: 24px 0; border-top: 1px solid #e5e2d9; border-bottom: 1px solid #e5e2d9; }
+.install-steps>div { min-width: 0; }
+.install-steps span { display: block; margin-bottom: 11px; color: #97734c; font: 500 12px "IBM Plex Mono", monospace; }
+.install-steps strong { display: block; font-size: 15px; }
+.install-steps p { font-size: 13px; line-height: 1.58; color: #62645c; margin: 8px 0 0; max-width: 33ch; }
+.install-steps code, .install-existing code { overflow-wrap: anywhere; font-size: .93em; }
+.install-existing { margin-top: 8px; }
+.install-existing summary { display: flex; align-items: center; justify-content: space-between; min-height: 44px; gap: 12px; cursor: pointer; font-weight: 650; font-size: 13px; list-style: none; }
+.install-existing summary::-webkit-details-marker { display: none; }
+.install-existing[open] summary span { transform: rotate(45deg); }
+.install-existing summary span { transition: transform .16s ease; font-size: 21px; font-weight: 400; }
+.install-existing p { margin: 3px 0 12px; font-size: 13px; line-height: 1.65; color: #585b52; max-width: 90ch; }
+.install-existing>a { display: inline-flex; padding: 6px 0 12px; font-size: 13px; color: #705432; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Responsive clarity: no preview overflows and download remains reachable. */
+@media (max-width: 1280px) {
+  .download-hero { grid-template-columns: minmax(0,1fr); gap: 34px; }
+  .download-hero h1 { max-width: 18ch; }
+  .extension-showcase { max-width: 740px; }
+}
+@media (max-width: 760px) {
+  .ghana-app .content { padding-top: 14px; }
+  .ghana-app .topbar-download { min-height: 40px; font-size: 12px; padding: 8px 11px; }
+  .ghana-app .topbar .top-actions { gap: 7px; }
+  .ghana-app .welcome-row { padding-top: 25px; margin-top: 20px; }
+  .ghana-app .welcome-row h2 { font-size: 27px; }
+  .download-hero { padding: 26px 20px; border-radius: 16px; min-height: auto; }
+  .download-hero h1 { font-size: clamp(31px, 8.6vw, 42px); margin-top: 17px; }
+  .download-intro { font-size: 14px; }
+  .download-primary { flex: 1 1 auto; }
+  .download-secondary { flex: 1 1 auto; }
+  .download-trust { gap: 10px 17px; }
+  .release-summary { gap: 6px; }
+  .showcase-caption span:last-child { margin-left: 0; }
+  .install-heading { align-items: start; flex-direction: column; }
+  .install-steps { grid-template-columns: 1fr; gap: 21px; padding: 22px 0; }
+  .install-steps p { max-width: none; }
+  .ghana-app .mobile-nav { background: #f9f8f4; border-top-color: #dbd8cf; }
+  .ghana-app .mobile-nav a.active { color: #111110; background: #ebe8df; }
+}
+@media (max-width: 510px) {
+  .showcase-window { padding: 12px; }
+  .sample-panel { padding: 15px; }
+  .sample-metrics { gap: 7px; }
+  .sample-metrics strong { font-size: 16px; }
+  .sample-metrics div>small { font-size: 9px; }
+  .showcase-status { font-size: 9px; }
+  .download-actions { gap: 7px; }
+  .download-secondary { justify-content: flex-start; }
+  .download-trust { display: grid; }
+  .ghana-app .topbar-download { padding-inline: 9px; }
+  .ghana-app .topbar .icon-btn#refresh-data { display: none; }
+}
+@media (max-width: 380px) {
+  .sample-metrics { grid-template-columns: 1fr; gap: 7px; margin-top: 17px; }
+  .sample-metrics>div { padding-top: 7px; }
+  .sample-panel { min-height: 0; }
+  .showcase-status { display: none; }
+  .download-hero h1 { font-size: 30px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .download-hero *, .install-guide *, .showcase-window, .rail-download { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
