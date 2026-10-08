@@ -3,8 +3,17 @@
   const KEY = "starlink.ghana.phone.view.v1";
   const el = (id) => document.getElementById(id);
   const state = { token: "", payload: null, period: "today", timer: null };
-  const money = (n) => Number.isFinite(n) ? "GH₵ " + n.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—";
-  const amount = (n, decimals = 2) => Number.isFinite(n) ? n.toLocaleString("en-GH", { maximumFractionDigits: decimals, minimumFractionDigits: decimals }) : "—";
+  const money = (n) =>
+    Number.isFinite(n)
+      ? "GH₵ " + n.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+      : "—";
+  const amount = (n, decimals = 2) =>
+    Number.isFinite(n)
+      ? n.toLocaleString("en-GH", {
+          maximumFractionDigits: decimals,
+          minimumFractionDigits: decimals,
+        })
+      : "—";
   const ago = (t) => {
     if (!t || !Number.isFinite(Number(t))) return "No reading";
     const seconds = Math.max(0, Math.floor((Date.now() - Number(t)) / 1000));
@@ -14,7 +23,9 @@
     return Math.floor(seconds / 86400) + " d ago";
   };
   const valid = (s) => /^[a-zA-Z0-9_-]{43}$/.test(s);
-  const note = (text) => { el("pair-feedback").textContent = text; };
+  const note = (text) => {
+    el("pair-feedback").textContent = text;
+  };
   const setStatus = (text, type = "") => {
     const badge = el("sync-badge");
     badge.textContent = text;
@@ -23,9 +34,13 @@
   const connect = (candidate) => {
     try {
       let token = candidate.trim();
-      if (token.includes("#pair=")) token = new URL(token).hash.split("pair=")[1]?.split("&")[0] ?? "";
+      if (token.includes("#pair="))
+        token = new URL(token).hash.split("pair=")[1]?.split("&")[0] ?? "";
       token = decodeURIComponent(token);
-      if (!valid(token)) throw Error("That doesn't look like a valid pairing link. Copy the complete link from your laptop.");
+      if (!valid(token))
+        throw Error(
+          "That doesn't look like a valid pairing link. Copy the complete link from your laptop.",
+        );
       state.token = token;
       localStorage.setItem(KEY, token);
       history.replaceState(null, "", location.pathname + location.search);
@@ -40,7 +55,10 @@
 
   const displayDate = (unix, format = "short") => {
     const date = new Date(unix * 1000);
-    return date.toLocaleDateString("en-GH", { timeZone: "UTC", ...(format === "short" ? { weekday: "short" } : { month: "short", day: "numeric" }) });
+    return date.toLocaleDateString("en-GH", {
+      timeZone: "UTC",
+      ...(format === "short" ? { weekday: "short" } : { month: "short", day: "numeric" }),
+    });
   };
   const chart = (entry, period) => {
     const target = el("phone-chart");
@@ -67,28 +85,34 @@
     const slot = plotWidth / count;
     let parts = "";
     for (let i = 0; i < 4; i++) {
-      const y = margin.top + (drawable * i / 3);
-      parts += `<line class="gridline" x1="${margin.left}" y1="${y}" x2="${width-margin.right}" y2="${y}"/>`;
-      parts += `<text x="0" y="${y+4}">${(max * (1-i/3)).toFixed(1)}</text>`;
+      const y = margin.top + (drawable * i) / 3;
+      parts += `<line class="gridline" x1="${margin.left}" y1="${y}" x2="${width - margin.right}" y2="${y}"/>`;
+      parts += `<text x="0" y="${y + 4}">${(max * (1 - i / 3)).toFixed(1)}</text>`;
     }
     for (let i = 0; i < bars.length; i++) {
       const b = bars[i];
-      const x = margin.left + i * slot + slot * .16;
-      const w = Math.max(4, slot * .68);
+      const x = margin.left + i * slot + slot * 0.16;
+      const w = Math.max(4, slot * 0.68);
       const val = b.gb;
-      const barHeight = val === null ? 10 : Math.max(2, drawable * val / max);
+      const barHeight = val === null ? 10 : Math.max(2, (drawable * val) / max);
       const y = margin.top + drawable - barHeight;
-      const label = period === "today"
-        ? new Date(b.t * 1000).getUTCHours().toString().padStart(2, "0") + ":00"
-        : displayDate(b.t, period === "week" ? "short" : "long");
-      const accessible = label + ": " + (val === null ? "no recording" : amount(val) + " GB recorded");
+      const label =
+        period === "today"
+          ? new Date(b.t * 1000).getUTCHours().toString().padStart(2, "0") + ":00"
+          : displayDate(b.t, period === "week" ? "short" : "long");
+      const accessible =
+        label + ": " + (val === null ? "no recording" : amount(val) + " GB recorded");
       parts += `<rect class="${val === null ? "gap" : "recorded"}" tabindex="0" role="graphics-symbol" aria-label="${accessible}" x="${x}" y="${y}" rx="3" width="${w}" height="${barHeight}"><title>${accessible}</title></rect>`;
-      if (i % Math.max(1, Math.ceil(count/7)) === 0) parts += `<text x="${x}" y="${height - 10}">${label}</text>`;
+      if (i % Math.max(1, Math.ceil(count / 7)) === 0)
+        parts += `<text x="${x}" y="${height - 10}">${label}</text>`;
     }
     target.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Usage over time. Blank outlined bars mean no recorded data.">${parts}</svg>`;
     target.style.minWidth = width + "px";
     el("chart-summary").textContent = observed.length
-      ? amount(entry.gb) + " GB recorded · " + Math.round((entry.trafficCoverage || 0) * 100) + "% of the period sampled"
+      ? amount(entry.gb) +
+        " GB recorded · " +
+        Math.round((entry.trafficCoverage || 0) * 100) +
+        "% of the period sampled"
       : "No usable traffic readings for this period";
   };
   const render = () => {
@@ -100,13 +124,24 @@
     const latest = Number(current.latestSampleAt || 0) * 1000;
     const updated = Number(new Date(state.payload.updatedAt));
     const age = Date.now() - updated;
-    const fresh = Number.isFinite(age) && age >= 0 && age < 20 * 60_000 && latest > 0 && Date.now() - latest < 20 * 60_000;
+    const fresh =
+      Number.isFinite(age) &&
+      age >= 0 &&
+      age < 20 * 60_000 &&
+      latest > 0 &&
+      Date.now() - latest < 20 * 60_000;
     setStatus(fresh ? "Recent readings" : "Saved history", fresh ? "" : "stale");
-    el("sync-copy").textContent = "Last synced " + ago(updated) + " · Laptop uploads approximately every 10 minutes while Chrome is running.";
+    el("sync-copy").textContent =
+      "Last synced " +
+      ago(updated) +
+      " · Laptop uploads approximately every 10 minutes while Chrome is running.";
     el("hero-gb").textContent = amount(month?.gb);
-    el("hero-coverage").textContent = Math.round((month?.trafficCoverage || 0) * 100) + "% of the month measured";
+    el("hero-coverage").textContent =
+      Math.round((month?.trafficCoverage || 0) * 100) + "% of the month measured";
     el("metric-cost").textContent = money(month?.projectedCost);
-    el("metric-energy").textContent = Number.isFinite(month?.kWh) ? amount(month.kWh, 2) + " kWh" : "—";
+    el("metric-energy").textContent = Number.isFinite(month?.kWh)
+      ? amount(month.kWh, 2) + " kWh"
+      : "—";
     el("metric-energy-note").textContent = "Measured during recorded time · gaps excluded";
     el("metric-cost-note").textContent = "Full-month projection · plan + energy";
     el("cost-plan").textContent = money(period?.planAllocation);
@@ -127,12 +162,22 @@
       list.textContent = "No completed daily readings yet. Your recorder will fill this over time.";
     } else {
       for (const day of days) {
-        const row = document.createElement("div"); row.className = "phone-day";
-        const left = document.createElement("span"); left.textContent = displayDate(day.t, "long");
+        const row = document.createElement("div");
+        row.className = "phone-day";
+        const left = document.createElement("span");
+        left.textContent = displayDate(day.t, "long");
         const right = document.createElement("div");
-        const strong = document.createElement("strong"); strong.textContent = Number.isFinite(day.gb) ? amount(day.gb) + " GB" : "No traffic reading";
-        const small = document.createElement("small"); small.textContent = Number.isFinite(day.kWh) ? amount(day.kWh, 2) + " kWh" : "No energy reading";
-        right.append(strong, small); row.append(left, right); list.append(row);
+        const strong = document.createElement("strong");
+        strong.textContent = Number.isFinite(day.gb)
+          ? amount(day.gb) + " GB"
+          : "No traffic reading";
+        const small = document.createElement("small");
+        small.textContent = Number.isFinite(day.kWh)
+          ? amount(day.kWh, 2) + " kWh"
+          : "No energy reading";
+        right.append(strong, small);
+        row.append(left, right);
+        list.append(row);
       }
     }
   };
@@ -145,41 +190,53 @@
         headers: { Authorization: "Bearer " + state.token },
         cache: "no-store",
         credentials: "omit",
-        signal: controller.signal
+        signal: controller.signal,
       });
       const data = await response.json();
       if (!response.ok) {
         if (response.status === 503) setStatus("Sync not configured", "error");
-        else if (response.status === 401 || response.status === 404) setStatus("Pairing expired", "error");
+        else if (response.status === 401 || response.status === 404)
+          setStatus("Pairing expired", "error");
         else setStatus("Could not refresh", "error");
-        el("sync-copy").textContent = data.error === "sync_not_configured"
-          ? "The cloud database has not been connected to this site yet. Your extension will continue recording locally."
-          : "Could not retrieve readings. Reconnect from the laptop extension or try again.";
+        el("sync-copy").textContent =
+          data.error === "sync_not_configured"
+            ? "The cloud database has not been connected to this site yet. Your extension will continue recording locally."
+            : "Could not retrieve readings. Reconnect from the laptop extension or try again.";
         return;
       }
       state.payload = data;
       if (!data.snapshot?.periods) {
         setStatus("Waiting for first upload", "stale");
-        el("sync-copy").textContent = "Paired. Open the extension and select Sync now to send the first readings.";
+        el("sync-copy").textContent =
+          "Paired. Open the extension and select Sync now to send the first readings.";
         return;
       }
       render();
     } catch {
       setStatus("Offline", "error");
-      el("sync-copy").textContent = "Cannot reach the sync service. Existing data remains on the laptop.";
+      el("sync-copy").textContent =
+        "Cannot reach the sync service. Existing data remains on the laptop.";
     } finally {
       clearTimeout(timeout);
     }
   }
   el("pair-form").addEventListener("submit", (event) => {
-    event.preventDefault(); connect(el("pair-code").value);
+    event.preventDefault();
+    connect(el("pair-code").value);
   });
   el("phone-refresh").addEventListener("click", () => void refresh());
   el("forget-monitor").addEventListener("click", () => {
-    if (!window.confirm("Forget the private pairing code on this phone? Your laptop recorder and cloud history will not be deleted.")) return;
+    if (
+      !window.confirm(
+        "Forget the private pairing code on this phone? Your laptop recorder and cloud history will not be deleted.",
+      )
+    )
+      return;
     localStorage.removeItem(KEY);
-    state.token = ""; state.payload = null;
-    clearInterval(state.timer); state.timer = null;
+    state.token = "";
+    state.payload = null;
+    clearInterval(state.timer);
+    state.timer = null;
     el("pair-section").hidden = false;
     el("monitor-section").hidden = true;
     note("Phone access forgotten. Pair again using your extension if needed.");
@@ -193,13 +250,16 @@
         b.setAttribute("aria-selected", String(selected));
       });
       render();
-    })
+    }),
   );
   // The fragment is never transmitted in a request. Clear it before fetching.
   const initialFragment = location.hash.startsWith("#pair=") ? location.hash.slice(6) : "";
   if (initialFragment) connect(initialFragment);
   else {
-    try { const saved = localStorage.getItem(KEY); if (saved) connect(saved); } catch {}
+    try {
+      const saved = localStorage.getItem(KEY);
+      if (saved) connect(saved);
+    } catch {}
   }
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && state.token) void refresh();
