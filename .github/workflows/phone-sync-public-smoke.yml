@@ -1,0 +1,35 @@
+name: Verify public phone monitor
+on:
+  push:
+    branches: [master]
+    paths:
+      - landing/api/monitor.ts
+      - extension/lib/phoneSync.ts
+      - scripts/test-phone-sync-backend.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Wait for production API deployment
+        run: |
+          for attempt in $(seq 1 24); do
+            if curl --max-time 10 --fail --silent "https://starlink-ghana.vercel.app/api/monitor?action=health" | grep -q '"configured":true'; then
+              echo "Production phone sync endpoint is configured."
+              exit 0
+            fi
+            echo "Waiting for website deployment (attempt $attempt)"
+            sleep 10
+          done
+          echo "Production proxy did not become healthy." >&2
+          exit 1
+      - name: Test pairing through public website
+        env:
+          PHONE_SYNC_ENDPOINT: https://starlink-ghana.vercel.app/api/monitor
+        run: node scripts/test-phone-sync-backend.mjs
