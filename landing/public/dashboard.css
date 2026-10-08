@@ -1471,3 +1471,201 @@ summary:focus-visible {
     flex: 1;
   }
 }
+
+/*
+ * Public calculator refinement (2026-10-08).
+ * Calm, readable, responsive. Scoped to the website: no extension styles change.
+ * Keep this section consolidated until the base stylesheet is refactored.
+ */
+.ghana-app {
+  --app-bg: #f7f9f7;
+  --app-paper: #ffffff;
+  --app-ink: #1b2e23;
+  --app-muted: #53665b;
+  --app-line: #dce5dd;
+  --app-green: #16664f;
+  --app-green-dark: #104d3c;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.ghana-app .content { max-width: 1320px; }
+.ghana-app .welcome-row { align-items: center; margin-bottom: 25px; }
+.ghana-app .welcome-row h1 { font-size: clamp(2.35rem, 3.8vw, 3.4rem); line-height: 1.07; }
+.ghana-app .welcome-copy { font-size: 15px; line-height: 1.6; max-width: 57ch; }
+.ghana-app .eyebrow { font-size: 11px; letter-spacing: .075em; line-height: 1.5; }
+.ghana-app .rail-label { font-size: 10px; }
+.ghana-app .rail-nav a { min-height: 46px; font-size: 14px; }
+.ghana-app .rail-country { font-size: 12px; }
+.ghana-app .rail-help { min-height: 44px; }
+.ghana-app .privacy-pill { font-size: 11px; }
+.ghana-app .connect-button { min-height: 46px; font-size: 14px; padding: 12px 18px; }
+.ghana-app .connect-button:active:not(:disabled),
+.ghana-app .period:active:not(:disabled),
+.ghana-app .icon-btn:active:not(:disabled) { transform: scale(.96); }
+.ghana-app .icon-btn { min-width: 44px; min-height: 44px; }
+.ghana-app .connection-strip {
+  background: #fff;
+  border-color: var(--app-line);
+  padding: 16px 18px;
+  gap: 15px;
+  border-radius: 12px;
+  margin-bottom: 22px;
+}
+.ghana-app .connection-strip.connected { background: #f0f8f2; }
+.ghana-app .strip-copy strong { font-size: 14px; color: var(--app-ink); }
+.ghana-app .strip-copy span { font-size: 13px; line-height: 1.55; color: var(--app-muted); }
+.ghana-app .strip-icon { display: none; }
+.ghana-app .text-button, .ghana-app .micro-link {
+  color: var(--app-green);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: start;
+}
+.ghana-app .text-button, .ghana-app .micro-link,
+.ghana-app .period, .ghana-app .outline-button,
+.ghana-app .find-local, .ghana-app .button-quiet {
+  min-height: 44px;
+  padding-block: 9px;
+}
+.ghana-app .metrics-grid { gap: 16px; margin-bottom: 20px; }
+.ghana-app .metric-card, .ghana-app .panel {
+  border: 1px solid var(--app-line);
+  border-radius: 13px;
+  box-shadow: 0 1px 2px rgba(15, 42, 27, .025);
+  min-width: 0;
+}
+.ghana-app .metric-card { padding: 20px 21px 15px; }
+.ghana-app .metric-icon { display: none; }
+.ghana-app .metric-label, .ghana-app .muted-label {
+  font: 600 11px/1.4 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: .045em;
+  color: #53675a;
+}
+.ghana-app .metric-main { margin: 16px 0 8px; flex-wrap: wrap; row-gap: 3px; white-space: normal; }
+.ghana-app .metric-main strong { font-size: clamp(28px, 2.4vw, 38px); font-variant-numeric: tabular-nums; }
+.ghana-app .metric-main .currency { font-size: 13px; }
+.ghana-app .metric-suffix { font-size: 12px; }
+.ghana-app .metric-note { font-size: 13px; line-height: 1.5; color: var(--app-muted); }
+.ghana-app .metric-footer { gap: 10px; margin-top: 16px; padding-top: 11px; flex-wrap: wrap; }
+.ghana-app .range-pill { font: 11px/1.5 "IBM Plex Mono", ui-monospace, monospace; }
+.ghana-app .subtle-label { font-size: 12px; color: var(--app-muted); }
+.ghana-app .section-grid { gap: 18px; margin-bottom: 20px; }
+.ghana-app .panel { padding: 24px; }
+.ghana-app .panel h2 { font-size: 22px; line-height: 1.2; }
+.ghana-app .period { font-size: 12px; padding-inline: 12px; min-width: 65px; }
+.ghana-app .cost-summary { gap: 20px; flex-wrap: wrap; }
+.ghana-app .big-cost strong { font-variant-numeric: tabular-nums; }
+.ghana-app .energy-stat small { font-size: 12px; color: var(--app-muted); }
+.ghana-app .bar-top, .ghana-app .bar-labels { font-size: 12px; gap: 10px; flex-wrap: wrap; }
+.ghana-app .bar-top span:last-child { font-size: 11px; color: var(--app-muted); }
+.ghana-app .estimate-caption { font-size: 12px; color: var(--app-muted); line-height: 1.55; padding: 13px 14px; }
+.ghana-app .setup-step { font-size: 10px; }
+.ghana-app .field { margin-top: 19px; }
+.ghana-app .field label { font-size: 14px; line-height: 1.45; color: var(--app-ink); gap: 10px; }
+.ghana-app .field small { font-size: 12px; line-height: 1.55; color: var(--app-muted); }
+.ghana-app .field select, .ghana-app .input-wrap, .ghana-app .connect-dialog input {
+  min-height: 46px;
+  height: auto;
+  font-size: 15px;
+  background: #fff;
+  border-color: #bacdc0;
+}
+.ghana-app .input-wrap input { font-size: 15px; min-height: 44px; }
+.ghana-app .input-wrap span { font-size: 12px; color: var(--app-muted); }
+.ghana-app .range-input { min-height: 36px; cursor: pointer; }
+.ghana-app .range-labels { font-size: 12px; }
+.ghana-app .analysis-note { font-size: 13px; line-height: 1.65; color: var(--app-muted); }
+.ghana-app .analysis-values { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ghana-app .analysis-values strong { font-variant-numeric: tabular-nums; font-size: clamp(23px, 2vw, 29px); }
+.ghana-app .save-status { margin: 16px 0 0; color: var(--app-muted); font-size: 13px; line-height: 1.55; }
+.ghana-app .signal-row strong { font-size: 13px; }
+.ghana-app .signal-row small { font-size: 12px; color: var(--app-muted); line-height: 1.4; }
+.ghana-app .signal-status { font-size: 11px; color: var(--app-muted); text-align: end; }
+.ghana-app .trust-note p { font-size: 12px; color: var(--app-muted); }
+.ghana-app .device-empty strong { font-size: 15px; }
+.ghana-app .device-empty p, .ghana-app .device-footer { font-size: 13px; line-height: 1.55; }
+.ghana-app .how-panel { background: #f0f5f0; gap: 26px; }
+.ghana-app .how-panel p, .ghana-app .connect-section p { font-size: 13px; line-height: 1.6; }
+.ghana-app .how-steps div { font-size: 13px; line-height: 1.5; }
+.ghana-app .app-footer { font-size: 11px; line-height: 1.6; color: var(--app-muted); }
+.ghana-app .dialog-close { min-width: 44px; min-height: 44px; }
+.ghana-app .connect-dialog { overflow-y: auto; overscroll-behavior: contain; }
+.ghana-app .dialog-intro { font-size: 14px; line-height: 1.6; color: var(--app-muted); }
+.ghana-app .connect-hint { padding: 12px 14px; gap: 5px; }
+.ghana-app .connect-hint b { font-size: 13px; }
+.ghana-app .connect-hint span { font-size: 12px; color: var(--app-muted); line-height: 1.55; }
+.ghana-app .connect-hint code { font-size: 12px; overflow-wrap: anywhere; }
+.ghana-app .dialog-error { font-size: 12px; }
+.ghana-app .dialog-privacy { font-size: 12px; line-height: 1.55; }
+.ghana-app .button-quiet { font-size: 13px; }
+.ghana-app .update-panel { background: #fff; }
+.ghana-app .update-panel a { font-size: 13px; }
+.ghana-app :is(button, a, select, input, summary):focus-visible {
+  outline: 3px solid #187b59;
+  outline-offset: 3px;
+}
+.ghana-app :is(input, select):focus-visible { outline-offset: 1px; }
+.ghana-app :is(.rail-nav a, .mobile-nav a).active { font-weight: 650; }
+.ghana-app section[id] { scroll-margin-top: 86px; }
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+@media (hover: none) {
+  .ghana-app .connect-button:hover { transform: none; }
+}
+@media (max-width: 1100px) {
+  .ghana-app .section-grid { grid-template-columns: minmax(0, 1fr); }
+  .ghana-app .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ghana-app .cost-card { grid-column: span 2; }
+}
+@media (max-width: 760px) {
+  .ghana-app .topbar { padding-inline: 18px; }
+  .ghana-app .content { padding: 26px 16px calc(105px + env(safe-area-inset-bottom)); }
+  .ghana-app .welcome-row h1 { font-size: clamp(32px, 8.5vw, 42px); }
+  .ghana-app .welcome-copy { font-size: 14px; max-width: 44ch; }
+  .ghana-app .welcome-row > .connect-button { width: 100%; justify-content: center; }
+  .ghana-app .connection-strip { display: grid; gap: 9px; padding: 16px; }
+  .ghana-app .connection-strip > .text-button {
+    font-size: 13px;
+    padding: 8px 0;
+    width: fit-content;
+    white-space: normal;
+  }
+  .ghana-app .connection-strip > .text-button span { font-size: inherit; }
+  .ghana-app .panel { padding: 20px 18px; }
+  .ghana-app .metric-card { padding: 18px; }
+  .ghana-app .metrics-grid { gap: 12px; }
+  .ghana-app .metric-label { font-size: 11px; }
+  .ghana-app .metric-note { font-size: 12px; }
+  .ghana-app .metric-footer .micro-link { font-size: 13px; }
+  .ghana-app .field select, .ghana-app .input-wrap input, .ghana-app .connect-dialog input {
+    font-size: 16px;
+  }
+  .ghana-app .mobile-nav {
+    height: calc(64px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .ghana-app .mobile-nav a { min-height: 48px; }
+  .ghana-app .mobile-nav small { font-size: 11px; }
+  .ghana-app section[id] { scroll-margin-top: 72px; }
+}
+@media (max-width: 520px) {
+  .ghana-app .metrics-grid { grid-template-columns: minmax(0, 1fr); }
+  .ghana-app .cost-card { grid-column: auto; }
+  .ghana-app .metric-main strong { font-size: 33px; }
+  .ghana-app .analysis-values { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .ghana-app .cost-summary { align-items: start; }
+  .ghana-app .energy-stat { width: 100%; }
+  .ghana-app .panel-heading { gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ghana-app :is(.connect-button, .icon-btn, .period):active { transform: none; }
+}
