@@ -43,31 +43,31 @@ Sources reviewed: [Rare UI](https://rareui.com/components) (the correct site; **
 
 Rare UI is a free React component collection, normally installed through shadcn. The phone companion is a statically rendered **Astro** site with lightweight JavaScript, so React components cannot simply be pasted directly without adding Astro's React integration, Motion and the individual dependencies. We audited ten actual Rare UI components and ten useLayouts patterns, and built lightweight task-focused equivalents where appropriate. **The twenty original React components have NOT been installed or copied as-is.** A follow-up React integration can faithfully reuse their source if that visual direction is essential, after functionality is verified.
 
-| Rare UI component examined | Assessment for phone companion |
-| --- | --- |
-| Step player | Pairing steps; a static three-step instruction is clearer |
-| OTP Input | Would fit a shorter one-time pairing code; unnecessary for current private URL |
-| Animated counter | Use restrained value transitions when readings update; avoid fabricated increments |
-| Task list | Useful for a setup checklist, not the normal dashboard |
-| Notification bell | Could show genuinely delivered alerts; not implemented for cloud yet |
-| Scroll Progress | Little value on a short mobile monitoring screen |
-| Rail TOC | Better for long settings/help pages than three primary screens |
-| Proximity Sidebar | Reference for desktop dashboard's navigation hierarchy |
-| Hook Sidebar | Reference for desktop menu readability, not needed on phone |
-| Delete button | Pattern for explicit disconnect/revoke with clear confirmation |
+| Rare UI component examined | Assessment for phone companion                                                     |
+| -------------------------- | ---------------------------------------------------------------------------------- |
+| Step player                | Pairing steps; a static three-step instruction is clearer                          |
+| OTP Input                  | Would fit a shorter one-time pairing code; unnecessary for current private URL     |
+| Animated counter           | Use restrained value transitions when readings update; avoid fabricated increments |
+| Task list                  | Useful for a setup checklist, not the normal dashboard                             |
+| Notification bell          | Could show genuinely delivered alerts; not implemented for cloud yet               |
+| Scroll Progress            | Little value on a short mobile monitoring screen                                   |
+| Rail TOC                   | Better for long settings/help pages than three primary screens                     |
+| Proximity Sidebar          | Reference for desktop dashboard's navigation hierarchy                             |
+| Hook Sidebar               | Reference for desktop menu readability, not needed on phone                        |
+| Delete button              | Pattern for explicit disconnect/revoke with clear confirmation                     |
 
-| useLayouts pattern examined | Assessment |
-| --- | --- |
-| Status Button | Clear and truthful last-sync status |
-| AccordionOS | Advanced help/settings revealed on demand |
-| Accessible Action | Explicit refresh and pairing actions |
-| Theme Toggle | Not needed yet: this experience intentionally uses a dark theme |
-| Confidential Folder | Reference for privacy-sensitive sections, not a real folder interface |
-| Bucket | Could group collected summary items; unnecessary decoration avoided |
-| 3D Book | Not appropriate for a data-monitoring screen |
-| Polaroid Stack | Not appropriate for usage history |
-| Photo Albums | Not appropriate for telemetry data |
-| Get In Touch | Not appropriate to core monitoring tasks |
+| useLayouts pattern examined | Assessment                                                            |
+| --------------------------- | --------------------------------------------------------------------- |
+| Status Button               | Clear and truthful last-sync status                                   |
+| AccordionOS                 | Advanced help/settings revealed on demand                             |
+| Accessible Action           | Explicit refresh and pairing actions                                  |
+| Theme Toggle                | Not needed yet: this experience intentionally uses a dark theme       |
+| Confidential Folder         | Reference for privacy-sensitive sections, not a real folder interface |
+| Bucket                      | Could group collected summary items; unnecessary decoration avoided   |
+| 3D Book                     | Not appropriate for a data-monitoring screen                          |
+| Polaroid Stack              | Not appropriate for usage history                                     |
+| Photo Albums                | Not appropriate for telemetry data                                    |
+| Get In Touch                | Not appropriate to core monitoring tasks                              |
 
 Actual implemented UI uses a dark editorial metrics grid, accessible tabs, status pills, gap-aware charts and plain pairing steps inspired by the **functional patterns**; never claim that original third-party component source was integrated. Product Design OS principles: brief time to first reading, understandable data freshness, accurate missing-data labels, responsive hierarchy, keyboard focus, and reduced motion.
 
