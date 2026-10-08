@@ -100,11 +100,7 @@
   background: #30493a;
 }
 .ghana-app .bars {
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0 25px,
-    #24312e 26px
-  );
+  background: repeating-linear-gradient(to bottom, transparent 0 25px, #24312e 26px);
   border-color: #34413b;
 }
 .ghana-app .bar {

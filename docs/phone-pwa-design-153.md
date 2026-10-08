@@ -11,7 +11,7 @@
 - Color semantics align the public product with the paired phone: deep near-black page, charcoal surfaces, subdued mint for the primary action and positive status, restrained borders, no bright gold.
 - Reuses the existing four-tab navigation, paired read token and data flows. The cost, energy, recording and device metrics have **not** been rewritten.
 - Retains the laptop Chrome extension ZIP as the public page's primary action, with a dedicated phone-companion entry second.
-- Adds a versioned PWA offline *shell* only. /api requests and household data cannot be cached by the service worker.
+- Adds a versioned PWA offline _shell_ only. /api requests and household data cannot be cached by the service worker.
 - Uses patterns informed by useLayouts (segmented navigation, clear task regions) and Rare UI (small tactile interactions) rather than importing heavy animation libraries.
 - Keeps keyboard focus, minimum comfortable tap targets, aria-hidden decorative icons and reduced-motion support.
 

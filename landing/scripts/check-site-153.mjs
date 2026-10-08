@@ -30,8 +30,16 @@ assert.match(
   /\/public-dark-details\.css\?v=153/,
   "Main website missing companion panel styling",
 );
-assert.match(publicHome, /\/public-dark-contrast\.css\?v=153/, "Calculator dark contrast layer missing");
-assert.match(read("public/public-dark-contrast.css"), /\.ghana-app h1/, "Calculator heading contrast missing");
+assert.match(
+  publicHome,
+  /\/public-dark-contrast\.css\?v=153/,
+  "Calculator dark contrast layer missing",
+);
+assert.match(
+  read("public/public-dark-contrast.css"),
+  /\.ghana-app h1/,
+  "Calculator heading contrast missing",
+);
 assert.match(publicHome, /id="phone-companion"/, "Public phone companion entry is missing");
 assert.match(publicHome, /data-release-download/, "Main extension download was removed");
 assert.match(publicHome, /data-sample-tab/, "Interactive extension preview was removed");
