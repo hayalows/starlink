@@ -1,5 +1,5 @@
 import type { DishStatusJson } from "@core/dishClient";
-import { electricityCost, effectiveCostPerGb, forecastUsage } from "@core/ghanaCost";
+import { electricityCost, forecastUsage } from "@core/ghanaCost";
 import { analyzePeriodCost, modeledWatts } from "@core/ghanaPeriodCosts";
 import {
   buildInsights,
@@ -72,14 +72,19 @@ export function useGhanaAnalysis(status: DishStatusJson | null, period: ViewPeri
   const costFor = (units: number) =>
     electricityCost(units, settings.tariff, settings.homeKwh, settings.customRate);
   const dataForecast = forecastUsage(usage.gb, usage.sampledSeconds, days);
+  // A fixed subscription buys the month, not a metered GB allowance. Divide
+  // the full projected monthly bill by GB actually observed so far. This is a
+  // partial-month effective ratio, useful from the first GB; never label missing
+  // samples as zero or turn coverage into a permission gate.
+  const monthlyObservedGb =
+    period === "month"
+      ? usage.gb
+      : (history.data ?? buildInsights([], now, settings.billingDay)).periods.month.current.gb;
   const perGb =
-    settings.planFee > 0 && total !== null
-      ? effectiveCostPerGb(
-          total,
-          usage.gb,
-          Math.min(usage.coverage, energy.kWh !== null ? energy.coverage : 1),
-        )
+    projectedTotal !== null && monthlyObservedGb !== null && monthlyObservedGb > 0
+      ? projectedTotal / monthlyObservedGb
       : null;
+  const dataValueCoverage = (history.data ?? buildInsights([], now, settings.billingDay)).periods.month.current.trafficCoverage;
   return {
     settings,
     update,
@@ -107,6 +112,7 @@ export function useGhanaAnalysis(status: DishStatusJson | null, period: ViewPeri
     projectedTotal,
     dataForecast,
     perGb,
+    dataValueCoverage,
     costFor,
   };
 }
