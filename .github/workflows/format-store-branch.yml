@@ -1,0 +1,32 @@
+name: One-time Store readiness formatter
+on:
+  push:
+    branches: [chore/chrome-store-readiness-2026-10]
+    paths:
+      - .github/workflows/format-store-branch.yml
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: chore/chrome-store-readiness-2026-10
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Format and remove the one-time formatter
+        run: |
+          npx prettier --write docs/chrome-web-store/README.md scripts/check-store-readiness.mjs src/components/shared/ConnectAccount.tsx
+          rm .github/workflows/format-store-branch.yml
+          git add docs/chrome-web-store/README.md scripts/check-store-readiness.mjs src/components/shared/ConnectAccount.tsx .github/workflows/format-store-branch.yml
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Format Chrome Store release files"
+            git push origin HEAD:chore/chrome-store-readiness-2026-10
+          fi
