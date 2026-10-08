@@ -147,7 +147,7 @@ function recalc() {
       : Math.round(a.period.coverage * 100) + "% of period recorded",
   );
   text("cost-range", "Model estimate");
-  text("chart-caption", "recorded energy only");
+  text("chart-caption", a.period.kWh === null ? "No measurements yet" : "Recorded readings only");
   text(
     "estimate-explain",
     "Electricity estimate uses PURC energy charges and your other household usage. Fixed charges, levies, router and mesh power are excluded. Lifeline only applies while total household use stays within 30 kWh.",
@@ -163,11 +163,11 @@ function recalc() {
       (a.sufficient ? "recorded GB." : "your entered monthly GB.") +
       " It is not a charge for each GB used.",
   );
-  text("data-total", a.monthUsage.gb === null ? "—" : a.monthUsage.gb.toFixed(1) + " GB");
+  text("data-total", a.monthUsage.gb !== null ? a.monthUsage.gb.toFixed(1) + " GB" : s.manualGb > 0 ? s.manualGb.toFixed(1) + " GB" : "—");
   text(
     "data-footnote",
     a.monthUsage.gb === null
-      ? "Open the extension for live usage"
+      ? s.manualGb > 0 ? "Your entered monthly GB · not measured" : "Enter GB below, or connect a collector"
       : Math.round(a.monthUsage.coverage * 100) + "% WAN recording coverage",
   );
   text(
@@ -233,13 +233,13 @@ function recalc() {
         ? "Collector connected · last read " + lastRead.toLocaleTimeString("en-GH")
         : lastRead
           ? "Collector unavailable · previous readings may be stale"
-          : "Your dashboard is ready.";
+          : "Works without connecting a device.";
     const span = document.createElement("span");
     span.textContent = connected
       ? "Local readings refresh every 30 seconds while this page is open."
       : lastRead
         ? "Check your monitor connection. Effective cost uses manual monthly GB until readings recover."
-        : "Use the calculator below, or open the extension for live readings, budgets and device cost shares.";
+        : "Start with an estimate. Live usage and device readings require a local monitor.";
     copy.append(strong, span);
   }
   const bars = el("cost-bars");
@@ -285,8 +285,9 @@ const fields: [string, keyof Settings, number?][] = [
 function save() {
   try {
     localStorage.setItem("starlinkGhanaSettings", JSON.stringify(s));
+    text("save-status", "Your changes are saved automatically on this device.");
   } catch {
-    /* optional storage */
+    text("save-status", "Changes are temporary: this browser is not allowing local storage.");
   }
   recalc();
 }
@@ -307,10 +308,6 @@ document.querySelectorAll<HTMLButtonElement>("[data-period]").forEach((b) =>
     save();
   }),
 );
-el("save-setup").addEventListener("click", () => {
-  save();
-  el("save-setup").textContent = "Setup saved on this device ✓";
-});
 el("export-report").addEventListener("click", () => {
   const a = calc();
   const rows = [
@@ -339,7 +336,7 @@ document
 document.querySelectorAll<HTMLElement>("[data-scroll]").forEach((b) =>
   b.addEventListener("click", () =>
     el(b.dataset.scroll!).scrollIntoView({
-      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
     }),
   ),
 );
@@ -462,10 +459,51 @@ el("disconnect").addEventListener("click", () => {
   renderDevices();
   recalc();
 });
-el("refresh-data").addEventListener("click", () => {
-  void refresh();
-  recalc();
+el("refresh-data").addEventListener("click", async () => {
+  const button = el("refresh-data") as HTMLButtonElement;
+  if (button.disabled) return;
+  button.disabled = true;
+  text("refresh-status", "Checking for collector readings.");
+  try {
+    const base = localStorage.getItem("starlinkGhanaCollector");
+    if (!base) {
+      text("refresh-status", "No collector connected. Calculator results update as you type.");
+      return;
+    }
+    await refresh();
+    text("refresh-status", connected ? "Local readings updated." : "Collector unavailable. Check your connection.");
+  } finally {
+    button.disabled = false;
+  }
 });
+// Keep keyboard and mobile navigation in sync with the section actually in view.
+const sectionIds = ["overview", "power", "data", "connection"] as const;
+const navigationLinks = Array.from(
+  document.querySelectorAll<HTMLAnchorElement>(".rail-nav a, .mobile-nav a"),
+);
+let navigationTicking = false;
+const updateNavigation = () => {
+  navigationTicking = false;
+  let activeId: string = sectionIds[0];
+  for (const id of sectionIds) {
+    const rect = el(id).getBoundingClientRect();
+    if (rect.top <= Math.min(window.innerHeight * 0.28, 180)) activeId = id;
+  }
+  navigationLinks.forEach((link) => {
+    const current = link.hash === "#" + activeId;
+    link.classList.toggle("active", current);
+    if (current) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  });
+};
+window.addEventListener("scroll", () => {
+  if (navigationTicking) return;
+  navigationTicking = true;
+  requestAnimationFrame(updateNavigation);
+}, { passive: true });
+window.addEventListener("hashchange", updateNavigation);
+updateNavigation();
+
 let installPrompt: { prompt: () => Promise<void> } | null = null;
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
