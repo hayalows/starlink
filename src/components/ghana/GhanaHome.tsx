@@ -6,6 +6,7 @@ import { ghs } from "../../lib/ghanaFormat";
 import { ghanaHost } from "../../lib/ghanaHost";
 import { BackupRestore } from "./BackupRestore";
 import { MonitorUpdates } from "../data-usage/MonitorUpdates";
+import { PhoneConnect } from "./PhoneConnect";
 export function GhanaHome({
   status,
   connected,
@@ -303,6 +304,7 @@ export function GhanaHome({
         </p>
       </details>
       <p role='status'>{message}</p>
+      <PhoneConnect />
       <BackupRestore />
       <MonitorUpdates />
     </div>
