@@ -1,0 +1,30 @@
+name: Prepare phone PWA formatting
+on:
+  push:
+    branches: [feat/phone-pwa-parity-152]
+    paths: [.github/workflows/format-phone-152.yml]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/phone-pwa-parity-152
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: |
+          npx prettier --write core/ghanaDataValue.ts core/ghanaDataValue.test.ts landing/public/live/sw.js landing/public/phone.css landing/public/phone.js src/App.tsx src/components/ghana/GhanaHome.tsx src/hooks/useGhanaAnalysis.ts extension/lib/phoneSync.ts
+          rm .github/workflows/format-phone-152.yml
+          git add -u
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "Format phone PWA release"
+            git pull --rebase origin feat/phone-pwa-parity-152
+            git push origin HEAD:feat/phone-pwa-parity-152
+          fi
