@@ -33,7 +33,7 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm run typecheck
       - run: npm run typecheck:extension
-      - run: npm test -- --project node core/ghanaCost.test.ts core/ghanaInsights.test.ts core/ghanaBackup.test.ts core/ghanaBudgets.test.ts
+      - run: npm test -- --project node core/ghanaCost.test.ts core/ghanaPeriodCosts.test.ts core/ghanaInsights.test.ts core/ghanaBackup.test.ts core/ghanaBudgets.test.ts
       - run: npx playwright install --with-deps chromium
       - run: npm test -- --project browser extension/lib/history.browser.test.ts src/components/ghana/BackupRestore.test.tsx
       - run: npm run build:extension
