@@ -6,7 +6,7 @@ import { NotificationThrottle, describeTransition } from "@core/alertNotificatio
 import type { AlertTransition } from "@core/alertEngine";
 import type { AlertSeverity, AlertState } from "@core/alertDefinitions";
 import { routeApiRequest } from "../lib/apiRouter";
-import { accountSignedIn, handleCloudRequest } from "../lib/cloudHandler";
+import { accountSignedIn, handleCloudRequest, migrateLegacySession } from "../lib/cloudHandler";
 import type { MeterHost } from "../lib/meterHost";
 import { IndexedDbHistory } from "../lib/history";
 import { singleFlight } from "../lib/singleFlight";
@@ -236,6 +236,8 @@ async function updateBadge(active: AlertState[]): Promise<void> {
 }
 
 export default defineBackground(() => {
+  // Remove copied login cookies left in storage by earlier versions on browser start.
+  void migrateLegacySession();
   void browser.storage.local.get("ghanaReopenAfterUpdate").then(async (data) => {
     if (data.ghanaReopenAfterUpdate) {
       await browser.storage.local.remove("ghanaReopenAfterUpdate");

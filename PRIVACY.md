@@ -1,79 +1,54 @@
-# Starlink Ghana Monitor privacy
+# Starlink Ghana Monitor privacy policy
 
-This Ghana extension builds on Dishylink. Local network readings, history, device totals and cost preferences stay on your computer. CSV reports download only when you request them.
+**Last updated: 8 October 2026**
 
-The **Check for updates** button sends a normal HTTPS request to `starlink-ghana.vercel.app/version.json`. It sends no readings, device names, cost settings, account cookies or Starlink session. Standard hosting request metadata, such as an IP address, may be processed by the hosting provider. The check is manual and optional.
+Starlink Ghana Monitor is an independent, open-source browser extension and website for monitoring compatible Starlink equipment and estimating costs in Ghana. It builds on Dishylink under the MIT licence. It is **not affiliated with or endorsed by Starlink or SpaceX**.
 
-The public calculator stores your inputs in that website's local storage. The extension's history lives separately in IndexedDB. A configured local collector may be read from the website only when you explicitly connect it; collector tokens remain in that browser's local storage and are sent only to the collector address you enter. Forecasts and CSV calculations are made on your device.
+This policy describes **Starlink Ghana Monitor**, not the original Dishylink product.
 
-For questions about this Ghana fork, [open a repository issue](https://github.com/hayalows/starlink/issues). The upstream Dishylink privacy policy below describes its original local monitor, optional account connection and speed tests.
+## What the extension reads
 
----
+While Google Chrome is running on a network where your Starlink dish and compatible router can be reached, the extension may automatically read: connection status, bandwidth and latency, power consumption, outages, obstruction information, router status and connected-device information (including device names, identifiers and network traffic). The extension saves readings, device preferences, Ghana cedi cost assumptions and notifications in its **local browser storage** for charts, history, budgets and cost calculations. It does not inspect the contents of websites you browse.
 
-# Privacy Policy
+You may optionally grant access to a custom local router address or use the device's location for satellite positioning. If you use location, your browser provides it to the extension for the feature you requested. The satellite view can obtain public orbital data from CelesTrak. Local dish and router communications take place on your own network, which may use HTTP because of the equipment interface.
 
-Dishylink is an open-source app that monitors the performance and health of
-your Starlink. This page describes what the app does with your data.
+## Optional Starlink account connection
 
-## What stays on your machine
+You can use local monitoring **without connecting a Starlink account**. If you choose to connect, the extension reads the existing `starlink.com` sign-in cookies from your browser to request your plan, billing-cycle, data-usage and account/device details **directly from Starlink**, and to perform supported account-authorised device or router actions you initiate or configure. Some controls can alter your network connectivity.
 
-Dishylink talks directly to your dish and router over your own LAN, including
-while its window is closed. Everything it measures — throughput, latency,
-power draw, obstruction, outages, thermal events, radio temps, device lists —
-is written to local storage on your machine and is never transmitted
-anywhere. There is no backend, no analytics, and no telemetry collection by
-us. We do not see your data; we never receive it.
+The extension saves only a connection preference in Chrome extension storage, rather than a permanent copy of Starlink authentication cookies. Account cookies are held temporarily in the extension's service-worker memory and may be applied to its own Starlink requests by a browser session network rule. The authentication cookies still exist in your normal Starlink browser session. Signing out from inside the extension disconnects its access but does not sign you out of the regular Starlink website.
 
-## The optional "connect account" feature
+**Important:** Account data may contain your name, email, service address, account identifier and subscription information. These details are used for the account features you request and are not uploaded to a Starlink Ghana Monitor server.
 
-If you choose to sign in with your own Starlink account (the "Cloud account"
-tab), the app opens a Starlink login window and keeps the resulting session
-on your device only:
+## Data transfers and third parties
 
-- On desktop, the session is stored in your app's local data directory,
-  encrypted with your OS's keychain where available.
-- In the browser extension, the session is stored in the extension's own
-  storage area, inside your browser profile. No website and no other
-  extension can read it. It is not encrypted at rest, so anything with
-  access to your browser profile on disk could.
-- The session is used solely to read your own plan, billing, and usage data
-  directly from `starlink.com` on your behalf, in response to your own
-  requests.
-- It is never sent to us or to any third party — we have no server that
-  could receive it. Disconnecting the account clears the stored session.
-  In the extension, disconnecting clears only Dishylink's copy — your own
-  starlink.com login in the browser is left signed in.
+- **Your Starlink dish/router:** local network reads and, when requested, configuration operations. These interfaces may use local HTTP.
+- **Starlink (SpaceX):** optional signed-in account information, billing data and authorised commands exchanged directly with Starlink over HTTPS.
+- **CelesTrak:** optional public satellite/orbit information requested to support the satellite view.
+- **Cloudflare:** an on-demand speed test may exchange network traffic with Cloudflare's speed-test servers, exposing ordinary request metadata such as an IP address to that provider.
+- **Starlink Ghana Monitor website and hosting:** optional update checks request a public version file. As with ordinary web visits, the hosting provider can process IP address, user agent and standard access-log metadata. Update checks do **not** send recorded network readings, device identifiers, Starlink cookies or account details.
+- **GitHub:** optional download/update helpers contact GitHub to fetch published release files.
 
-This feature is entirely opt-in. If you never sign in, no Starlink account
-session is created or stored.
+There is no Starlink Ghana Monitor cloud account, advertising tracker, telemetry ingestion service or automatic upload of your monitoring history. We do not sell monitoring or account data.
 
-## Third parties
+## Public website and optional collector
 
-The one exception to "never leaves your machine": the in-app speed test
-measures your connection against Cloudflare's public speed-test
-infrastructure, the same way any browser-based speed test does. That request
-carries no personal data beyond what any internet connection to Cloudflare
-already involves.
+The public website at [starlink-ghana.vercel.app](https://starlink-ghana.vercel.app/) is primarily a cost calculator. Its values are stored in that browser's local storage and are not automatically linked to the extension's IndexedDB history. If you voluntarily configure a separate local collector, the website can request readings from the collector address you provide; credentials for that connection remain in your browser's local storage. Do not expose an unprotected collector to the public internet.
 
-## Open source
+## Backups, retention and deletion
 
-Dishylink's source is public, so you can verify all of the above yourself —
-see the repository this file lives in.
+Recording history remains in Chrome's extension IndexedDB; settings and connection preference remain in extension storage. Some detailed history is retained for a limited period and aggregated for longer-term comparison. Chrome may remove extension data when you uninstall it, clear site/extension storage or reset its browser profile.
 
-## Changes
+You can export an optional JSON backup of selected aggregated history and settings. The file stays wherever you save it and can contain personal usage patterns, so store and share it carefully. Existing backup exports omit account credentials and per-device traffic counters. Disconnect the Starlink account from the extension to remove its connection preference. To erase saved monitor data, use Chrome's controls for the extension and its storage; export anything you wish to keep before uninstalling.
 
-If a future feature changes what leaves your machine, this document will be
-updated before that feature ships, and any such feature will require its own
-explicit opt-in.
+## Your choices and security
 
-## Contact
+Chrome asks for extension permissions at installation or when a specific optional network address is required. Account connection, location-based features, notifications, speed tests, backups and update checks have user-facing controls. The extension has no advertising purpose. Network readings remain local unless you deliberately export or separately connect them to a collector.
 
-Questions about this policy: hello@dishylink.com
+We use data available through Chrome extension permissions only to provide or improve the monitor's user-facing features. **Use of information received from Google APIs adheres to the Chrome Web Store User Data Policy, including its Limited Use requirements.** We do not use this information for targeted advertising or data brokering.
 
-### Ghana monitor preferences and backups (v1.4)
+## Open source and support
 
-Device display names/groups and cost settings stay on this computer. Optional budget notifications read existing saved telemetry; they do not add router requests. Quiet hours use Ghana time. Alert thresholds and delivery timestamps are saved locally to suppress repeat alerts.
+Source code, licence notices, questions and privacy reports: [github.com/hayalows/starlink](https://github.com/hayalows/starlink) and [GitHub Issues](https://github.com/hayalows/starlink/issues). The original Dishylink MIT copyright and licence notices are retained in the repository; they do not mean that the original author operates this Ghana-specific extension.
 
-Backups are user-downloaded JSON files containing aggregate minute/month energy and data readings, cost preferences and local device profiles. They exclude account credentials, router controls, automation rules and per-device traffic counters. Restore is previewed and merges missing records; it does not overwrite existing readings or the most recent 30 minutes. Only restore history from the same dish.
-
-Opt-in daily version checks run while Overview is open and contact the public website without telemetry or account details. Update helpers download release files and checksums from GitHub. They operate on the installation folder and retain a copy of previous extension files; they do not read browser history databases.
+We will update this policy before introducing material changes to collection, sharing or data handling.

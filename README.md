@@ -2,7 +2,7 @@
 
 A Ghana-focused extension and calculator built on [Dishylink](https://github.com/DaveyHert/dishylink), by DaveyHert, under its MIT license.
 
-**[Open the Ghana calculator](https://starlink-ghana.vercel.app)** · **[Download the latest Chrome extension](https://github.com/hayalows/starlink/releases/latest/download/starlink-ghana-monitor-chrome.zip)** · [Release notes and update instructions](docs/ghana-release-notes.md)
+**[Open the Ghana calculator](https://starlink-ghana.vercel.app)** · [Privacy policy](https://starlink-ghana.vercel.app/privacy/) · [Chrome Web Store preparation](docs/chrome-web-store/README.md) · **[Download the latest Chrome extension](https://github.com/hayalows/starlink/releases/latest/download/starlink-ghana-monitor-chrome.zip)** · [Release notes and update instructions](docs/ghana-release-notes.md)
 
 ## What Ghana Monitor adds
 
