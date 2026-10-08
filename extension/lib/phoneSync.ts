@@ -68,7 +68,8 @@ export async function syncPhoneNow(): Promise<void> {
       homeKwh: num(prefs?.homeKwh),
       watts: num(prefs?.watts),
       hours: num(prefs?.hours),
-      model: (typeof prefs?.model === "string" ? prefs.model : "auto") as "auto" | "mini" | "standard4" | "standard5" | "custom",
+      model: (typeof prefs?.model === "string" ? prefs.model : "auto") as
+        "auto" | "mini" | "standard4" | "standard5" | "custom",
       detectedModel: String(prefs?.detectedModel ?? "unknown"),
       bundlePrice: num(prefs?.bundlePrice),
       bundleGb: num(prefs?.bundleGb),
@@ -101,7 +102,8 @@ export async function syncPhoneNow(): Promise<void> {
             electricityCost: costs.electricity,
             planAllocation: costs.planAllocation,
             projectedCost: costs.projectedTotal,
-            forecastGb: id === "month" ? forecastUsage(current.gb, current.trafficSeconds, costs.days) : null,
+            forecastGb:
+              id === "month" ? forecastUsage(current.gb, current.trafficSeconds, costs.days) : null,
             forecastCoverageEligible: current.trafficSeconds >= 86400,
             projectedElectricity: costs.projectedElectricity,
             modeledKwh: costs.modeledKwh,
@@ -124,19 +126,25 @@ export async function syncPhoneNow(): Promise<void> {
     const snapshot = migrateSnapshot(await db.readTotalsSnapshot());
     const odometer = new ClientTotalsCore();
     if (snapshot) odometer.loadSnapshot(snapshot);
-    const profiles = stored.ghanaDeviceProfiles as Record<string, { name?: string; group?: string }> | undefined;
+    const profiles = stored.ghanaDeviceProfiles as
+      Record<string, { name?: string; group?: string }> | undefined;
     const monthKey = now.getUTCFullYear() * 12 + now.getUTCMonth();
-    const all = odometer.totals().filter((t) => {
-      const d = new Date(t.sinceMs);
-      return d.getUTCFullYear() * 12 + d.getUTCMonth() === monthKey;
-    }).map((t) => {
-      const p = profiles?.[usageKey(t.clientId, t.macAddress)];
-      return {
-        name: (p?.name || t.name || "Unnamed device").slice(0, 60),
-        group: (p?.group || "").slice(0, 50),
-        gb: (num(t.rxBytes) + num(t.txBytes)) / 1e9,
-      };
-    }).filter((t) => t.gb > 0).sort((a, b) => b.gb - a.gb);
+    const all = odometer
+      .totals()
+      .filter((t) => {
+        const d = new Date(t.sinceMs);
+        return d.getUTCFullYear() * 12 + d.getUTCMonth() === monthKey;
+      })
+      .map((t) => {
+        const p = profiles?.[usageKey(t.clientId, t.macAddress)];
+        return {
+          name: (p?.name || t.name || "Unnamed device").slice(0, 60),
+          group: (p?.group || "").slice(0, 50),
+          gb: (num(t.rxBytes) + num(t.txBytes)) / 1e9,
+        };
+      })
+      .filter((t) => t.gb > 0)
+      .sort((a, b) => b.gb - a.gb);
     const deviceTotalGb = all.reduce((sum, item) => sum + item.gb, 0);
     const top = all.slice(0, 15).map((item) => ({
       ...item,

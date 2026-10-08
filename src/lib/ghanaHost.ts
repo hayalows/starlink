@@ -3,7 +3,7 @@ export interface GhanaHost {
   exportHistory(): Promise<GhanaHistoryBackup>;
   restoreHistory(data: GhanaHistoryBackup): Promise<number>;
   reload(): Promise<void>;
-  syncDeviceProfiles?(profiles: Record<string, {name: string; group: string}>): Promise<void>;
+  syncDeviceProfiles?(profiles: Record<string, { name: string; group: string }>): Promise<void>;
   syncBudgets(settings: {
     budgetAlerts: boolean;
     costBudget: number;

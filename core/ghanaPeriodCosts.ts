@@ -63,7 +63,7 @@ export function allocatedPlanFee(
   const end = Math.max(start, window.end);
   if (period === "cycle") {
     const seconds = Math.max(1, window.fullEnd - window.start);
-    return fee * (end - start) / seconds;
+    return (fee * (end - start)) / seconds;
   }
   let cursor = start;
   let result = 0;
@@ -72,7 +72,7 @@ export function allocatedPlanFee(
     const firstNext = Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1) / 1000;
     const firstThis = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1) / 1000;
     const segmentEnd = Math.min(end, firstNext);
-    result += fee * (segmentEnd - cursor) / (firstNext - firstThis);
+    result += (fee * (segmentEnd - cursor)) / (firstNext - firstThis);
     cursor = segmentEnd;
   }
   return result;
@@ -94,19 +94,22 @@ export function analyzePeriodCost({
   const days =
     period === "cycle"
       ? (window.fullEnd - window.start) / DAY
-      : new Date(Date.UTC(
-          new Date(window.end * 1000).getUTCFullYear(),
-          new Date(window.end * 1000).getUTCMonth() + 1, 0,
-        )).getUTCDate();
+      : new Date(
+          Date.UTC(
+            new Date(window.end * 1000).getUTCFullYear(),
+            new Date(window.end * 1000).getUTCMonth() + 1,
+            0,
+          ),
+        ).getUTCDate();
   const elapsed = Math.max(0, (window.end - window.start) / DAY);
-  const modeledKwh = watts === null ? null : watts * inputs.hours * elapsed / 1000;
+  const modeledKwh = watts === null ? null : (watts * inputs.hours * elapsed) / 1000;
   const kwh = current.kWh ?? modeledKwh;
   const forecastKwh =
     current.sampledSeconds >= DAY && current.kWh !== null
-      ? current.kWh / current.sampledSeconds * DAY * days
+      ? (current.kWh / current.sampledSeconds) * DAY * days
       : watts === null
         ? null
-        : watts * inputs.hours * days / 1000;
+        : (watts * inputs.hours * days) / 1000;
   const costFor = (units: number) =>
     electricityCost(units, inputs.tariff, inputs.homeKwh, inputs.customRate);
   const projectedElectricity = forecastKwh === null ? null : costFor(forecastKwh);
@@ -118,10 +121,18 @@ export function analyzePeriodCost({
         : costFor(kwh);
   const planAllocation = allocatedPlanFee(inputs.planFee, window, period);
   const total = electricity === null ? null : electricity + planAllocation;
-  const projectedTotal = projectedElectricity === null ? null :
-    projectedElectricity + inputs.planFee;
+  const projectedTotal =
+    projectedElectricity === null ? null : projectedElectricity + inputs.planFee;
   return {
-    days, elapsed, kwh, forecastKwh, electricity, planAllocation, total,
-    projectedElectricity, projectedTotal, modeledKwh,
+    days,
+    elapsed,
+    kwh,
+    forecastKwh,
+    electricity,
+    planAllocation,
+    total,
+    projectedElectricity,
+    projectedTotal,
+    modeledKwh,
   };
 }

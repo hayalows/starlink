@@ -41,8 +41,9 @@ export function HouseholdDevices({ status }: { status: DishStatusJson | null }) 
     <section className='ghana-section'>
       <h2>Your household devices</h2>
       <p className='ghana-muted'>
-        Give each device a familiar name and a person or room. If you connect your phone, these labels are included in your private encrypted-transport summaries; MAC addresses are never sent.
-        Router names and access rules are managed in Advanced → Network.
+        Give each device a familiar name and a person or room. If you connect your phone, these
+        labels are included in your private encrypted-transport summaries; MAC addresses are never
+        sent. Router names and access rules are managed in Advanced → Network.
       </p>
       <label className='ghana-label'>
         Find a device

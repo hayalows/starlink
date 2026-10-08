@@ -73,10 +73,13 @@
     const byTime = new Map((entry.buckets ?? []).map((b) => [b.t, b]));
     const bars = Array.from({ length: count }, (_, i) => {
       const t = start + i * stride;
-      return { t, gb: byTime.get(t)?.gb ?? null,
+      return {
+        t,
+        gb: byTime.get(t)?.gb ?? null,
         downGB: byTime.get(t)?.downGB ?? null,
         upGB: byTime.get(t)?.upGB ?? null,
-        kWh: byTime.get(t)?.kWh ?? null };
+        kWh: byTime.get(t)?.kWh ?? null,
+      };
     });
     const observed = bars.filter((b) => b.gb !== null);
     const max = Math.max(0.2, ...observed.map((b) => b.gb));
@@ -118,34 +121,53 @@
       target.querySelectorAll("rect[data-index]").forEach((r) => {
         r.setAttribute("aria-pressed", String(Number(r.getAttribute("data-index")) === i));
       });
-      const label = period === "today"
-        ? new Date(b.t * 1000).getUTCHours().toString().padStart(2, "0") + ":00–" +
-          new Date((b.t + stride) * 1000).getUTCHours().toString().padStart(2, "0") + ":00"
-        : displayDate(b.t, "long");
-      detail.textContent = b.gb === null
-        ? label + " · No recording in this interval. This is a gap, not zero usage."
-        : label + " · " + amount(b.gb) + " GB total" +
-          " · ↓ " + amount(b.downGB) + " GB" +
-          " · ↑ " + amount(b.upGB) + " GB" +
-          " · " + (Number.isFinite(b.kWh) ? amount(b.kWh, 3) + " kWh measured" : "Energy not recorded");
+      const label =
+        period === "today"
+          ? new Date(b.t * 1000).getUTCHours().toString().padStart(2, "0") +
+            ":00–" +
+            new Date((b.t + stride) * 1000).getUTCHours().toString().padStart(2, "0") +
+            ":00"
+          : displayDate(b.t, "long");
+      detail.textContent =
+        b.gb === null
+          ? label + " · No recording in this interval. This is a gap, not zero usage."
+          : label +
+            " · " +
+            amount(b.gb) +
+            " GB total" +
+            " · ↓ " +
+            amount(b.downGB) +
+            " GB" +
+            " · ↑ " +
+            amount(b.upGB) +
+            " GB" +
+            " · " +
+            (Number.isFinite(b.kWh) ? amount(b.kWh, 3) + " kWh measured" : "Energy not recorded");
     };
     target.querySelectorAll("rect[data-index]").forEach((r) => {
       const index = Number(r.getAttribute("data-index"));
       r.addEventListener("click", () => select(index));
       r.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault(); select(index);
+          event.preventDefault();
+          select(index);
         }
       });
     });
     detail.textContent = "Tap or press Enter on a bar to inspect its readings.";
     const ranked = observed.filter((b) => Number.isFinite(b.gb)).sort((a, b) => b.gb - a.gb);
-    el("chart-insight").textContent = ranked.length < 2
-      ? "More recorded intervals are needed to identify busy and quiet periods."
-      : "Busiest recorded " + (period === "today" ? "hour" : "day") + ": " +
-        (period === "today" ? new Date(ranked[0].t * 1000).getUTCHours().toString().padStart(2, "0") + ":00"
-          : displayDate(ranked[0].t, "long")) +
-        " (" + amount(ranked[0].gb) + " GB). This compares recorded intervals only; gaps are excluded.";
+    el("chart-insight").textContent =
+      ranked.length < 2
+        ? "More recorded intervals are needed to identify busy and quiet periods."
+        : "Busiest recorded " +
+          (period === "today" ? "hour" : "day") +
+          ": " +
+          (period === "today"
+            ? new Date(ranked[0].t * 1000).getUTCHours().toString().padStart(2, "0") + ":00"
+            : displayDate(ranked[0].t, "long")) +
+          " (" +
+          amount(ranked[0].gb) +
+          " GB). This compares recorded intervals only; gaps are excluded.";
     el("chart-summary").textContent = observed.length
       ? amount(entry.gb) +
         " GB recorded · " +
@@ -192,17 +214,26 @@
     el("recorder-description").textContent = fresh
       ? "The saved readings are recent. This does not guarantee that the laptop will remain online."
       : "These are saved readings, not a live network connection. Open Chrome on your laptop to resume collection.";
-    el("cost-period-label").textContent = ({today:"today so far",week:"the last 7 days",month:"this month so far",cycle:"this billing cycle so far"})[state.period];
+    el("cost-period-label").textContent = {
+      today: "today so far",
+      week: "the last 7 days",
+      month: "this month so far",
+      cycle: "this billing cycle so far",
+    }[state.period];
     el("plan-full").textContent = money(current.planFee);
     chart(period, state.period);
     // A monthly fixed-fee contract has an effective cost/GB, not a price charged
     // per transferred gigabyte. Hide unreliable ratios when WAN coverage is low.
-    const enoughTraffic = month?.gb > 0 && month?.trafficCoverage >= .8;
-    const monthlyRate = enoughTraffic && Number.isFinite(month?.cost)
-      ? month.cost / month.gb : null;
-    const forecastRate = !monthlyRate && month?.forecastGb > 0 &&
-      Number.isFinite(month?.projectedCost) && month?.forecastCoverageEligible === true
-      ? month.projectedCost / month.forecastGb : null;
+    const enoughTraffic = month?.gb > 0 && month?.trafficCoverage >= 0.8;
+    const monthlyRate =
+      enoughTraffic && Number.isFinite(month?.cost) ? month.cost / month.gb : null;
+    const forecastRate =
+      !monthlyRate &&
+      month?.forecastGb > 0 &&
+      Number.isFinite(month?.projectedCost) &&
+      month?.forecastCoverageEligible === true
+        ? month.projectedCost / month.forecastGb
+        : null;
     const rate = monthlyRate || forecastRate;
     el("starlink-per-gb").textContent = Number.isFinite(rate) ? money(rate) : "—";
     el("starlink-gb-per-cedi").textContent = rate > 0 ? amount(1 / rate, 3) + " GB" : "—";
@@ -214,32 +245,41 @@
     const bundle = current.bundle ?? {};
     const bundleRate = bundle.price > 0 && bundle.gb > 0 ? bundle.price / bundle.gb : null;
     el("bundle-title").textContent = bundleRate
-      ? money(bundle.price) + " / " + amount(bundle.gb) + " GB" : "Not configured";
+      ? money(bundle.price) + " / " + amount(bundle.gb) + " GB"
+      : "Not configured";
     el("bundle-per-gb").textContent = bundleRate ? money(bundleRate) : "—";
-    el("bundle-comparison").textContent = bundleRate && rate
-      ? "At these estimated rates, your saved mobile bundle costs " +
-        amount(bundleRate / rate, 2) + "× the Starlink effective GH₵/GB rate. They have different coverage, portability and billing rules."
-      : "Set a mobile bundle price and GB in the extension's Costs screen. Example only: GH₵399 / 240 GB = GH₵1.66 per GB; it is not a live MTN quote.";
+    el("bundle-comparison").textContent =
+      bundleRate && rate
+        ? "At these estimated rates, your saved mobile bundle costs " +
+          amount(bundleRate / rate, 2) +
+          "× the Starlink effective GH₵/GB rate. They have different coverage, portability and billing rules."
+        : "Set a mobile bundle price and GB in the extension's Costs screen. Example only: GH₵399 / 240 GB = GH₵1.66 per GB; it is not a live MTN quote.";
 
     const devices = Array.isArray(current.devices) ? current.devices : [];
     const holder = el("phone-device-list");
     holder.replaceChildren();
     const trackedGb = Number(current.deviceTotalGb) || 0;
     el("device-summary").textContent = devices.length
-      ? amount(trackedGb) + " GB counted across " + devices.length +
+      ? amount(trackedGb) +
+        " GB counted across " +
+        devices.length +
         " device groups this month. Shares are based on router counters."
       : "No synced router-device history yet. Check the Devices panel on your laptop.";
     for (const [i, device] of devices.entries()) {
-      const row = document.createElement("div"); row.className = "phone-device";
-      const title = document.createElement("div"); title.className = "phone-device-head";
+      const row = document.createElement("div");
+      row.className = "phone-device";
+      const title = document.createElement("div");
+      title.className = "phone-device-head";
       const label = document.createElement("span");
-      label.textContent = (i + 1) + ". " + (device.name || "Unnamed device");
+      label.textContent = i + 1 + ". " + (device.name || "Unnamed device");
       const value = document.createElement("strong");
       const share = Math.max(0, Math.min(1, Number(device.share) || 0));
       value.textContent = amount(device.gb) + " GB · " + Math.round(share * 100) + "%";
       title.append(label, value);
-      const bar = document.createElement("div"); bar.className = "phone-device-track";
-      const fill = document.createElement("div"); fill.className = "phone-device-fill";
+      const bar = document.createElement("div");
+      bar.className = "phone-device-track";
+      const fill = document.createElement("div");
+      fill.className = "phone-device-fill";
       fill.style.width = (share * 100).toFixed(2) + "%";
       bar.append(fill);
       row.append(title, bar);

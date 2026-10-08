@@ -59,8 +59,15 @@ export function useGhanaAnalysis(status: DishStatusJson | null, period: ViewPeri
     watts,
   });
   const {
-    days, elapsed, kwh, electricity, planAllocation, total, forecastKwh,
-    projectedElectricity, projectedTotal,
+    days,
+    elapsed,
+    kwh,
+    electricity,
+    planAllocation,
+    total,
+    forecastKwh,
+    projectedElectricity,
+    projectedTotal,
   } = calculated;
   const costFor = (units: number) =>
     electricityCost(units, settings.tariff, settings.homeKwh, settings.customRate);

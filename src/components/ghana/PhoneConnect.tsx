@@ -175,9 +175,9 @@ export function PhoneConnect() {
       )}
       <p className='ghana-muted'>
         Treat the pairing link like a private key. Anyone with a copy can see your uploaded
-        summaries until you disconnect the phone here. Up to 16 current-month device labels,
-        groups and router-based usage shares sync only when paired; MAC addresses and Starlink
-        sign-in credentials are never uploaded.
+        summaries until you disconnect the phone here. Up to 16 current-month device labels, groups
+        and router-based usage shares sync only when paired; MAC addresses and Starlink sign-in
+        credentials are never uploaded.
       </p>
     </section>
   );
