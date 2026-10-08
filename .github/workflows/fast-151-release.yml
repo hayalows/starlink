@@ -1,0 +1,35 @@
+name: Publish verified v1.5.1 Chrome ZIP
+on:
+  push:
+    branches: [master]
+    paths: [.github/workflows/fast-151-release.yml]
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck && npm run typecheck:extension
+      # The previous complete CI browser suite passed on the merged pull request.
+      # Re-run the dedicated subscription and power forecast regressions here.
+      - run: npm test -- --project node core/ghanaPeriodCosts.test.ts
+      - run: npm run build:extension
+      - run: node scripts/check-store-readiness.mjs
+      - run: npm run zip:extension
+      - name: Publish verified ZIP (stable v1.5.1 tag)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp .output/dishylink-1.5.1-chrome.zip starlink-ghana-monitor-chrome.zip
+          sha256sum starlink-ghana-monitor-chrome.zip > starlink-ghana-monitor-chrome.zip.sha256
+          TAG=monitor-v1.5.1-b51b783
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --target b51b783847d90c327edd79adf04d593f320c85d0 --latest --title "Starlink Ghana Monitor 1.5.1" --notes-file docs/ghana-release-notes.md
+          fi
+          gh release upload "$TAG" starlink-ghana-monitor-chrome.zip starlink-ghana-monitor-chrome.zip.sha256 --clobber
