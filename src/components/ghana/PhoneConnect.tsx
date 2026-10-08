@@ -18,8 +18,17 @@ export function PhoneConnect() {
   const [value, setValue] = useState<PhoneState | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [cloudReady, setCloudReady] = useState<boolean | null>(null);
   useEffect(() => {
     let alive = true;
+    void fetch("https://starlink-ghana.vercel.app/api/monitor?action=health", {
+      cache: "no-store",
+      credentials: "omit",
+      signal: AbortSignal.timeout(9000),
+    })
+      .then(async (response) => response.ok ? (await response.json() as { configured?: boolean }).configured === true : false)
+      .then((ready) => { if (alive) setCloudReady(ready); })
+      .catch(() => { if (alive) setCloudReady(false); });
     void send("status")
       .then((result) => {
         if (alive) setValue(result);
@@ -73,6 +82,7 @@ export function PhoneConnect() {
         The public site stays open, but your usage requires the link. Readings sync every 10 minutes
         while Chrome runs; your phone shows the last saved reading when the laptop is off.
       </p>
+      {cloudReady === false && <p role="status" className="ghana-muted">The phone website is ready, but cloud storage still needs to be connected before pairing can work. Your existing local monitor is unaffected.</p>}
       {value?.paired ? (
         <>
           {value.lastSync ? (
@@ -130,7 +140,7 @@ export function PhoneConnect() {
           <button
             type='button'
             className='ghana-button ghana-primary'
-            disabled={busy || value === null}
+            disabled={busy || value === null || cloudReady !== true}
             onClick={() => void run("create")}
           >
             {busy ? "Connecting…" : "Connect my phone"}
