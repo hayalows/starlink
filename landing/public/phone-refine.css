@@ -1,0 +1,329 @@
+/* Starlink Ghana Monitor 1.5.3: mobile-first, dark instrument system.
+   Patterns: quiet information hierarchy, compact status pills, task-focused
+   cards and useLayouts-style low-motion segmented controls. */
+html:has(.phone-shell),
+body:has(.phone-shell) {
+  background: #080b0d !important;
+  color: #f1f5f2 !important;
+  overscroll-behavior-y: none;
+}
+.phone-shell {
+  --ph-bg: #080b0d;
+  --ph-card: #101516;
+  --ph-card2: #171e1e;
+  --ph-border: #293334;
+  --ph-ink: #f4f6f3;
+  --ph-muted: #a3b2ae;
+  --ph-accent: #c7e1ce;
+  min-height: 100dvh;
+  font-family:
+    "Manrope",
+    "Barlow",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background: var(--ph-bg);
+}
+.phone-top {
+  border-bottom: 1px solid #222b2b;
+  background: #080b0df5;
+  box-sizing: content-box;
+  height: 72px;
+  padding-inline: max(18px, env(safe-area-inset-left)) max(18px, env(safe-area-inset-right));
+}
+.phone-brand {
+  letter-spacing: 0.08em;
+  gap: 11px;
+  font-weight: 700;
+}
+.phone-brand-icon {
+  width: 36px;
+  height: 36px;
+  padding: 3px;
+  border: 1px solid #34483c;
+  border-radius: 12px;
+  background: #15251b;
+}
+.phone-top-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  letter-spacing: 0.12em;
+  color: #acbeb6;
+  font-size: 10px;
+}
+.phone-icon-button {
+  border-radius: 13px;
+  border: 1px solid #2f3c39;
+  background: #151b1c;
+  width: 43px;
+  height: 43px;
+  color: #d2e5d7;
+  font-size: 20px;
+}
+.phone-icon-button .ui-icon {
+  width: 19px;
+  height: 19px;
+}
+.phone-icon-button:hover {
+  border-color: #607d6c;
+  color: #fff;
+  background: #24302b;
+}
+.phone-main {
+  padding-top: 35px;
+}
+.phone-heading-row h1 {
+  font-size: clamp(32px, 6vw, 42px);
+  letter-spacing: -0.057em;
+  font-weight: 670;
+}
+.phone-eyebrow {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  color: #a8bbb1;
+}
+.phone-sync-badge {
+  border: 1px solid #304f3e;
+  background: #172820;
+  color: #d5ebdb;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+}
+.phone-sync-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a8d1ad;
+  flex: 0 0 auto;
+}
+.phone-sync-badge.is-stale::before {
+  background: #e1c197;
+}
+.phone-sync-badge.is-error::before {
+  background: #e1b0a5;
+}
+.phone-sync-copy {
+  color: #a3b5ad;
+  line-height: 1.6;
+  font-size: 12px;
+}
+.phone-section-nav {
+  border-radius: 14px;
+  background: #12191a;
+  border-color: #273534;
+}
+.phone-section-nav button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  border-radius: 10px;
+  color: #a4b6ae;
+  font-weight: 650;
+}
+.phone-section-nav button[aria-current="page"] {
+  background: #d0e4d3;
+  color: #132019;
+}
+.phone-hero-metric {
+  background: linear-gradient(145deg, #1d3028, #14221f 56%, #10191a);
+  box-shadow: 0 8px 30px #00000024;
+  border: 1px solid #405849;
+  border-radius: 22px;
+  padding: 25px;
+}
+.phone-hero-metric::after {
+  opacity: 0.55;
+}
+.phone-hero-number strong {
+  letter-spacing: -0.075em;
+}
+.phone-hero-bottom button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.phone-stat {
+  border-color: #2a3536;
+  background: #111617;
+  border-radius: 18px;
+  box-shadow: 0 2px 6px #00000012;
+}
+.phone-stat-label {
+  letter-spacing: 0.07em;
+  color: #a3b5ac;
+  line-height: 1.55;
+}
+.phone-stat small {
+  line-height: 1.6;
+  color: #a5b3ae;
+}
+.phone-stat strong {
+  font-family: "Manrope", system-ui, sans-serif;
+  color: #f3f6f2;
+}
+.phone-panel {
+  background: #101516;
+  border-color: #2b3534;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px #00000013;
+}
+.phone-panel-head h2 {
+  font-size: 19px;
+  font-weight: 660;
+}
+.phone-chart-summary {
+  color: #d6dfd8;
+}
+.phone-tabs {
+  background: #1b2423;
+  border-color: #35433c;
+}
+.phone-tabs button {
+  min-height: 38px;
+}
+.phone-tabs button.selected {
+  background: #c8dfce;
+  color: #13231a;
+}
+.phone-chart-point {
+  background: #182923;
+  border-color: #496d55;
+  color: #e8f3e9;
+  border-radius: 12px;
+}
+.phone-chart-unit,
+.phone-tiny-icon {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  color: #b4c7b9;
+}
+.phone-tiny-icon .ui-icon {
+  font-size: 20px;
+}
+.phone-cost-line {
+  border-bottom-color: #2d3838;
+}
+.phone-recorder-icon {
+  color: #c7e1ce;
+}
+.phone-recorder-icon .ui-icon {
+  font-size: 20px;
+}
+.phone-screen-heading h2 {
+  font-weight: 680;
+  letter-spacing: -0.045em;
+}
+.phone-install-button .ui-icon {
+  font-size: 16px;
+}
+.phone-settings button {
+  min-height: 44px;
+}
+.phone-footer {
+  border-top: 1px solid #27322f;
+  line-height: 1.8;
+}
+.phone-bottom-nav:not([hidden]) button .ui-icon {
+  font-size: 20px;
+}
+.phone-bottom-nav:not([hidden]) button[aria-current="page"] {
+  background: #22382b;
+  color: #e3f1e6;
+}
+.phone-bottom-nav:not([hidden]) {
+  background: #090e0fec;
+}
+.phone-pair-row input {
+  font-size: 16px;
+}
+.phone-pair h1 {
+  font-family: "Manrope", system-ui, sans-serif;
+  font-weight: 680;
+}
+.phone-pair-form .phone-button {
+  white-space: nowrap;
+}
+.phone-pair-footer {
+  line-height: 1.7;
+}
+.phone-shell :is(button, a, input, summary):focus-visible {
+  outline: 2px solid #d1e4d5;
+  outline-offset: 3px;
+}
+.phone-shell button:active {
+  transform: scale(0.99);
+}
+@media (max-width: 680px) {
+  .phone-main {
+    padding-top: 26px;
+  }
+  .phone-top {
+    height: 67px;
+  }
+  .phone-top-label {
+    display: none;
+  }
+  .phone-icon-button {
+    margin-left: auto;
+  }
+  .phone-overview-grid .phone-stat strong {
+    font-size: clamp(20px, 5.6vw, 27px);
+  }
+  .phone-overview-grid .phone-stat {
+    padding: 19px 14px;
+  }
+  .phone-hero-metric {
+    padding: 23px;
+  }
+  .phone-bottom-nav:not([hidden]) button {
+    gap: 5px;
+    padding: 8px 3px;
+    font-size: 11px;
+    min-height: 57px;
+  }
+  .phone-bottom-nav:not([hidden]) button span:has(.ui-icon) {
+    font-size: 20px;
+    line-height: 22px;
+  }
+  .phone-footer {
+    padding-bottom: 25px;
+  }
+}
+@media (display-mode: standalone) {
+  /* iOS homescreen apps use a translucent status bar when viewport-fit=cover.
+     The clock/Dynamic Island is outside the safe content area.
+     Reserve device-reported top inset, with a notch-era fallback. */
+  .phone-shell {
+    padding-top: max(44px, env(safe-area-inset-top));
+    padding-bottom: env(safe-area-inset-bottom);
+    box-sizing: border-box;
+  }
+  .phone-top {
+    height: 64px;
+  }
+  .phone-main {
+    padding-top: 24px;
+  }
+  .phone-bottom-nav:not([hidden]) {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    border-top: 1px solid #2e3b34;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone-shell *,
+  .phone-shell *::before,
+  .phone-shell *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

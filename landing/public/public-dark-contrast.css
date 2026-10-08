@@ -1,0 +1,134 @@
+/* Dark-mode legibility pass for the existing calculator, device and
+   connection components. Keep their validated behaviors unchanged. */
+.ghana-app h1,
+.ghana-app .big-cost strong,
+.ghana-app .energy-stat strong,
+.ghana-app .strip-copy strong,
+.ghana-app .device-row strong,
+.ghana-app .device-empty strong,
+.ghana-app .signal-row strong,
+.ghana-app .panel h2 {
+  color: #f0f6f0;
+}
+.ghana-app .welcome-copy,
+.ghana-app .metric-note,
+.ghana-app .metric-suffix,
+.ghana-app .metric-main .currency,
+.ghana-app .bar-top,
+.ghana-app .bar-labels,
+.ghana-app .estimate-caption,
+.ghana-app .energy-stat small,
+.ghana-app .device-empty,
+.ghana-app .device-row > span,
+.ghana-app .signal-row small,
+.ghana-app .signal-status,
+.ghana-app .how-panel p,
+.ghana-app .how-steps div {
+  color: #a9bcb1;
+}
+.ghana-app .connection-strip,
+.ghana-app .connection-strip.connected,
+.ghana-app .trust-note,
+.ghana-app .estimate-caption,
+.ghana-app .how-panel,
+.ghana-app .update-panel {
+  background: #151e1e;
+  border-color: #314039;
+  color: #e0ebe2;
+}
+.ghana-app .connection-strip .strip-icon,
+.ghana-app .metric-icon,
+.ghana-app .metric-icon.amber,
+.ghana-app .metric-icon.blue,
+.ghana-app .metric-icon.green,
+.ghana-app .energy-orb,
+.ghana-app .signal-icon,
+.ghana-app .signal-icon.router,
+.ghana-app .signal-icon.measured,
+.ghana-app .signal-icon.estimated {
+  background: #22302b;
+  color: #bcdcc4;
+}
+.ghana-app .strip-copy span,
+.ghana-app .trust-note p,
+.ghana-app .how-steps b {
+  color: #b8cebd;
+}
+.ghana-app .mode-toggle,
+.ghana-app .range-pill,
+.ghana-app .range-pill.live,
+.ghana-app .range-pill.muted,
+.ghana-app .badge-estimate {
+  background: #1c2a25;
+  color: #c6dec9;
+  border-color: #35473c;
+}
+.ghana-app .period.active {
+  background: #d0e4d2;
+  color: #122017;
+}
+.ghana-app .field label,
+.ghana-app .connect-dialog label {
+  color: #d8e8d8;
+}
+.ghana-app .field select,
+.ghana-app .input-wrap,
+.ghana-app .connect-dialog input,
+.ghana-app .input-wrap input {
+  background: #171e1e;
+  border-color: #35453d;
+  color: #e9f2e9;
+}
+.ghana-app .field small,
+.ghana-app .setup-step,
+.ghana-app .range-labels,
+.ghana-app .tariff-footnote,
+.ghana-app .device-row small {
+  color: #a5b9ac;
+}
+.ghana-app .range-input {
+  accent-color: #c4dfc9;
+}
+.ghana-app .outline-button,
+.ghana-app .save-setup {
+  background: #22362b;
+  border: 1px solid #435a49;
+  color: #dbefde;
+}
+.ghana-app .outline-button:hover,
+.ghana-app .save-setup:hover {
+  background: #30493a;
+}
+.ghana-app .bars {
+  background: repeating-linear-gradient(to bottom, transparent 0 25px, #24312e 26px);
+  border-color: #34413b;
+}
+.ghana-app .bar {
+  background: #5d9072;
+}
+.ghana-app .bar.today {
+  background: #c7e1c8;
+}
+.ghana-app .data-meter,
+.ghana-app .device-track {
+  background: #28352e;
+}
+.ghana-app .cost-summary,
+.ghana-app .signal-row,
+.ghana-app .device-row,
+.ghana-app .device-footer,
+.ghana-app .metric-footer {
+  border-color: #2e3d35;
+}
+.ghana-app .how-panel,
+.ghana-app .connect-section {
+  border-radius: 18px;
+}
+.ghana-app .connect-section {
+  background: #15291e;
+  border-color: #345441;
+}
+.ghana-app .app-footer {
+  border-color: #2c3b32;
+  color: #b3c6b7;
+}

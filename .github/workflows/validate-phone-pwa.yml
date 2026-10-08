@@ -1,7 +1,7 @@
 name: Validate installable phone site
 on:
   push:
-    branches: [master, feat/phone-pwa-parity-152]
+    branches: [master, feat/untitled-dark-pwa-site-153]
     paths:
       - "landing/**"
       - ".github/workflows/validate-phone-pwa.yml"
@@ -47,3 +47,6 @@ jobs:
           for(const p of ["data-screen=\"overview\"","data-screen=\"costs\"","data-screen=\"devices\"","data-screen=\"connection\""]) if(!html.includes(p)) throw new Error("Missing phone section: "+p);
           console.log("Phone PWA static build, navigation and privacy guards passed.");
           '
+
+      - name: Audit updated public and installed PWA surfaces
+        run: node scripts/check-site-153.mjs

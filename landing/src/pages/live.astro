@@ -2,15 +2,16 @@
 import Base from "../layouts/Base.astro";
 ---
 <Base title="My monitor — Starlink Ghana" description="Your paired Starlink internet dashboard. Usage, energy, costs, devices and connection details on your phone." path="/live/">
-  <link slot="head" rel="stylesheet" href="/phone.css?v=152" />
+  <link slot="head" rel="stylesheet" href="/phone.css?v=153" />
+  <link slot="head" rel="stylesheet" href="/phone-refine.css?v=153" />
   <div class="phone-shell" id="phone-app">
     <header class="phone-top">
       <a href="/" class="phone-brand" aria-label="Starlink Ghana public website">
         <img class="phone-brand-icon" src="/icon-192.png" width="34" height="34" alt="" />
         <span>STARLINK<span class="phone-brand-small">/ GHANA</span></span>
       </a>
-      <span class="phone-top-label">MY MONITOR</span>
-      <button class="phone-icon-button" type="button" id="phone-refresh" title="Refresh saved readings" aria-label="Refresh saved readings">↻</button>
+      <span class="phone-top-label"><span class="ui-icon ui-icon--signal-01" aria-hidden="true"></span> MY MONITOR</span>
+      <button class="phone-icon-button" type="button" id="phone-refresh" title="Refresh saved readings" aria-label="Refresh saved readings"><span class="ui-icon ui-icon--refresh-cw-01" aria-hidden="true"></span></button>
     </header>
     <main class="phone-main">
       <section class="phone-pair" id="pair-section" aria-labelledby="pair-title">
@@ -38,17 +39,17 @@ import Base from "../layouts/Base.astro";
         <p class="phone-sync-copy" id="sync-copy" aria-live="polite">Connecting to your last saved monitor reading…</p>
         <div id="legacy-notice" class="phone-legacy-notice" role="status" hidden></div>
         <nav class="phone-section-nav" aria-label="Monitor sections">
-          <button type="button" data-view="overview" aria-current="page">Overview</button>
-          <button type="button" data-view="costs">Costs</button>
-          <button type="button" data-view="devices">Devices</button>
-          <button type="button" data-view="connection">Connection</button>
+          <button type="button" data-view="overview" aria-current="page"><span class="ui-icon ui-icon--home-02" aria-hidden="true"></span>Overview</button>
+          <button type="button" data-view="costs"><span class="ui-icon ui-icon--coins-01" aria-hidden="true"></span>Costs</button>
+          <button type="button" data-view="devices"><span class="ui-icon ui-icon--layers-three-01" aria-hidden="true"></span>Devices</button>
+          <button type="button" data-view="connection"><span class="ui-icon ui-icon--wifi" aria-hidden="true"></span>Connection</button>
         </nav>
         
         <section data-screen="overview" aria-label="Overview" class="phone-screen">
           <div class="phone-hero-metric">
-            <div class="phone-hero-top"><span>Data recorded today</span><span>↓ + ↑</span></div>
+            <div class="phone-hero-top"><span>Data recorded today</span><span class="phone-traffic-arrows" aria-label="Download and upload"><span class="ui-icon ui-icon--activity" aria-hidden="true"></span></span></div>
             <div class="phone-hero-number"><strong id="hero-gb">—</strong><span>GB</span></div>
-            <div class="phone-hero-bottom"><span id="hero-coverage">Waiting for readings</span><button type="button" data-open="history">View history ↗</button></div>
+            <div class="phone-hero-bottom"><span id="hero-coverage">Waiting for readings</span><button type="button" data-open="history">View history <span class="ui-icon ui-icon--arrow-up-right ui-icon--sm" aria-hidden="true"></span></button></div>
           </div>
           <section class="phone-stat-grid phone-overview-grid" aria-label="Your internet at a glance">
             <article class="phone-stat"><span class="phone-stat-label">ESTIMATED COST TODAY</span><strong id="overview-today-cost">—</strong><small>Plan time share + electricity</small></article>
@@ -79,7 +80,7 @@ import Base from "../layouts/Base.astro";
         <section data-screen="costs" aria-label="Costs" class="phone-screen" hidden>
           <div class="phone-screen-heading"><div class="phone-eyebrow">CEDIS & DATA</div><h2>Understand your costs</h2><p>Your Starlink fee is fixed. Your effective cost per gigabyte changes as you record more data.</p></div>
           <section class="phone-panel">
-            <div class="phone-panel-head"><div><span class="phone-eyebrow">COST CLARITY</span><h2>Cost for <span id="cost-period-label">today so far</span></h2></div><span class="phone-tiny-icon">GH₵</span></div>
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">COST CLARITY</span><h2>Cost for <span id="cost-period-label">today so far</span></h2></div><span class="phone-tiny-icon"><span class="ui-icon ui-icon--wallet-02" aria-hidden="true"></span></span></div>
             <div class="phone-tabs phone-cost-tabs" role="tablist" aria-label="Cost period">
               <button type="button" class="selected" data-period="today" role="tab" aria-selected="true">Today</button>
               <button type="button" data-period="week" role="tab" aria-selected="false">7 days</button>
@@ -92,7 +93,7 @@ import Base from "../layouts/Base.astro";
             <p class="phone-fine">Your full monthly subscription: <strong id="plan-full">—</strong>. This is an estimated spending allocation, not a Starlink or ECG invoice.</p>
           </section>
           <section class="phone-panel" id="data-value">
-            <div class="phone-panel-head"><div><span class="phone-eyebrow">DATA VALUE</span><h2>How much does each GB cost?</h2></div><span class="phone-tiny-icon">GH₵/GB</span></div>
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">DATA VALUE</span><h2>How much does each GB cost?</h2></div><span class="phone-tiny-icon"><span class="ui-icon ui-icon--bar-chart-02" aria-hidden="true"></span></span></div>
             <div class="phone-stat-grid">
               <article class="phone-stat"><span class="phone-stat-label">EFFECTIVE STARLINK GH₵ / GB</span><strong id="starlink-per-gb">—</strong><small id="starlink-rate-note">Full-month estimate ÷ GB recorded so far</small></article>
               <article class="phone-stat"><span class="phone-stat-label">GB PER GH₵</span><strong id="starlink-gb-per-cedi">—</strong><small>Recorded gigabytes received for every cedi so far</small></article>
@@ -107,7 +108,7 @@ import Base from "../layouts/Base.astro";
         <section data-screen="devices" aria-label="Devices" class="phone-screen" hidden>
           <div class="phone-screen-heading"><div class="phone-eyebrow">CONNECTED HOUSEHOLD</div><h2>Who uses the most?</h2><p>Device shares are based on router counters—not the separate dish-wide traffic meter.</p></div>
           <section class="phone-panel" id="device-shares">
-            <div class="phone-panel-head"><div><span class="phone-eyebrow">HOUSEHOLD MIX</span><h2>Usage by device</h2></div><span class="phone-chart-unit">ROUTER TOTALS</span></div>
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">HOUSEHOLD MIX</span><h2>Usage by device</h2></div><span class="phone-chart-unit"><span class="ui-icon ui-icon--layers-three-01" aria-hidden="true"></span> ROUTER TOTALS</span></div>
             <p class="phone-chart-summary" id="device-summary">Waiting for synced device totals.</p>
             <div id="phone-device-list" class="phone-device-list"></div>
             <p class="phone-fine">Devices may reconnect or reset their counters. Percentages describe known devices, and may not add up to total Starlink traffic.</p>
@@ -117,16 +118,16 @@ import Base from "../layouts/Base.astro";
         <section data-screen="connection" aria-label="Connection" class="phone-screen" hidden>
           <div class="phone-screen-heading"><div class="phone-eyebrow">REMOTE STATUS</div><h2>Connection & sync</h2><p>See the latest saved recorder state without needing to leave your laptop running.</p></div>
           <section class="phone-panel phone-recorder-panel">
-            <div class="phone-panel-head"><div><span class="phone-eyebrow">COLLECTOR</span><h2>Recording health</h2></div><span id="recorder-icon" class="phone-recorder-icon">◷</span></div>
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">COLLECTOR</span><h2>Recording health</h2></div><span id="recorder-icon" class="phone-recorder-icon"><span class="ui-icon ui-icon--activity" aria-hidden="true"></span></span></div>
             <div class="phone-cost-line"><span>Last reading</span><strong id="last-reading">—</strong></div>
             <div class="phone-cost-line"><span>Last upload</span><strong id="last-upload">—</strong></div>
             <div class="phone-cost-line"><span>Today's coverage</span><strong id="today-coverage">—</strong></div>
             <p class="phone-fine" id="recorder-description">Your laptop records while Chrome runs. A previous reading is not a live signal.</p>
           </section>
           <section class="phone-panel">
-            <div class="phone-panel-head"><div><span class="phone-eyebrow">YOUR PHONE</span><h2>Install the app</h2></div><span class="phone-chart-unit">PWA</span></div>
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">YOUR PHONE</span><h2>Install the app</h2></div><span class="phone-chart-unit"><span class="ui-icon ui-icon--monitor-01" aria-hidden="true"></span> PWA</span></div>
             <p class="phone-fine">Add this monitor to your home screen for a standalone, app-like experience. No App Store or account required.</p>
-            <button class="phone-button phone-button-primary phone-install-button" type="button" id="install-phone">How to install ↗</button>
+            <button class="phone-button phone-button-primary phone-install-button" type="button" id="install-phone"><span class="ui-icon ui-icon--download-01" aria-hidden="true"></span> <span class="install-label">How to install</span></button>
             <p id="install-instructions" class="phone-fine" role="status">On iPhone, open this page in Safari, tap Share, then Add to Home Screen.</p>
             <p class="phone-fine">The app shell can open offline, but fresh readings still require a network connection. This phone never silently collects dish data.</p>
           </section>
@@ -139,11 +140,11 @@ import Base from "../layouts/Base.astro";
     </main>
     <footer class="phone-footer"><span>STARLINK GHANA · INDEPENDENT TOOL</span><span>Made by <a href="https://pkm.hayalows.com" rel="noopener noreferrer" target="_blank">Papa Kojo Mensah ↗</a> · Not affiliated with Starlink or SpaceX.</span></footer>
     <nav class="phone-bottom-nav" id="phone-bottom-nav" aria-label="Mobile monitor navigation" hidden>
-      <button type="button" data-view="overview"><span aria-hidden="true">⌂</span>Overview</button>
-      <button type="button" data-view="costs"><span aria-hidden="true">◉</span>Costs</button>
-      <button type="button" data-view="devices"><span aria-hidden="true">▦</span>Devices</button>
-      <button type="button" data-view="connection"><span aria-hidden="true">⌁</span>Connection</button>
+      <button type="button" data-view="overview"><span aria-hidden="true"><span class="ui-icon ui-icon--home-02" aria-hidden="true"></span></span>Overview</button>
+      <button type="button" data-view="costs"><span aria-hidden="true"><span class="ui-icon ui-icon--coins-01" aria-hidden="true"></span></span>Costs</button>
+      <button type="button" data-view="devices"><span aria-hidden="true"><span class="ui-icon ui-icon--layers-three-01" aria-hidden="true"></span></span>Devices</button>
+      <button type="button" data-view="connection"><span aria-hidden="true"><span class="ui-icon ui-icon--wifi" aria-hidden="true"></span></span>Connection</button>
     </nav>
   </div>
-  <script type="module" is:inline src="/phone.js?v=152"></script>
+  <script type="module" is:inline src="/phone.js?v=153"></script>
 </Base>

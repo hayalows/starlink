@@ -1,0 +1,319 @@
+/* Public deep-ink theme — shared color rules with the phone PWA. */
+html:has(.ghana-app),
+body:has(.ghana-app) {
+  background: #090c0e !important;
+  color: #f2f5f1 !important;
+  color-scheme: dark;
+}
+.ghana-app {
+  --app-bg: #090c0e;
+  --app-paper: #121719;
+  --app-ink: #f1f5f0;
+  --app-muted: #a7b5b0;
+  --app-line: #2b3535;
+  --app-green: #bfdac5;
+  --app-green-dark: #99bca3;
+  --app-lime: #c8e4ce;
+  --app-orange: #c0a483;
+  --app-blue: #93bcd8;
+  background: #090c0e;
+  color: #f1f5f1;
+}
+.ghana-app .side-rail {
+  background: #0d1213;
+  color: #eef4ed;
+  border-right: 1px solid #283332;
+}
+.ghana-app .brand-mark {
+  color: #d5e8d7;
+  width: 39px;
+  height: 39px;
+}
+.ghana-app .brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.ghana-app .brand small {
+  color: #9bac9e;
+}
+.ghana-app .rail-label {
+  color: #879d93;
+}
+.ghana-app .rail-nav a {
+  min-height: 46px;
+  border-radius: 12px;
+  color: #b4c2bb;
+  font-weight: 550;
+}
+.ghana-app .rail-nav a:hover {
+  background: #1c2823;
+  color: #fff;
+}
+.ghana-app .rail-nav a.active {
+  background: #21372b;
+  color: #e5f4e7;
+  box-shadow: inset 2px 0 #c8e1cc;
+}
+.ghana-app .nav-glyph {
+  color: #bbcfc0;
+  font-size: 18px;
+}
+.ghana-app .rail-download {
+  background: #cce0ce;
+  color: #102018;
+  border: 1px solid transparent;
+}
+.ghana-app .rail-download:hover {
+  background: #e0f0e1;
+}
+.ghana-app .rail-help {
+  color: #bfcfbe;
+}
+.ghana-app .rail-country {
+  border-color: #2c4038;
+}
+.ghana-app .rail-country b {
+  color: #d4e3d4;
+}
+.ghana-app .topbar {
+  background: rgb(11 15 17 / 94%);
+  border-color: #293433;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.ghana-app .mobile-brand {
+  color: #f0f5ef;
+}
+.ghana-app .topbar .crumbs {
+  color: #a6b6af;
+}
+.ghana-app .topbar .crumbs strong {
+  color: #f4f7f3;
+}
+.ghana-app .topbar-download {
+  background: #d0e4d2;
+  color: #15211b;
+  border: 1px solid #d0e4d2;
+}
+.ghana-app .topbar-download:hover {
+  background: #e5f2e4;
+}
+.ghana-app .top-actions {
+  gap: 11px;
+}
+.ghana-app .privacy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #c9ded0;
+  background: #18271e;
+  border: 1px solid #345444;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.ghana-app .privacy-pill .ui-icon {
+  font-size: 14px;
+}
+.ghana-app .icon-btn {
+  border: 1px solid #31403b;
+  background: #172020;
+  color: #d3e2d7;
+}
+.ghana-app .icon-btn:hover {
+  background: #25352d;
+}
+.ghana-app .workspace {
+  background: #090c0e;
+}
+.ghana-app .content {
+  max-width: 1370px;
+  padding-top: 27px;
+}
+.ghana-app #download,
+.ghana-app #phone-companion,
+.ghana-app #install-guide {
+  scroll-margin-top: 93px;
+}
+.download-hero {
+  background: linear-gradient(135deg, #162620 0%, #111719 50%, #0c1113 100%);
+  border: 1px solid #32443a;
+  box-shadow: 0 14px 50px #00000020;
+  border-radius: 24px;
+  min-height: 510px;
+}
+.download-hero::before {
+  opacity: 0.6;
+  background-image: radial-gradient(#d2e3d221 0.8px, transparent 0.8px);
+}
+.download-kicker {
+  color: #b9d7c1;
+}
+.download-pulse {
+  background: #bddfc1;
+  box-shadow: 0 0 0 4px #b5dfbb12;
+}
+.download-hero h1 {
+  font-size: clamp(38px, 4vw, 61px);
+  max-width: 14ch;
+  letter-spacing: -0.063em;
+}
+.download-hero h1 span {
+  color: #bcd3c2;
+}
+.download-intro {
+  color: #afc2b6;
+  line-height: 1.75;
+}
+.download-primary {
+  background: #d7ead8;
+  color: #0c1d14;
+  border-radius: 13px;
+}
+.download-primary:hover {
+  background: #eff7ed;
+}
+.download-secondary {
+  color: #d3e4d5;
+}
+.download-secondary:hover {
+  color: white;
+}
+.download-trust {
+  border-color: #35453e;
+}
+.download-trust span {
+  color: #b5c9b9;
+}
+.download-trust svg {
+  color: #badcc5;
+}
+.download-hero .release-summary {
+  color: #b8c8bb;
+}
+.download-hero .release-summary a {
+  color: #d4e8d5;
+}
+.download-hero .release-feedback {
+  color: #aeb9b2;
+}
+.showcase-window {
+  background: #0d1315;
+  color: #f0f6ef;
+  border: 1px solid #31433a;
+  box-shadow: 0 20px 60px #0005;
+  border-radius: 18px;
+}
+.showcase-topbar {
+  border-color: #283b33;
+}
+.showcase-wordmark strong {
+  color: #eaf3eb;
+}
+.showcase-wordmark small {
+  color: #a6baaa;
+}
+.showcase-logo {
+  background: #1b2d22;
+  border-color: #344b3b;
+}
+.showcase-status {
+  color: #b3d0b9;
+}
+.showcase-tabs {
+  background: #172020;
+  border-color: #30403a;
+}
+.showcase-tabs button {
+  color: #b0c0b4;
+}
+.showcase-tabs button[aria-selected="true"] {
+  background: #d3e5d4;
+  color: #142219;
+}
+.sample-panel {
+  background: #111819;
+  border-color: #2c3934;
+}
+.sample-eyebrow {
+  color: #acbdb1;
+}
+.sample-heading strong {
+  color: #f0f6ef;
+}
+.sample-state {
+  color: #b1d2b6;
+}
+.sample-metrics > div {
+  border-color: #2b3934;
+}
+.sample-metrics span,
+.sample-metrics div > small,
+.sample-chart-heading {
+  color: #aebdb2;
+}
+.sample-metrics strong {
+  color: #f0f6ef;
+}
+.sample-chart,
+.sample-device div {
+  border-color: #2b3833;
+}
+.sample-bars {
+  border-color: #31443a;
+}
+.sample-bars i {
+  background: #83ac91;
+}
+.sample-bars i:nth-child(3n) {
+  background: #bfdec7;
+}
+.sample-note {
+  border-color: #2a3932;
+  color: #afc1b0;
+}
+.showcase-caption,
+.showcase-foot {
+  color: #a5b6a9;
+}
+.showcase-caption > .ui-icon {
+  color: #bdddc1;
+  font-size: 15px;
+}
+.install-guide {
+  background: #101617;
+  border: 1px solid #2e3937;
+  border-radius: 20px;
+  color: #f4f7f2;
+}
+.install-kicker {
+  color: #b9d7be;
+}
+.install-heading h2 {
+  color: #f0f5f0;
+}
+.install-heading p:not(.install-kicker),
+.install-steps p,
+.install-existing p {
+  color: #a9bcb0;
+}
+.install-guide-link {
+  background: #cce2cf;
+  color: #14211a;
+}
+.install-guide-link:hover {
+  background: #e3f0e3;
+}
+.install-steps {
+  border-color: #2b3834;
+}
+.install-steps span {
+  color: #b7d4bd;
+}
+.install-existing summary {
+  color: #e7f1e7;
+}
+.install-existing > a {
+  color: #c1dcca;
+}
