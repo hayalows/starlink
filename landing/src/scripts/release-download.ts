@@ -1,5 +1,5 @@
 // The release label and ZIP link always come from the same GitHub release.
-// A pinned, verified package in HTML remains available if the GitHub API is offline.
+// A pinned, confirmed published release in HTML remains available if the GitHub API is offline.
 type GithubRelease = {
   tag_name?: string;
   published_at?: string;
@@ -50,12 +50,12 @@ async function syncRelease() {
         });
       });
     }
-    if (releaseFeedback) releaseFeedback.textContent = "Latest published Chrome ZIP verified against the GitHub release.";
+    if (releaseFeedback) releaseFeedback.textContent = "Latest published Chrome ZIP matched to its GitHub release.";
   } catch {
     // Keep the specific release linked and named in static HTML, not a
     // vague "latest" URL whose contents could differ from the displayed version.
     if (releaseFeedback) releaseFeedback.textContent =
-      "Showing the verified v1.4.0 package. Check GitHub releases for newer versions.";
+      "Showing the published v1.4.0 ZIP. Check GitHub releases for newer versions.";
     const link = document.createElement("a");
     link.href = RELEASES_URL;
     link.target = "_blank";
