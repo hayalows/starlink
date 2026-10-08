@@ -1,0 +1,30 @@
+name: One-time docs formatter
+on:
+  push:
+    branches: [feat/phone-monitor-sync-2026-10]
+    paths:
+      - .github/workflows/format-phone-docs.yml
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/phone-monitor-sync-2026-10
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Format phone documentation
+        run: |
+          npx prettier --write docs/phone-sync/README.md
+          rm .github/workflows/format-phone-docs.yml
+          git add docs/phone-sync/README.md .github/workflows/format-phone-docs.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Format verified Rare UI phone companion notes"
+          git push origin HEAD:feat/phone-monitor-sync-2026-10
