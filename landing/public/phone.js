@@ -2,7 +2,7 @@
   const API = "/api/monitor?action=read";
   const KEY = "starlink.ghana.phone.view.v1";
   const el = (id) => document.getElementById(id);
-  const state = { token: "", payload: null, period: "today", timer: null };
+  const state = { token: "", payload: null, period: "today", view: "overview", timer: null };
   const money = (n) =>
     Number.isFinite(n)
       ? "GH₵ " + n.toLocaleString("en-GH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -46,6 +46,8 @@
       history.replaceState(null, "", location.pathname + location.search);
       el("pair-section").hidden = true;
       el("monitor-section").hidden = false;
+      el("phone-bottom-nav").hidden = false;
+      showView("overview");
       void refresh();
       if (!state.timer) state.timer = setInterval(() => void refresh(), 60_000);
     } catch (e) {
@@ -53,6 +55,38 @@
     }
   };
 
+  const showView = (next) => {
+    const allowed = ["overview", "costs", "devices", "connection"];
+    state.view = allowed.includes(next) ? next : "overview";
+    document.querySelectorAll("[data-screen]").forEach((section) => {
+      section.hidden = section.getAttribute("data-screen") !== state.view;
+    });
+    document.querySelectorAll("[data-view]").forEach((button) => {
+      const active = button.getAttribute("data-view") === state.view;
+      if (active) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+  const monthPlanEstimate = (snapshot, month) => {
+    if (Number.isFinite(snapshot.planFee) && snapshot.planFee > 0) return snapshot.planFee;
+    if (!month?.window || !Number.isFinite(month.planAllocation)) return null;
+    const start = new Date(month.window.start * 1000);
+    const days = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0)).getUTCDate();
+    const elapsed = (month.window.end - month.window.start) / 86400;
+    return elapsed > 0 ? month.planAllocation / elapsed * days : null;
+  };
+  const showLegacyWarning = (snapshot) => {
+    const today = snapshot.periods?.today;
+    const plan = monthPlanEstimate(snapshot, snapshot.periods?.month);
+    const notice = el("legacy-notice");
+    // Detect the real legacy bug using impossible single-day plan allocation.
+    // Never block otherwise valid old snapshots just because metadata is missing.
+    const impossible = plan > 0 && today?.planAllocation > (plan / 28) * 1.1;
+    notice.hidden = !impossible;
+    if (impossible) notice.textContent =
+      "This uploaded snapshot appears to use the old daily plan formula. The laptop's numbers may be newer. Open your updated extension and choose Sync now; this screen will refresh.";
+  };
   const displayDate = (unix, format = "short") => {
     const date = new Date(unix * 1000);
     return date.toLocaleDateString("en-GH", {
@@ -195,9 +229,11 @@
       "Last synced " +
       ago(updated) +
       " · Laptop uploads approximately every 10 minutes while Chrome is running.";
-    el("hero-gb").textContent = amount(month?.gb);
+    el("hero-gb").textContent = amount(today?.gb);
+    el("overview-today-cost").textContent = money(today?.cost);
+    el("overview-month-gb").textContent = Number.isFinite(month?.gb) ? amount(month.gb) + " GB" : "—";
     el("hero-coverage").textContent =
-      Math.round((month?.trafficCoverage || 0) * 100) + "% of the month measured";
+      Math.round((today?.trafficCoverage || 0) * 100) + "% of today measured";
     el("metric-cost").textContent = money(month?.projectedCost);
     el("metric-energy").textContent = Number.isFinite(month?.kWh)
       ? amount(month.kWh, 2) + " kWh"
@@ -220,28 +256,25 @@
       month: "this month so far",
       cycle: "this billing cycle so far",
     }[state.period];
-    el("plan-full").textContent = money(current.planFee);
+    el("plan-full").textContent = money(monthPlanEstimate(current, month));
+    showLegacyWarning(current);
     chart(period, state.period);
-    // A monthly fixed-fee contract has an effective cost/GB, not a price charged
-    // per transferred gigabyte. Hide unreliable ratios when WAN coverage is low.
-    const enoughTraffic = month?.gb > 0 && month?.trafficCoverage >= 0.8;
-    const monthlyRate =
-      enoughTraffic && Number.isFinite(month?.cost) ? month.cost / month.gb : null;
-    const forecastRate =
-      !monthlyRate &&
-      month?.forecastGb > 0 &&
-      Number.isFinite(month?.projectedCost) &&
-      month?.forecastCoverageEligible === true
-        ? month.projectedCost / month.forecastGb
-        : null;
-    const rate = monthlyRate || forecastRate;
+    // Always show an observed-rate estimate once there is a positive amount
+    // of recorded traffic. Do not hide useful arithmetic behind a coverage gate.
+    // Both screens use FULL monthly forecast divided by GB recorded to date.
+    const rate =
+      Number.isFinite(month?.projectedCost) && month?.gb > 0
+        ? month.projectedCost / month.gb : null;
     el("starlink-per-gb").textContent = Number.isFinite(rate) ? money(rate) : "—";
     el("starlink-gb-per-cedi").textContent = rate > 0 ? amount(1 / rate, 3) + " GB" : "—";
-    el("starlink-rate-note").textContent = monthlyRate
-      ? "Recorded month so far · ≥80% traffic coverage"
-      : forecastRate
-        ? "Extrapolated month · ≥24 hours recorded; treat as a forecast"
-        : "Requires good recording coverage or a longer sample";
+    const completeness = Math.round((month?.trafficCoverage || 0) * 100);
+    el("starlink-rate-note").textContent = rate
+      ? "Month-end estimate ÷ " + amount(month.gb) + " GB observed"
+      : "Waiting for your first recorded GB";
+    el("value-coverage-note").textContent = rate
+      ? "Based on " + completeness +
+        "% of the month recorded so far. As more usage is captured, the effective GH₵/GB normally falls while GB per cedi rises. Unobserved traffic is not treated as zero."
+      : "The rate appears as soon as your monitor records some usage.";
     const bundle = current.bundle ?? {};
     const bundleRate = bundle.price > 0 && bundle.gb > 0 ? bundle.price / bundle.gb : null;
     el("bundle-title").textContent = bundleRate
@@ -253,7 +286,7 @@
         ? "At these estimated rates, your saved mobile bundle costs " +
           amount(bundleRate / rate, 2) +
           "× the Starlink effective GH₵/GB rate. They have different coverage, portability and billing rules."
-        : "Set a mobile bundle price and GB in the extension's Costs screen. Example only: GH₵399 / 240 GB = GH₵1.66 per GB; it is not a live MTN quote.";
+        : "Optional: enter your own mobile bundle price and volume under Costs on your laptop. This is not an MTN price quote.";
 
     const devices = Array.isArray(current.devices) ? current.devices : [];
     const holder = el("phone-device-list");
@@ -374,6 +407,7 @@
     state.timer = null;
     el("pair-section").hidden = false;
     el("monitor-section").hidden = true;
+    el("phone-bottom-nav").hidden = true;
     note("Phone access forgotten. Pair again using your extension if needed.");
   });
   document.querySelectorAll("[data-period]").forEach((tab) =>
@@ -387,6 +421,36 @@
       render();
     }),
   );
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.addEventListener("click", () => showView(button.getAttribute("data-view")));
+  });
+  document.querySelectorAll("[data-open]").forEach((button) => {
+    button.addEventListener("click", () => {
+      showView("overview");
+      el(button.getAttribute("data-open"))?.scrollIntoView({ behavior: "smooth" });
+    });
+  });
+  let installationPrompt = null;
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    installationPrompt = event;
+    const button = el("install-phone");
+    if (button) button.textContent = "Install on this device ↗";
+  });
+  el("install-phone").addEventListener("click", async () => {
+    if (installationPrompt) {
+      await installationPrompt.prompt();
+      installationPrompt = null;
+    } else {
+      el("install-instructions").textContent =
+        "On iPhone open in Safari, tap Share, then Add to Home Screen. On Android use your browser's Install app or Add to Home Screen option.";
+    }
+  });
+  if ("serviceWorker" in navigator && window.isSecureContext) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/live/sw.js", { scope: "/live/" }).catch(() => {});
+    });
+  }
   // The fragment is never transmitted in a request. Clear it before fetching.
   const initialFragment = location.hash.startsWith("#pair=") ? location.hash.slice(6) : "";
   if (initialFragment) connect(initialFragment);
