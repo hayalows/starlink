@@ -83,7 +83,7 @@ function scrub(input:unknown):Obj|null {
  devices:Array.isArray(data.devices) ? data.devices.slice(0,16).map((item:unknown)=>{
    const device=obj(item);
    const safe=(v:unknown,max:number)=>typeof v==="string"
-      ? v.replace(/[\\x00-\\x1f<>]/g,"").slice(0,max) : "";
+      ? v.replace(/[\x00-\x1f<>]/g,"").slice(0,max) : "";
    return {
      name:safe(device.name,60),group:safe(device.group,50),
      gb:finite(device.gb),share:percent(device.share),
