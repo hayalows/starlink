@@ -59,8 +59,8 @@ function SignInConnect({
         <p className='m-0 text-[13.5px] leading-relaxed text-ink-secondary'>
           See your plan, data usage, service address, and every dish and router on the account, and
           enable supported router controls such as pausing connected devices. In Chrome, the
-          extension reads your existing Starlink sign-in when you choose to connect.
-          Your account credentials are not uploaded to our website.
+          extension reads your existing Starlink sign-in when you choose to connect. Your account
+          credentials are not uploaded to our website.
         </p>
       </div>
 
@@ -75,8 +75,8 @@ function SignInConnect({
       </Button>
 
       <p className='m-0 text-[11.5px] text-muted-foreground'>
-        Sign in on starlink.com in your browser. The extension can then read your account
-        details directly from Starlink.
+        Sign in on starlink.com in your browser. The extension can then read your account details
+        directly from Starlink.
       </p>
     </div>
   );

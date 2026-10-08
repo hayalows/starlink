@@ -26,20 +26,20 @@ Built using the open-source Dishylink project under its MIT licence. **Independe
 
 ## Permissions justification
 
-| Permission | Necessary functionality |
-| --- | --- |
-| `alarms` | Record local dish samples and check alert state while dashboard is closed. |
-| `storage` | Persist settings, user opt-ins and alert state. History is in local IndexedDB. |
-| `cookies` | Read an existing Starlink login only after an opt-in account connection. |
-| `declarativeNetRequestWithHostAccess` | Attach that session to the extension's own authenticated Starlink requests; clear on disconnect. |
-| `notifications` | User-enabled outage and budget notifications. |
-| `geolocation` | Optional satellite sky positioning when the user asks for it. |
-| `http://192.168.100.1/*` | Local Starlink dish monitoring API. |
-| `http://192.168.1.1/*` | Default Starlink router monitoring API. |
-| `https://*.starlink.com/*` | Optional login, subscription and supported account/device operations. |
-| `https://celestrak.org/*` | Satellite orbit/positioning data. |
-| `https://starlink-ghana.vercel.app/*` | Public version check; it sends no recording history. |
-| Optional `http://*/*` | User explicitly enters a nonstandard router IPv4 address; Chrome asks for that single origin on save. |
+| Permission                            | Necessary functionality                                                                               |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `alarms`                              | Record local dish samples and check alert state while dashboard is closed.                            |
+| `storage`                             | Persist settings, user opt-ins and alert state. History is in local IndexedDB.                        |
+| `cookies`                             | Read an existing Starlink login only after an opt-in account connection.                              |
+| `declarativeNetRequestWithHostAccess` | Attach that session to the extension's own authenticated Starlink requests; clear on disconnect.      |
+| `notifications`                       | User-enabled outage and budget notifications.                                                         |
+| `geolocation`                         | Optional satellite sky positioning when the user asks for it.                                         |
+| `http://192.168.100.1/*`              | Local Starlink dish monitoring API.                                                                   |
+| `http://192.168.1.1/*`                | Default Starlink router monitoring API.                                                               |
+| `https://*.starlink.com/*`            | Optional login, subscription and supported account/device operations.                                 |
+| `https://celestrak.org/*`             | Satellite orbit/positioning data.                                                                     |
+| `https://starlink-ghana.vercel.app/*` | Public version check; it sends no recording history.                                                  |
+| Optional `http://*/*`                 | User explicitly enters a nonstandard router IPv4 address; Chrome asks for that single origin on save. |
 
 **Data practices:** Network/device identifiers and usage are processed locally. Optional Starlink account access processes authentication cookies, identity, service, plan and billing data and communicates directly with Starlink. User-requested satellite view, Cloudflare speed test, update check or GitHub release download may contact those providers and expose normal IP/request metadata. No advertising, data sale, browsing-history collection or automatic telemetry upload. Validate the final release ZIP before signing the Store declaration.
 
