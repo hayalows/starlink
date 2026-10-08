@@ -109,8 +109,11 @@ export function GhanaHome({
           </div>
         </div>
         <p className='ghana-muted'>
-          Your monthly subscription remains fixed at {ghs(s.planFee)}; usage does not create a new
-          Starlink charge per GB. Compare it with a mobile bundle in Costs.
+          Your monthly subscription remains fixed at {ghs(s.planFee)}; GB usage does not create
+          an additional Starlink charge.{" "}
+          {s.bundlePrice > 0 && s.bundleGb > 0
+            ? `Your saved mobile bundle: ${ghs(s.bundlePrice / s.bundleGb)} per GB, or ${(s.bundleGb / s.bundlePrice).toFixed(2)} GB per GH₵.`
+            : "For comparison, an illustrative GH₵399 / 240 GB mobile bundle costs GH₵1.66 per GB. Enter your actual bundle in Costs."}
         </p>
         <button className='ghana-button ghana-primary' onClick={onCosts}>
           Understand my costs
