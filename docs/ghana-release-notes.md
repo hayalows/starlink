@@ -1,4 +1,4 @@
-Starlink Ghana Monitor 1.4.1 — Chrome Web Store readiness and account privacy.
+Starlink Ghana Monitor 1.5.0 — experimental phone companion (cloud database provisioning required).\n\n- Pair a phone with a private capability link from the extension Overview; no traditional sign-in.\n- New dark, responsive mobile dashboard at /live/ with recent network usage, energy, Ghana costs, and gap-aware charts.\n- Optional ten-minute background sync while Chrome is running. It does not collect new readings when Chrome is stopped.\n- A Neon database connection and SQL setup are still required before pairing can succeed; follow docs/phone-sync/README.md.\n- Your previously working 1.4.1 local recording and backup functions are retained.\n\n---\n\nStarlink Ghana Monitor 1.4.1 — Chrome Web Store readiness and account privacy.
 
 - Browser extension now persists only a connection preference, not a copy of your Starlink login cookies. Existing saved cookie strings are migrated when Chrome starts the updated extension.
 - Clearer account sign-in wording and public privacy documentation specific to this Ghana project.
