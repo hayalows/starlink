@@ -1,6 +1,9 @@
 import { browser } from "wxt/browser";
 import { buildInsights } from "@core/ghanaInsights";
-import { electricityCost, type GhanaTariff } from "@core/ghanaCost";
+import { type GhanaTariff } from "@core/ghanaCost";
+import { analyzePeriodCost, modeledWatts } from "@core/ghanaPeriodCosts";
+import { ClientTotalsCore, migrateSnapshot } from "@core/clientTotals";
+import { usageKey } from "@core/clientUsage";
 import { IndexedDbHistory } from "./history";
 
 const ENDPOINT = "https://starlink-ghana.vercel.app/api/monitor";
@@ -51,8 +54,8 @@ export async function syncPhoneNow(): Promise<void> {
     const pair = await readPair();
     if (!pair) return;
     const now = new Date();
-    const prefs = (await browser.storage.local.get("ghanaBudgetSettings")).ghanaBudgetSettings as
-      Record<string, unknown> | undefined;
+    const stored = await browser.storage.local.get(["ghanaBudgetSettings", "ghanaDeviceProfiles"]);
+    const prefs = stored.ghanaBudgetSettings as Record<string, unknown> | undefined;
     const settings = {
       planFee: num(prefs?.planFee),
       billingDay: Math.max(1, Math.min(31, Math.floor(num(prefs?.billingDay) || 1))),
@@ -65,6 +68,10 @@ export async function syncPhoneNow(): Promise<void> {
       homeKwh: num(prefs?.homeKwh),
       watts: num(prefs?.watts),
       hours: num(prefs?.hours),
+      model: (typeof prefs?.model === "string" ? prefs.model : "auto") as "auto" | "mini" | "standard4" | "standard5" | "custom",
+      detectedModel: String(prefs?.detectedModel ?? "unknown"),
+      bundlePrice: num(prefs?.bundlePrice),
+      bundleGb: num(prefs?.bundleGb),
     };
     const db = await IndexedDbHistory.open();
     const rows = await db.readMinutes(now.getTime() / 1000 - 95 * 86400, now.getTime() / 1000);
@@ -75,23 +82,13 @@ export async function syncPhoneNow(): Promise<void> {
       (["today", "week", "month", "cycle"] as const).map((id) => {
         const item = insights.periods[id];
         const current = item.current;
-        const fullDays = (item.window.fullEnd - item.window.start) / 86400;
-        const daysElapsed = (item.window.end - item.window.start) / 86400;
-        const projectedKwh =
-          current.kWh != null && current.sampledSeconds >= 86400
-            ? (current.kWh / current.sampledSeconds) * fullDays * 86400
-            : settings.watts > 0
-              ? (settings.watts * settings.hours * fullDays) / 1000
-              : null;
-        const energyCost =
-          current.kWh == null || projectedKwh == null
-            ? null
-            : electricityCost(
-                projectedKwh,
-                settings.tariff,
-                settings.homeKwh,
-                settings.customRate,
-              ) * (projectedKwh > 0 ? current.kWh / projectedKwh : 0);
+        const costs = analyzePeriodCost({
+          current,
+          window: item.window,
+          period: id,
+          inputs: settings,
+          watts: modeledWatts(settings.model, settings.detectedModel, settings.watts),
+        });
         return [
           id,
           {
@@ -100,26 +97,18 @@ export async function syncPhoneNow(): Promise<void> {
             coverage: current.coverage,
             trafficCoverage: current.trafficCoverage,
             latest: current.latest,
-            cost:
-              energyCost == null
-                ? null
-                : energyCost + (settings.planFee * daysElapsed) / Math.max(1, fullDays),
-            electricityCost: energyCost,
-            planAllocation: (settings.planFee * daysElapsed) / Math.max(1, fullDays),
-            projectedCost:
-              projectedKwh == null
-                ? null
-                : settings.planFee +
-                  electricityCost(
-                    projectedKwh,
-                    settings.tariff,
-                    settings.homeKwh,
-                    settings.customRate,
-                  ),
+            cost: costs.total,
+            electricityCost: costs.electricity,
+            planAllocation: costs.planAllocation,
+            projectedCost: costs.projectedTotal,
+            projectedElectricity: costs.projectedElectricity,
+            modeledKwh: costs.modeledKwh,
             // Null means no observation, not zero use.
             buckets: current.buckets.map((b) => ({
               t: b.t,
               gb: b.downGB == null ? null : b.downGB + (b.upGB ?? 0),
+              downGB: b.downGB,
+              upGB: b.upGB,
               kWh: b.kWh,
             })),
             window: { start: item.window.start, end: item.window.end },
@@ -127,6 +116,35 @@ export async function syncPhoneNow(): Promise<void> {
         ];
       }),
     );
+    // Router device totals and dish WAN usage are different meters. Upload a
+    // ranked *subset* of monthly device totals without MACs or client IDs.
+    // Device names are included only when the owner explicitly paired the phone.
+    const snapshot = migrateSnapshot(await db.readTotalsSnapshot());
+    const odometer = new ClientTotalsCore();
+    if (snapshot) odometer.loadSnapshot(snapshot);
+    const profiles = stored.ghanaDeviceProfiles as Record<string, { name?: string; group?: string }> | undefined;
+    const monthKey = now.getUTCFullYear() * 12 + now.getUTCMonth();
+    const all = odometer.totals().filter((t) => {
+      const d = new Date(t.sinceMs);
+      return d.getUTCFullYear() * 12 + d.getUTCMonth() === monthKey;
+    }).map((t) => {
+      const p = profiles?.[usageKey(t.clientId, t.macAddress)];
+      return {
+        name: (p?.name || t.name || "Unnamed device").slice(0, 60),
+        group: (p?.group || "").slice(0, 50),
+        gb: (num(t.rxBytes) + num(t.txBytes)) / 1e9,
+      };
+    }).filter((t) => t.gb > 0).sort((a, b) => b.gb - a.gb);
+    const deviceTotalGb = all.reduce((sum, item) => sum + item.gb, 0);
+    const top = all.slice(0, 15).map((item) => ({
+      ...item,
+      share: deviceTotalGb > 0 ? item.gb / deviceTotalGb : 0,
+    }));
+    if (all.length > 15) {
+      const otherGb = all.slice(15).reduce((sum, item) => sum + item.gb, 0);
+      top.push({ name: "Other devices", group: "", gb: otherGb, share: otherGb / deviceTotalGb });
+    }
+    db.close();
     await post(
       "push",
       {
@@ -140,6 +158,10 @@ export async function syncPhoneNow(): Promise<void> {
           collectorOk: lastDrain?.ok === true,
           lastCollectorAt: lastDrain?.at ?? null,
           periods,
+          planFee: settings.planFee,
+          bundle: { price: settings.bundlePrice, gb: settings.bundleGb },
+          devices: top,
+          deviceTotalGb,
         },
       },
       pair.writeToken,
