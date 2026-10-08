@@ -107,6 +107,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck:extension
       - run: npm run build:extension
+      - run: node scripts/check-store-readiness.mjs
       - run: npm run build:extension:firefox
 
   # Packages the unsigned Windows installer. Deliberately not run on every push:

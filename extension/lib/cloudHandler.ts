@@ -104,15 +104,20 @@ async function captureSession(): Promise<string> {
   return (await jarCookies()).map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
 }
 
+/** Replace a persisted raw Cookie header from v1.4.0 with a boolean opt-in marker. */
+export async function migrateLegacySession(): Promise<void> {
+  const stored = (await browser.storage.local.get(SESSION_KEY))[SESSION_KEY] as unknown;
+  if (typeof stored === "string") {
+    await browser.storage.local.set({ [SESSION_KEY]: stored.length > 0 });
+  }
+}
+
 /** The marker is an explicit user choice, not a credential. Migrate older
  * installs that persisted a raw Cookie header in chrome.storage, replacing
  * the sensitive string with the marker on the first subsequent account read. */
 async function loadOurCookie(): Promise<void> {
-  const stored = (await browser.storage.local.get(SESSION_KEY))[SESSION_KEY] as unknown;
-  const connected = stored === true || (typeof stored === "string" && stored.length > 0);
-  if (typeof stored === "string") {
-    await browser.storage.local.set({ [SESSION_KEY]: connected });
-  }
+  await migrateLegacySession();
+  const connected = (await browser.storage.local.get(SESSION_KEY))[SESSION_KEY] === true;
   const session = connected ? await captureSession() : "";
   ourCookie = /(?:^|;\s*)Starlink\.Com\.Sso=/.test(session) ? session : null;
 }
