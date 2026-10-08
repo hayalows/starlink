@@ -1,0 +1,31 @@
+name: Format redesigned Starlink surfaces
+on:
+  push:
+    branches: [feat/untitled-dark-pwa-site-153]
+    paths: [.github/workflows/format-site-153.yml]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/untitled-dark-pwa-site-153
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Format site design changes
+        run: |
+          npx prettier --write landing/public/phone-refine.css landing/public/phone.js landing/public/public-dark-details.css landing/public/public-dark.css landing/public/ui-icons.css landing/scripts/check-site-153.mjs
+          rm .github/workflows/format-site-153.yml
+          git add -u
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "Format dark PWA and public website components"
+            git pull --rebase origin feat/untitled-dark-pwa-site-153
+            git push origin HEAD:feat/untitled-dark-pwa-site-153
+          fi
