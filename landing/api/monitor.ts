@@ -1,8 +1,7 @@
 // Stable same-origin proxy for the account-free Starlink Ghana phone companion.
 // The backing Postgres database is hosted in an isolated, RLS-protected table
 // in the owner's existing Supabase project. No service credentials leave Supabase.
-const REMOTE =
-  "https://hdvkmpotagbigcmyozaf.supabase.co/functions/v1/starlink-ghana-monitor";
+const REMOTE = "https://hdvkmpotagbigcmyozaf.supabase.co/functions/v1/starlink-ghana-monitor";
 const HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",

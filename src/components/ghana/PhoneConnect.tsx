@@ -26,9 +26,17 @@ export function PhoneConnect() {
       credentials: "omit",
       signal: AbortSignal.timeout(9000),
     })
-      .then(async (response) => response.ok ? (await response.json() as { configured?: boolean }).configured === true : false)
-      .then((ready) => { if (alive) setCloudReady(ready); })
-      .catch(() => { if (alive) setCloudReady(false); });
+      .then(async (response) =>
+        response.ok
+          ? ((await response.json()) as { configured?: boolean }).configured === true
+          : false,
+      )
+      .then((ready) => {
+        if (alive) setCloudReady(ready);
+      })
+      .catch(() => {
+        if (alive) setCloudReady(false);
+      });
     void send("status")
       .then((result) => {
         if (alive) setValue(result);
@@ -82,7 +90,12 @@ export function PhoneConnect() {
         The public site stays open, but your usage requires the link. Readings sync every 10 minutes
         while Chrome runs; your phone shows the last saved reading when the laptop is off.
       </p>
-      {cloudReady === false && <p role="status" className="ghana-muted">The phone website is ready, but cloud storage still needs to be connected before pairing can work. Your existing local monitor is unaffected.</p>}
+      {cloudReady === false && (
+        <p role='status' className='ghana-muted'>
+          The phone website is ready, but cloud storage still needs to be connected before pairing
+          can work. Your existing local monitor is unaffected.
+        </p>
+      )}
       {value?.paired ? (
         <>
           {value.lastSync ? (
