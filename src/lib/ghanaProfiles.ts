@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { ghanaHost } from "./ghanaHost";
 export interface DeviceProfile {
   name: string;
   group: string;
@@ -44,6 +45,7 @@ export function saveProfiles(next: DeviceProfiles) {
   const cleaned = cleanProfiles(next);
   localStorage.setItem(PROFILES_KEY, JSON.stringify(cleaned));
   profiles = cleaned;
+  void ghanaHost()?.syncDeviceProfiles?.(cleaned).catch(() => {});
   listeners.forEach((fn) => fn());
 }
 export function getProfiles() {
