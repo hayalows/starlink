@@ -252,7 +252,10 @@
     el("last-upload").textContent = ago(updated);
     el("today-coverage").textContent = Math.round((today?.coverage || 0) * 100) + "%";
     el("recorder-icon").classList.toggle("is-stale", !fresh);
-    el("recorder-icon").setAttribute("aria-label", fresh ? "Recent recorder data" : "Saved recorder data");
+    el("recorder-icon").setAttribute(
+      "aria-label",
+      fresh ? "Recent recorder data" : "Saved recorder data",
+    );
     el("recorder-description").textContent = fresh
       ? "The saved readings are recent. This does not guarantee that the laptop will remain online."
       : "These are saved readings, not a live network connection. Open Chrome on your laptop to resume collection.";

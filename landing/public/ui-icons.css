@@ -1,26 +1,84 @@
 /* Official Untitled UI Icons FREE line SVGs, used as CSS masks so one
  * color system works in dark surfaces and visible focus/selected states.
  * Licensed for personal/commercial application use: untitledui.com/license. */
-.ui-icon{display:inline-block;width:1.25em;height:1.25em;flex:0 0 auto;vertical-align:-.2em;background-color:currentColor;mask:var(--ui-icon) center/contain no-repeat;-webkit-mask:var(--ui-icon) center/contain no-repeat}
-.ui-icon--home-02{--ui-icon:url("/ui-icons/home-02.svg")}
-.ui-icon--coins-01{--ui-icon:url("/ui-icons/coins-01.svg")}
-.ui-icon--bar-chart-02{--ui-icon:url("/ui-icons/bar-chart-02.svg")}
-.ui-icon--wifi{--ui-icon:url("/ui-icons/wifi.svg")}
-.ui-icon--refresh-cw-01{--ui-icon:url("/ui-icons/refresh-cw-01.svg")}
-.ui-icon--activity{--ui-icon:url("/ui-icons/activity.svg")}
-.ui-icon--signal-01{--ui-icon:url("/ui-icons/signal-01.svg")}
-.ui-icon--monitor-01{--ui-icon:url("/ui-icons/monitor-01.svg")}
-.ui-icon--link-01{--ui-icon:url("/ui-icons/link-01.svg")}
-.ui-icon--zap{--ui-icon:url("/ui-icons/zap.svg")}
-.ui-icon--clock{--ui-icon:url("/ui-icons/clock.svg")}
-.ui-icon--download-01{--ui-icon:url("/ui-icons/download-01.svg")}
-.ui-icon--arrow-up-right{--ui-icon:url("/ui-icons/arrow-up-right.svg")}
-.ui-icon--shield-01{--ui-icon:url("/ui-icons/shield-01.svg")}
-.ui-icon--wallet-02{--ui-icon:url("/ui-icons/wallet-02.svg")}
-.ui-icon--globe-02{--ui-icon:url("/ui-icons/globe-02.svg")}
-.ui-icon--check-circle{--ui-icon:url("/ui-icons/check-circle.svg")}
-.ui-icon--settings-02{--ui-icon:url("/ui-icons/settings-02.svg")}
-.ui-icon--menu-02{--ui-icon:url("/ui-icons/menu-02.svg")}
-.ui-icon--layers-three-01{--ui-icon:url("/ui-icons/layers-three-01.svg")}
-.ui-icon--battery-charging-01{--ui-icon:url("/ui-icons/battery-charging-01.svg")}
-.ui-icon--sm{width:1em;height:1em}.ui-icon--lg{width:1.45em;height:1.45em}
+.ui-icon {
+  display: inline-block;
+  width: 1.25em;
+  height: 1.25em;
+  flex: 0 0 auto;
+  vertical-align: -0.2em;
+  background-color: currentColor;
+  mask: var(--ui-icon) center/contain no-repeat;
+  -webkit-mask: var(--ui-icon) center/contain no-repeat;
+}
+.ui-icon--home-02 {
+  --ui-icon: url("/ui-icons/home-02.svg");
+}
+.ui-icon--coins-01 {
+  --ui-icon: url("/ui-icons/coins-01.svg");
+}
+.ui-icon--bar-chart-02 {
+  --ui-icon: url("/ui-icons/bar-chart-02.svg");
+}
+.ui-icon--wifi {
+  --ui-icon: url("/ui-icons/wifi.svg");
+}
+.ui-icon--refresh-cw-01 {
+  --ui-icon: url("/ui-icons/refresh-cw-01.svg");
+}
+.ui-icon--activity {
+  --ui-icon: url("/ui-icons/activity.svg");
+}
+.ui-icon--signal-01 {
+  --ui-icon: url("/ui-icons/signal-01.svg");
+}
+.ui-icon--monitor-01 {
+  --ui-icon: url("/ui-icons/monitor-01.svg");
+}
+.ui-icon--link-01 {
+  --ui-icon: url("/ui-icons/link-01.svg");
+}
+.ui-icon--zap {
+  --ui-icon: url("/ui-icons/zap.svg");
+}
+.ui-icon--clock {
+  --ui-icon: url("/ui-icons/clock.svg");
+}
+.ui-icon--download-01 {
+  --ui-icon: url("/ui-icons/download-01.svg");
+}
+.ui-icon--arrow-up-right {
+  --ui-icon: url("/ui-icons/arrow-up-right.svg");
+}
+.ui-icon--shield-01 {
+  --ui-icon: url("/ui-icons/shield-01.svg");
+}
+.ui-icon--wallet-02 {
+  --ui-icon: url("/ui-icons/wallet-02.svg");
+}
+.ui-icon--globe-02 {
+  --ui-icon: url("/ui-icons/globe-02.svg");
+}
+.ui-icon--check-circle {
+  --ui-icon: url("/ui-icons/check-circle.svg");
+}
+.ui-icon--settings-02 {
+  --ui-icon: url("/ui-icons/settings-02.svg");
+}
+.ui-icon--menu-02 {
+  --ui-icon: url("/ui-icons/menu-02.svg");
+}
+.ui-icon--layers-three-01 {
+  --ui-icon: url("/ui-icons/layers-three-01.svg");
+}
+.ui-icon--battery-charging-01 {
+  --ui-icon: url("/ui-icons/battery-charging-01.svg");
+}
+.ui-icon--sm {
+  width: 1em;
+  height: 1em;
+}
+.ui-icon--lg {
+  width: 1.45em;
+  height: 1.45em;
+}
