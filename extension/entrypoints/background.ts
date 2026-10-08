@@ -1,3 +1,4 @@
+import { handlePhoneSync, startPhoneSync, syncPhoneNow } from "../lib/phoneSync";
 import { checkGhanaBudgetAlerts } from "../lib/ghanaBudgetAlerts";
 import { defineBackground } from "#imports";
 import { browser } from "wxt/browser";
@@ -236,6 +237,7 @@ async function updateBadge(active: AlertState[]): Promise<void> {
 }
 
 export default defineBackground(() => {
+  startPhoneSync();
   // Remove copied login cookies left in storage by earlier versions on browser start.
   void migrateLegacySession();
   void browser.storage.local.get("ghanaReopenAfterUpdate").then(async (data) => {
@@ -272,6 +274,10 @@ export default defineBackground(() => {
     // worker is the only context with chrome.notifications — so a real alert and
     // the toggle's confirmation take the exact same path. One fixed key, so
     // toggling on repeatedly replaces the confirmation rather than stacking it.
+    if (request.type === "phoneSync") {
+      const syncRequest = message as { action?: string };
+      return handlePhoneSync(syncRequest.action ?? "status");
+    }
     if (request.type === "notify") {
       return postNotification("notify-probe", request.title ?? "", String(request.body ?? ""));
     }
@@ -386,6 +392,7 @@ export default defineBackground(() => {
   });
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "drain") void runDrain();
+    if (alarm.name === "ghanaPhoneSync") void syncPhoneNow().catch(() => {});
     if (alarm.name === "compactEnergy") void runCompactEnergy();
   });
   // A worker that just started (install, browser launch, or wake) drains at once

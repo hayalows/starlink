@@ -1,0 +1,100 @@
+---
+import Base from "../layouts/Base.astro";
+---
+<Base title="My monitor — Starlink Ghana" description="Open your paired Starlink Ghana Monitor on any phone. View your last saved usage, energy, costs and history." path="/live/">
+  <link slot="head" rel="stylesheet" href="/phone.css" />
+  <div class="phone-shell" id="phone-app">
+    <header class="phone-top">
+      <a href="/" class="phone-brand" aria-label="Starlink Ghana public calculator">
+        <span class="phone-orbit" aria-hidden="true">✳</span><span>STARLINK<span class="phone-brand-small">/ GHANA</span></span>
+      </a>
+      <span class="phone-top-label">PHONE COMPANION</span>
+      <button class="phone-icon-button" type="button" id="phone-refresh" title="Refresh" aria-label="Refresh monitor readings">↻</button>
+    </header>
+    <main class="phone-main">
+      <section class="phone-pair" id="pair-section" aria-labelledby="pair-title">
+        <div class="phone-eyebrow"><span class="phone-status-light"></span> CONNECT YOUR MONITOR</div>
+        <h1 id="pair-title">Your internet, wherever you are.</h1>
+        <p>Keep the public website open. Connect your own monitor with a private link from the laptop extension—no sign-in, no password.</p>
+        <div class="phone-stepper" aria-label="Pairing steps">
+          <div><span>01</span>Open Overview on your laptop</div>
+          <div><span>02</span>Choose Connect my phone</div>
+          <div><span>03</span>Open or paste your private link here</div>
+        </div>
+        <form id="pair-form" class="phone-pair-form">
+          <label for="pair-code">Paste your pairing link or code</label>
+          <div class="phone-pair-row">
+            <input id="pair-code" type="text" spellcheck="false" autocomplete="off" placeholder="Paste from the extension" required />
+            <button type="submit" class="phone-button phone-button-primary">Connect <span aria-hidden="true">↗</span></button>
+          </div>
+        </form>
+        <p id="pair-feedback" class="phone-pair-feedback" role="status"></p>
+        <div class="phone-pair-footer">
+          <span class="phone-lock" aria-hidden="true">⌑</span>
+          Your readings require the private pairing code. If shared, revoke it from your laptop.
+        </div>
+      </section>
+
+      <section id="monitor-section" class="phone-monitor" hidden>
+        <div class="phone-heading-row">
+          <div><div class="phone-eyebrow">YOUR HOUSEHOLD · REMOTE VIEW</div><h1>Home network<span class="phone-title-period">.</span></h1></div>
+          <div id="sync-badge" class="phone-sync-badge" role="status">Checking…</div>
+        </div>
+        <p class="phone-sync-copy" id="sync-copy" aria-live="polite">Connecting to your saved monitor…</p>
+
+        <div class="phone-hero-metric">
+          <div class="phone-hero-top"><span>Data recorded this month</span><span>↓ + ↑</span></div>
+          <div class="phone-hero-number"><strong id="hero-gb">—</strong><span>GB</span></div>
+          <div class="phone-hero-bottom"><span id="hero-coverage">Waiting for readings</span><a href="#history">View history <span aria-hidden="true">↗</span></a></div>
+        </div>
+
+        <section class="phone-stat-grid" aria-label="Monthly costs and energy">
+          <article class="phone-stat"><span class="phone-stat-label">MONTH-END ESTIMATE</span><strong id="metric-cost">—</strong><small id="metric-cost-note">Includes plan + electricity</small></article>
+          <article class="phone-stat"><span class="phone-stat-label">ENERGY RECORDED</span><strong id="metric-energy">—</strong><small id="metric-energy-note">Measured kWh · tracked time</small></article>
+        </section>
+
+        <section class="phone-panel phone-chart-panel" id="history">
+          <div class="phone-panel-head"><div><span class="phone-eyebrow">NETWORK TRAFFIC</span><h2>Usage over time</h2></div>
+            <span class="phone-chart-unit">GB</span>
+          </div>
+          <div class="phone-tabs" role="tablist" aria-label="Usage period">
+            <button type="button" class="selected" data-period="today" role="tab" aria-selected="true">Today</button>
+            <button type="button" data-period="week" role="tab" aria-selected="false">7 days</button>
+            <button type="button" data-period="month" role="tab" aria-selected="false">Month</button>
+            <button type="button" data-period="cycle" role="tab" aria-selected="false">Billing cycle</button>
+          </div>
+          <div id="chart-summary" class="phone-chart-summary">Waiting for measurements</div>
+          <div class="phone-chart-scroll"><div id="phone-chart" class="phone-chart" role="img" aria-label="Recorded download and upload usage chart"></div></div>
+          <div class="phone-chart-foot"><span><i class="phone-legend-live"></i> Recorded</span><span><i class="phone-legend-gap"></i> No reading / gap</span></div>
+        </section>
+
+        <div class="phone-two-panels">
+          <section class="phone-panel">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">COST CLARITY</span><h2>What you spend</h2></div><span class="phone-tiny-icon">GH₵</span></div>
+            <div class="phone-cost-line"><span>Monthly plan allocation</span><strong id="cost-plan">—</strong></div>
+            <div class="phone-cost-line"><span>Electricity estimate so far</span><strong id="cost-electricity">—</strong></div>
+            <div class="phone-cost-line phone-cost-total"><span>Combined estimate</span><strong id="cost-total">—</strong></div>
+            <p class="phone-fine">Your plan is a fixed monthly charge. Data usage changes the cost per GB, not the subscription bill. This is not a Starlink or ECG invoice.</p>
+          </section>
+          <section class="phone-panel phone-recorder-panel">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">COLLECTOR</span><h2>Recording health</h2></div><span id="recorder-icon" class="phone-recorder-icon">◷</span></div>
+            <div class="phone-cost-line"><span>Last reading</span><strong id="last-reading">—</strong></div>
+            <div class="phone-cost-line"><span>Last upload</span><strong id="last-upload">—</strong></div>
+            <div class="phone-cost-line"><span>Today's coverage</span><strong id="today-coverage">—</strong></div>
+            <p class="phone-fine" id="recorder-description">Your laptop records only while Chrome runs. An older reading is saved history, not confirmation the dish is offline.</p>
+          </section>
+        </div>
+        <section class="phone-panel phone-history">
+          <div class="phone-panel-head"><div><span class="phone-eyebrow">DAILY JOURNAL</span><h2>Your recent days</h2></div><span class="phone-chart-unit">HISTORY</span></div>
+          <div id="phone-day-list" class="phone-day-list"></div>
+        </section>
+        <section class="phone-settings">
+          <button id="forget-monitor" type="button">Forget this monitor on this phone</button>
+          <a href="/">Public cost calculator ↗</a>
+        </section>
+      </section>
+    </main>
+    <footer class="phone-footer"><span>STARLINK GHANA · INDEPENDENT TOOL</span><span>Not affiliated with Starlink or SpaceX. Your local recording stays in the extension.</span></footer>
+  </div>
+  <script type="module" is:inline src="/phone.js"></script>
+</Base>

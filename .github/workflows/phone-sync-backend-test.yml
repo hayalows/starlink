@@ -1,0 +1,19 @@
+name: Verify phone sync backend
+on:
+  push:
+    branches: [feat/phone-monitor-sync-2026-10]
+    paths:
+      - .github/workflows/phone-sync-backend-test.yml
+      - scripts/test-phone-sync-backend.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/test-phone-sync-backend.mjs

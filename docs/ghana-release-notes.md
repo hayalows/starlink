@@ -1,3 +1,13 @@
+Starlink Ghana Monitor 1.5.0 — optional mobile companion and privately paired cloud sync.
+
+- Pair a phone with a private capability link from the extension Overview; no traditional sign-in.
+- New dark, responsive mobile dashboard at /live/ with recent network usage, energy, Ghana costs, and gap-aware charts.
+- Optional ten-minute background sync while Chrome is running. It does not collect new readings when Chrome is stopped.
+- The sync service uses an isolated table and Edge Function in the owner's existing free Supabase project. Pairing is protected by private capability links; see docs/phone-sync/README.md.
+- Your previously working 1.4.1 local recording and backup functions are retained.
+
+---
+
 Starlink Ghana Monitor 1.4.1 — Chrome Web Store readiness and account privacy.
 
 - Browser extension now persists only a connection preference, not a copy of your Starlink login cookies. Existing saved cookie strings are migrated when Chrome starts the updated extension.
