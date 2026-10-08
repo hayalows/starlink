@@ -77,7 +77,7 @@ Actual implemented UI uses a dark editorial metrics grid, accessible tabs, statu
 
 ## Known limitations
 
-- Sync is not active until a Supabase PostgreSQL backend is attached to Vercel and the SQL schema is installed.
+- The cloud backend and schema have been provisioned. End-to-end pairing through the published public website and a real laptop monitor should still be checked after deployment.
 - A phone cannot collect new LAN measurements when the laptop is off. It reads the latest uploaded snapshot.
 - This version syncs summary history and estimates, not individual device names or account information.
 - Do not mistake a 60-second phone refresh for a 60-second laptop recording or 10-minute upload schedule.
