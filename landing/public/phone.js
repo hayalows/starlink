@@ -72,9 +72,11 @@
     if (Number.isFinite(snapshot.planFee) && snapshot.planFee > 0) return snapshot.planFee;
     if (!month?.window || !Number.isFinite(month.planAllocation)) return null;
     const start = new Date(month.window.start * 1000);
-    const days = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0)).getUTCDate();
+    const days = new Date(
+      Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0),
+    ).getUTCDate();
     const elapsed = (month.window.end - month.window.start) / 86400;
-    return elapsed > 0 ? month.planAllocation / elapsed * days : null;
+    return elapsed > 0 ? (month.planAllocation / elapsed) * days : null;
   };
   const showLegacyWarning = (snapshot) => {
     const today = snapshot.periods?.today;
@@ -84,8 +86,9 @@
     // Never block otherwise valid old snapshots just because metadata is missing.
     const impossible = plan > 0 && today?.planAllocation > (plan / 28) * 1.1;
     notice.hidden = !impossible;
-    if (impossible) notice.textContent =
-      "This uploaded snapshot appears to use the old daily plan formula. The laptop's numbers may be newer. Open your updated extension and choose Sync now; this screen will refresh.";
+    if (impossible)
+      notice.textContent =
+        "This uploaded snapshot appears to use the old daily plan formula. The laptop's numbers may be newer. Open your updated extension and choose Sync now; this screen will refresh.";
   };
   const displayDate = (unix, format = "short") => {
     const date = new Date(unix * 1000);
@@ -231,7 +234,9 @@
       " · Laptop uploads approximately every 10 minutes while Chrome is running.";
     el("hero-gb").textContent = amount(today?.gb);
     el("overview-today-cost").textContent = money(today?.cost);
-    el("overview-month-gb").textContent = Number.isFinite(month?.gb) ? amount(month.gb) + " GB" : "—";
+    el("overview-month-gb").textContent = Number.isFinite(month?.gb)
+      ? amount(month.gb) + " GB"
+      : "—";
     el("hero-coverage").textContent =
       Math.round((today?.trafficCoverage || 0) * 100) + "% of today measured";
     el("metric-cost").textContent = money(month?.projectedCost);
@@ -264,7 +269,8 @@
     // Both screens use FULL monthly forecast divided by GB recorded to date.
     const rate =
       Number.isFinite(month?.projectedCost) && month?.gb > 0
-        ? month.projectedCost / month.gb : null;
+        ? month.projectedCost / month.gb
+        : null;
     el("starlink-per-gb").textContent = Number.isFinite(rate) ? money(rate) : "—";
     el("starlink-gb-per-cedi").textContent = rate > 0 ? amount(1 / rate, 3) + " GB" : "—";
     const completeness = Math.round((month?.trafficCoverage || 0) * 100);
@@ -272,7 +278,8 @@
       ? "Month-end estimate ÷ " + amount(month.gb) + " GB observed"
       : "Waiting for your first recorded GB";
     el("value-coverage-note").textContent = rate
-      ? "Based on " + completeness +
+      ? "Based on " +
+        completeness +
         "% of the month recorded so far. As more usage is captured, the effective GH₵/GB normally falls while GB per cedi rises. Unobserved traffic is not treated as zero."
       : "The rate appears as soon as your monitor records some usage.";
     const bundle = current.bundle ?? {};

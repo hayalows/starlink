@@ -82,7 +82,8 @@ export function useGhanaAnalysis(status: DishStatusJson | null, period: ViewPeri
       ? usage.gb
       : (history.data ?? buildInsights([], now, settings.billingDay)).periods.month.current.gb;
   const perGb = effectiveObservedPricePerGb(projectedTotal, monthlyObservedGb);
-  const dataValueCoverage = (history.data ?? buildInsights([], now, settings.billingDay)).periods.month.current.trafficCoverage;
+  const dataValueCoverage = (history.data ?? buildInsights([], now, settings.billingDay)).periods
+    .month.current.trafficCoverage;
   return {
     settings,
     update,

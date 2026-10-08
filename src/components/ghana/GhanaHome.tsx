@@ -113,12 +113,15 @@ export function GhanaHome({
             <small>
               {month.perGb === null
                 ? "Waiting for the first recorded GB"
-                : (1 / month.perGb).toFixed(3) + " GB per GH₵ · month-end cost ÷ GB recorded so far"}
+                : (1 / month.perGb).toFixed(3) +
+                  " GB per GH₵ · month-end cost ÷ GB recorded so far"}
             </small>
           </div>
         </div>
         <p className='ghana-muted'>
-          This effective ratio uses the full month's estimated cost and the {Math.round(month.dataValueCoverage * 100)}% of the month recorded so far. It becomes more representative as more data is measured.
+          This effective ratio uses the full month's estimated cost and the{" "}
+          {Math.round(month.dataValueCoverage * 100)}% of the month recorded so far. It becomes more
+          representative as more data is measured.
         </p>
         <p className='ghana-muted'>
           Your monthly subscription remains fixed at {ghs(s.planFee)}; GB usage does not create an

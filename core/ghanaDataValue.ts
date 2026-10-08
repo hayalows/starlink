@@ -17,7 +17,8 @@ export function effectiveObservedPricePerGb(
     typeof observedGb !== "number" ||
     !Number.isFinite(observedGb) ||
     observedGb <= 0
-  ) return null;
+  )
+    return null;
   return fullMonthEstimate / observedGb;
 }
 
