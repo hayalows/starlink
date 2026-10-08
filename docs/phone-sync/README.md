@@ -13,13 +13,17 @@ No sign-in, account or subscription. The public site at **/live/** is open, but 
 
 The API should never be configured to return readings without verifying the read capability. The public page has **no login**; that does **not** mean it can reveal any household.
 
-## How to activate the database
+## Deployed backend (zero paid services)
 
-The existing Vercel project does not yet have `DATABASE_URL` set. To activate sync, connect a free Neon PostgreSQL project to **the existing Vercel starlink-ghana project** or set a server-only environment variable `DATABASE_URL` to Neon's pooled Postgres connection string (never put this value in GitHub or client code).
+The connected Neon account did not expose any project identifier or credential in the available integration, so the initial implementation now runs in **the existing free Supabase RouteLab PostgreSQL project**, in the independent RLS-protected table `public.starlink_phone_pairs`. It does not modify RouteLab's tables, users, or authentication settings. We can migrate the small table to Neon later if desired, without changing the pairing experience.
 
-Run [001_phone_monitor.sql](001_phone_monitor.sql) in that Neon database's SQL editor, then redeploy the Vercel project.
+- Database migration `starlink_phone_capability_storage` has been applied.
+- Supabase Edge Function `starlink-ghana-monitor` handles read, write, pairing and revocation with two separate SHA-256 capability hashes.
+- `/api/monitor` on the existing Vercel website proxies to the isolated function. No public API keys or Starlink credentials are shared.
+- The public website does not require login. A private 256-bit pairing URL is required to see an individual household.
+- Automatic summary upload is every ten minutes while Chrome is open. Browser closure stops new readings. No iPhone app install is required.
 
-No other paid service is needed, but free-tier capacity is limited. Avoid shortening the ten-minute upload interval without checking usage.
+**Operational caveat:** The owner's existing Supabase project now also hosts this isolated personal-service table. This is a shared free-tier resource: usage caps, outages or suspension affect both apps. An independent Neon project would remove that coupling in the future.
 
 ### Verify after provisioning
 
@@ -35,7 +39,7 @@ No other paid service is needed, but free-tier capacity is limited. Avoid shorte
 
 This is a **capability link**, not public anonymous access to household data. If the link is leaked, revoke it on the laptop. Do not paste the link into public chats, issue trackers or analytics. It is not transmitted as a URL query string or HTTP Referer by our UI. Upload only aggregated measurements; no device identifiers, locations, account data, login cookies or browsing history.
 
-The create endpoint is intentionally unauthenticated for a zero-sign-in setup. Before wide distribution, enforce abuse protection or require a private server-side enrollment secret to avoid anonymous database exhaustion. For this personal setup, set a conservative maximum number of paired monitors and monitor free-tier consumption. Keep Neon credentials solely in Vercel's server environment.
+The create endpoint is intentionally unauthenticated for the no-sign-in experience, but it enforces a twenty-pair global storage cap to limit free-tier abuse. It is meant only for personal use, not public mass adoption. To distribute broadly, add stronger abuse protection or enrollment authorization and keep an eye on storage/compute limits. Keep Neon credentials solely in Vercel's server environment.
 
 ## Product Design OS and component research
 
@@ -73,7 +77,7 @@ Actual implemented UI uses a dark editorial metrics grid, accessible tabs, statu
 
 ## Known limitations
 
-- Sync is not active until a Neon database is attached to Vercel and the SQL schema is installed.
+- Sync is not active until a Supabase PostgreSQL backend is attached to Vercel and the SQL schema is installed.
 - A phone cannot collect new LAN measurements when the laptop is off. It reads the latest uploaded snapshot.
 - This version syncs summary history and estimates, not individual device names or account information.
 - Do not mistake a 60-second phone refresh for a 60-second laptop recording or 10-minute upload schedule.
