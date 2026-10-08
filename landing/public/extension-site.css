@@ -114,6 +114,7 @@ html, body { background: #f4f3ee !important; }
 .release-check { display: grid; place-items: center; flex: 0 0 auto; border-radius: 50%; width: 20px; height: 20px; background: #334238; color: #d0e4ce; font-size: 13px; }
 .release-dot { color: #83867e; margin-inline: 4px; }
 .release-feedback { font-size: 11px; color: #b5b4a9; line-height: 1.5; margin: 8px 0 0; }
+.platform-note { margin: 10px 0 0; max-width: 58ch; color: #d6d3c9; font-size: 12px; line-height: 1.55; }
 .download-trust { display: flex; flex-wrap: wrap; gap: 14px 18px; border-top: 1px solid #3c3c37; margin-top: 26px; padding-top: 22px; }
 .download-trust span { color: #b3b8ac; display: inline-flex; align-items: center; gap: 7px; font-size: 12px; line-height: 1.4; }
 .download-trust svg { color: #d0ba94; flex: none; }
@@ -148,10 +149,10 @@ html, body { background: #f4f3ee !important; }
 .sample-state { display: inline-flex; gap: 6px; align-items: center; font-size: 11px; color: #5a7161; }
 .sample-metrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-top: 24px; }
 .sample-metrics>div { border-top: 1px solid #e3e1d9; padding-top: 12px; min-width: 0; }
-.sample-metrics span { display: block; font-size: 10px; line-height: 1.4; color: #66665f; }
+.sample-metrics span { display: block; font-size: 11px; line-height: 1.4; color: #55574f; }
 .sample-metrics strong { display: block; margin: 7px 0 4px; color: #161714; font-size: clamp(15px, 1.6vw, 21px); white-space: normal; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
 .sample-metrics strong small { font-size: 12px; font-weight: 600; }
-.sample-metrics div>small { font-size: 9px; color: #84847e; line-height: 1.4; display: block; }
+.sample-metrics div>small { font-size: 10px; color: #62645b; line-height: 1.4; display: block; }
 .sample-chart { border-top: 1px solid #e8e6de; margin-top: 20px; padding-top: 14px; }
 .sample-chart-heading { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: #62635e; }
 .sample-bars { display: flex; align-items: flex-end; height: 63px; gap: 7px; margin-top: 8px; border-bottom: 1px solid #e4e2d9; }
@@ -218,7 +219,7 @@ html, body { background: #f4f3ee !important; }
   .sample-panel { padding: 15px; }
   .sample-metrics { gap: 7px; }
   .sample-metrics strong { font-size: 16px; }
-  .sample-metrics div>small { font-size: 9px; }
+  .sample-metrics div>small { font-size: 10px; }
   .showcase-status { font-size: 9px; }
   .download-actions { gap: 7px; }
   .download-secondary { justify-content: flex-start; }
