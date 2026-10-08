@@ -37,39 +37,39 @@ This is a **capability link**, not public anonymous access to household data. If
 
 The create endpoint is intentionally unauthenticated for a zero-sign-in setup. Before wide distribution, enforce abuse protection or require a private server-side enrollment secret to avoid anonymous database exhaustion. For this personal setup, set a conservative maximum number of paired monitors and monitor free-tier consumption. Keep Neon credentials solely in Vercel's server environment.
 
-## UI library references and integration choices
+## Product Design OS and component research
 
-User provided `realui.com` and `uselayouts.com`. RealUI.com did not resolve reliably; the actively maintained shadcn library appears to be **ReUI** at https://reui.io. useLayouts is at https://uselayouts.com.
+Sources reviewed: [Rare UI](https://rareui.com/components) (the correct site; **not** ReUI) and [useLayouts](https://uselayouts.com/).
 
-We reviewed ten applicable patterns from each library. This first version uses a small set of **adapted patterns** (not copied package code) so we can keep the Astro website static, avoid upgrading the stack, and prioritize correct metrics. Future exact library installs can be done when needed.
+Rare UI is a free React component collection, normally installed through shadcn. The phone companion is a statically rendered **Astro** site with lightweight JavaScript, so React components cannot simply be pasted directly without adding Astro's React integration, Motion and the individual dependencies. We audited ten actual Rare UI components and ten useLayouts patterns, and built lightweight task-focused equivalents where appropriate. **The twenty original React components have NOT been installed or copied as-is.** A follow-up React integration can faithfully reuse their source if that visual direction is essential, after functionality is verified.
 
-| ReUI reference   | Where the pattern helps          |
-| ---------------- | -------------------------------- |
-| Stepper          | Pairing steps                    |
-| Card / Stats     | Metric overview                  |
-| Chart            | Gap-aware traffic bars           |
-| Badge            | Connection freshness             |
-| Tabs             | Time range selection             |
-| Alert            | Missing sync and invalid key     |
-| Skeleton         | Pending readings                 |
-| Button group     | Manual refresh and range actions |
-| Data grid / List | Daily history rows               |
-| Empty state      | No data after pairing            |
+| Rare UI component examined | Assessment for phone companion |
+| --- | --- |
+| Step player | Pairing steps; a static three-step instruction is clearer |
+| OTP Input | Would fit a shorter one-time pairing code; unnecessary for current private URL |
+| Animated counter | Use restrained value transitions when readings update; avoid fabricated increments |
+| Task list | Useful for a setup checklist, not the normal dashboard |
+| Notification bell | Could show genuinely delivered alerts; not implemented for cloud yet |
+| Scroll Progress | Little value on a short mobile monitoring screen |
+| Rail TOC | Better for long settings/help pages than three primary screens |
+| Proximity Sidebar | Reference for desktop dashboard's navigation hierarchy |
+| Hook Sidebar | Reference for desktop menu readability, not needed on phone |
+| Delete button | Pattern for explicit disconnect/revoke with clear confirmation |
 
-| useLayouts reference | Where the pattern helps                 |
-| -------------------- | --------------------------------------- |
-| Discrete Tabs        | The selected time range                 |
-| Status Button        | Sync/refresh status                     |
-| Stacked List         | Daily history                           |
-| Multi Step Form      | Three-step pairing instructions         |
-| AccordionOS          | Progressive help/advanced content       |
-| Vertical Tabs        | Future desktop navigation               |
-| Animated Collection  | Latest devices with meaningful ordering |
-| Expandable Gallery   | Future drill-down chart cards           |
-| Fluid Expanding Grid | Mobile to desktop metric reflow         |
-| Feature Carousel     | Short, focused onboarding hints         |
+| useLayouts pattern examined | Assessment |
+| --- | --- |
+| Status Button | Clear and truthful last-sync status |
+| AccordionOS | Advanced help/settings revealed on demand |
+| Accessible Action | Explicit refresh and pairing actions |
+| Theme Toggle | Not needed yet: this experience intentionally uses a dark theme |
+| Confidential Folder | Reference for privacy-sensitive sections, not a real folder interface |
+| Bucket | Could group collected summary items; unnecessary decoration avoided |
+| 3D Book | Not appropriate for a data-monitoring screen |
+| Polaroid Stack | Not appropriate for usage history |
+| Photo Albums | Not appropriate for telemetry data |
+| Get In Touch | Not appropriate to core monitoring tasks |
 
-Reference patterns preserve the core interaction, but we deliberately removed unnecessary bounce/auto-play and retained keyboard focus, reduced motion, truthful no-data states, and dark contrast. **These are references, not a claim that all twenty original components were installed unchanged.**
+Actual implemented UI uses a dark editorial metrics grid, accessible tabs, status pills, gap-aware charts and plain pairing steps inspired by the **functional patterns**; never claim that original third-party component source was integrated. Product Design OS principles: brief time to first reading, understandable data freshness, accurate missing-data labels, responsive hierarchy, keyboard focus, and reduced motion.
 
 ## Known limitations
 
