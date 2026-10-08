@@ -1,9 +1,9 @@
-Starlink Ghana Monitor 1.5.0 — experimental phone companion (cloud database provisioning required).
+Starlink Ghana Monitor 1.5.0 — optional mobile companion and privately paired cloud sync.
 
 - Pair a phone with a private capability link from the extension Overview; no traditional sign-in.
 - New dark, responsive mobile dashboard at /live/ with recent network usage, energy, Ghana costs, and gap-aware charts.
 - Optional ten-minute background sync while Chrome is running. It does not collect new readings when Chrome is stopped.
-- A Neon database connection and SQL setup are still required before pairing can succeed; follow docs/phone-sync/README.md.
+- The sync service uses an isolated table and Edge Function in the owner's existing free Supabase project. Pairing is protected by private capability links; see docs/phone-sync/README.md.
 - Your previously working 1.4.1 local recording and backup functions are retained.
 
 ---
