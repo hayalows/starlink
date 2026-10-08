@@ -2,7 +2,7 @@
   "name": "dishylink",
   "productName": "Dishylink",
   "private": true,
-  "version": "1.5.0",
+  "version": "1.5.1",
   "type": "module",
   "main": "dist-electron/main.js",
   "author": "daveyhert <daviehert@gmail.com>",
