@@ -4,9 +4,9 @@ A Ghana-focused extension and calculator built on [Dishylink](https://github.com
 
 **[Open the Ghana calculator](https://starlink-ghana.vercel.app)** · [Privacy policy](https://starlink-ghana.vercel.app/privacy/) · [Chrome Web Store preparation](docs/chrome-web-store/README.md) · **[Download the latest Chrome extension](https://github.com/hayalows/starlink/releases/latest/download/starlink-ghana-monitor-chrome.zip)** · [Release notes and update instructions](docs/ghana-release-notes.md)
 
-## Phone companion (v1.5.0)
+## Phone companion (v1.5.2)
 
-Open [the mobile dashboard](https://starlink-ghana.vercel.app/live/) on your iPhone or any browser. No sign-in: from the **Chrome extension → Overview → Phone companion**, select **Connect my phone**, then open the private pairing link on your phone. Summary usage, energy and cedi cost estimates sync approximately every ten minutes while Chrome is running. When the laptop is off, the phone accurately shows the last saved snapshot instead of claiming live connectivity.
+Open [the installable mobile dashboard](https://starlink-ghana.vercel.app/live/) on your iPhone or any browser. Use Safari's Share → Add to Home Screen to install as a PWA. The companion now has Overview, Costs, Devices and Connection tabs. No sign-in: from the **Chrome extension → Overview → Phone companion**, select **Connect my phone**, then open the private pairing link on your phone. Summary usage, energy and cedi cost estimates sync approximately every ten minutes while Chrome is running. When the laptop is off, the phone accurately shows the last saved snapshot instead of claiming live connectivity.
 
 Pairing is protected by separate long random read/write tokens. Only aggregated metrics are uploaded, not Starlink sign-in cookies or household device names. Phone cloud storage is an isolated table in the owner's existing free PostgreSQL project. Full setup, limitations, revocation and component reference notes: [Phone sync documentation](docs/phone-sync/README.md).
 

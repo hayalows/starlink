@@ -1,3 +1,13 @@
+Starlink Ghana Monitor 1.5.2 — mobile app and desktop-parity navigation
+
+- Mobile companion is now an installable dark-theme PWA with Overview, Costs, Devices and Connection views. Adds a dedicated home screen manifest and network-first service worker caching only the public app shell, never account tokens, readings or API responses.
+- Overview shows today's recorded GB, estimated cost today, month-end forecast, monthly traffic and measured monthly energy, matching desktop semantics.
+- Effective Starlink cost per recorded GB and GB per cedi now appear with any positive observed monthly data rather than waiting for an arbitrary coverage percentage. Clear disclosure of partial-month observations remains.
+- Phone detects obviously out-of-date daily fee allocations and directs owners to sync an updated extension instead of silently displaying inconsistent cost numbers.
+- Adds discreet creator credit on desktop and phone. Existing pairing keys, history and Starlink login stay intact. Installation is an in-place extension update.
+
+---
+
 Starlink Ghana Monitor 1.5.1 — accurate phone costs and interactive usage insights.
 
 - Phone and desktop extension now share the same subscription allocation and electricity forecast logic; auto-detected Mini defaults to 32.5 W rather than 50 W.

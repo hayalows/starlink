@@ -1,120 +1,149 @@
 ---
 import Base from "../layouts/Base.astro";
 ---
-<Base title="My monitor — Starlink Ghana" description="Open your paired Starlink Ghana Monitor on any phone. View your last saved usage, energy, costs and history." path="/live/">
-  <link slot="head" rel="stylesheet" href="/phone.css" />
+<Base title="My monitor — Starlink Ghana" description="Your paired Starlink internet dashboard. Usage, energy, costs, devices and connection details on your phone." path="/live/">
+  <link slot="head" rel="stylesheet" href="/phone.css?v=152" />
   <div class="phone-shell" id="phone-app">
     <header class="phone-top">
-      <a href="/" class="phone-brand" aria-label="Starlink Ghana public calculator">
-        <span class="phone-orbit" aria-hidden="true">✳</span><span>STARLINK<span class="phone-brand-small">/ GHANA</span></span>
+      <a href="/" class="phone-brand" aria-label="Starlink Ghana public website">
+        <img class="phone-brand-icon" src="/icon-192.png" width="34" height="34" alt="" />
+        <span>STARLINK<span class="phone-brand-small">/ GHANA</span></span>
       </a>
-      <span class="phone-top-label">PHONE COMPANION</span>
-      <button class="phone-icon-button" type="button" id="phone-refresh" title="Refresh" aria-label="Refresh monitor readings">↻</button>
+      <span class="phone-top-label">MY MONITOR</span>
+      <button class="phone-icon-button" type="button" id="phone-refresh" title="Refresh saved readings" aria-label="Refresh saved readings">↻</button>
     </header>
     <main class="phone-main">
       <section class="phone-pair" id="pair-section" aria-labelledby="pair-title">
         <div class="phone-eyebrow"><span class="phone-status-light"></span> CONNECT YOUR MONITOR</div>
         <h1 id="pair-title">Your internet, wherever you are.</h1>
-        <p>Keep the public website open. Connect your own monitor with a private link from the laptop extension—no sign-in, no password.</p>
+        <p>Your site is open. Your household readings are private. Pair the extension on your laptop once to view them on your phone, without signing in.</p>
         <div class="phone-stepper" aria-label="Pairing steps">
-          <div><span>01</span>Open Overview on your laptop</div>
+          <div><span>01</span>Open the extension's Overview</div>
           <div><span>02</span>Choose Connect my phone</div>
-          <div><span>03</span>Open or paste your private link here</div>
+          <div><span>03</span>Open your private link here</div>
         </div>
         <form id="pair-form" class="phone-pair-form">
-          <label for="pair-code">Paste your pairing link or code</label>
-          <div class="phone-pair-row">
-            <input id="pair-code" type="text" spellcheck="false" autocomplete="off" placeholder="Paste from the extension" required />
-            <button type="submit" class="phone-button phone-button-primary">Connect <span aria-hidden="true">↗</span></button>
-          </div>
+          <label for="pair-code">Paste your private pairing link or code</label>
+          <div class="phone-pair-row"><input id="pair-code" type="text" spellcheck="false" autocomplete="off" placeholder="Paste from your extension" required /><button type="submit" class="phone-button phone-button-primary">Connect ↗</button></div>
         </form>
         <p id="pair-feedback" class="phone-pair-feedback" role="status"></p>
-        <div class="phone-pair-footer">
-          <span class="phone-lock" aria-hidden="true">⌑</span>
-          Your readings require the private pairing code. If shared, revoke it from your laptop.
-        </div>
+        <p class="phone-pair-footer">Anyone with a copy of your private pairing link can read saved summaries. Disconnect it on the laptop to revoke access.</p>
       </section>
 
       <section id="monitor-section" class="phone-monitor" hidden>
         <div class="phone-heading-row">
-          <div><div class="phone-eyebrow">YOUR HOUSEHOLD · REMOTE VIEW</div><h1>Home network<span class="phone-title-period">.</span></h1></div>
+          <div><div class="phone-eyebrow">YOUR STARLINK · GHANA</div><h1>Your internet<span class="phone-title-period">.</span></h1></div>
           <div id="sync-badge" class="phone-sync-badge" role="status">Checking…</div>
         </div>
-        <p class="phone-sync-copy" id="sync-copy" aria-live="polite">Connecting to your saved monitor…</p>
-
-        <div class="phone-hero-metric">
-          <div class="phone-hero-top"><span>Data recorded this month</span><span>↓ + ↑</span></div>
-          <div class="phone-hero-number"><strong id="hero-gb">—</strong><span>GB</span></div>
-          <div class="phone-hero-bottom"><span id="hero-coverage">Waiting for readings</span><a href="#history">View history <span aria-hidden="true">↗</span></a></div>
-        </div>
-
-        <section class="phone-stat-grid" aria-label="Monthly costs and energy">
-          <article class="phone-stat"><span class="phone-stat-label">MONTH-END ESTIMATE</span><strong id="metric-cost">—</strong><small id="metric-cost-note">Includes plan + electricity</small></article>
-          <article class="phone-stat"><span class="phone-stat-label">ENERGY RECORDED</span><strong id="metric-energy">—</strong><small id="metric-energy-note">Measured kWh · tracked time</small></article>
+        <p class="phone-sync-copy" id="sync-copy" aria-live="polite">Connecting to your last saved monitor reading…</p>
+        <div id="legacy-notice" class="phone-legacy-notice" role="status" hidden></div>
+        <nav class="phone-section-nav" aria-label="Monitor sections">
+          <button type="button" data-view="overview" aria-current="page">Overview</button>
+          <button type="button" data-view="costs">Costs</button>
+          <button type="button" data-view="devices">Devices</button>
+          <button type="button" data-view="connection">Connection</button>
+        </nav>
+        
+        <section data-screen="overview" aria-label="Overview" class="phone-screen">
+          <div class="phone-hero-metric">
+            <div class="phone-hero-top"><span>Data recorded today</span><span>↓ + ↑</span></div>
+            <div class="phone-hero-number"><strong id="hero-gb">—</strong><span>GB</span></div>
+            <div class="phone-hero-bottom"><span id="hero-coverage">Waiting for readings</span><button type="button" data-open="history">View history ↗</button></div>
+          </div>
+          <section class="phone-stat-grid phone-overview-grid" aria-label="Your internet at a glance">
+            <article class="phone-stat"><span class="phone-stat-label">ESTIMATED COST TODAY</span><strong id="overview-today-cost">—</strong><small>Plan time share + electricity</small></article>
+            <article class="phone-stat"><span class="phone-stat-label">MONTH-END ESTIMATE</span><strong id="metric-cost">—</strong><small id="metric-cost-note">Plan + projected electricity</small></article>
+            <article class="phone-stat"><span class="phone-stat-label">DATA THIS MONTH</span><strong id="overview-month-gb">—</strong><small>Measured download + upload</small></article>
+            <article class="phone-stat"><span class="phone-stat-label">ENERGY THIS MONTH</span><strong id="metric-energy">—</strong><small id="metric-energy-note">Recorded kWh · gaps excluded</small></article>
+          </section>
+          <section class="phone-panel phone-chart-panel" id="history">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">NETWORK TRAFFIC</span><h2>Usage over time</h2></div><span class="phone-chart-unit">GB</span></div>
+            <div class="phone-tabs" role="tablist" aria-label="Usage period">
+              <button type="button" class="selected" data-period="today" role="tab" aria-selected="true">Today</button>
+              <button type="button" data-period="week" role="tab" aria-selected="false">7 days</button>
+              <button type="button" data-period="month" role="tab" aria-selected="false">Month</button>
+              <button type="button" data-period="cycle" role="tab" aria-selected="false">Billing cycle</button>
+            </div>
+            <div id="chart-summary" class="phone-chart-summary">Waiting for measurements</div>
+            <div class="phone-chart-scroll"><div id="phone-chart" class="phone-chart" role="img" aria-label="Recorded download and upload usage chart"></div></div>
+            <div id="chart-point-detail" class="phone-chart-point" role="status" aria-live="polite">Tap a bar to view recorded download, upload and energy.</div>
+            <p id="chart-insight" class="phone-fine"></p>
+            <div class="phone-chart-foot"><span><i class="phone-legend-live"></i> Recorded</span><span><i class="phone-legend-gap"></i> No reading / gap</span></div>
+          </section>
+          <section class="phone-panel phone-history">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">DAILY JOURNAL</span><h2>Your recent days</h2></div><span class="phone-chart-unit">HISTORY</span></div>
+            <div id="phone-day-list" class="phone-day-list"></div>
+          </section>
         </section>
 
-        <section class="phone-panel phone-chart-panel" id="history">
-          <div class="phone-panel-head"><div><span class="phone-eyebrow">NETWORK TRAFFIC</span><h2>Usage over time</h2></div>
-            <span class="phone-chart-unit">GB</span>
-          </div>
-          <div class="phone-tabs" role="tablist" aria-label="Usage period">
-            <button type="button" class="selected" data-period="today" role="tab" aria-selected="true">Today</button>
-            <button type="button" data-period="week" role="tab" aria-selected="false">7 days</button>
-            <button type="button" data-period="month" role="tab" aria-selected="false">Month</button>
-            <button type="button" data-period="cycle" role="tab" aria-selected="false">Billing cycle</button>
-          </div>
-          <div id="chart-summary" class="phone-chart-summary">Waiting for measurements</div>
-          <div class="phone-chart-scroll"><div id="phone-chart" class="phone-chart" role="img" aria-label="Recorded download and upload usage chart"></div></div>
-          <div id="chart-point-detail" class="phone-chart-point" role="status" aria-live="polite">Tap or use Enter on a bar to inspect its download, upload and energy readings.</div>
-          <p id="chart-insight" class="phone-fine"></p>
-          <div class="phone-chart-foot"><span><i class="phone-legend-live"></i> Recorded</span><span><i class="phone-legend-gap"></i> No reading / gap</span></div>
-        </section>
-
-        <div class="phone-two-panels">
+        <section data-screen="costs" aria-label="Costs" class="phone-screen" hidden>
+          <div class="phone-screen-heading"><div class="phone-eyebrow">CEDIS & DATA</div><h2>Understand your costs</h2><p>Your Starlink fee is fixed. Your effective cost per gigabyte changes as you record more data.</p></div>
           <section class="phone-panel">
-            <div class="phone-panel-head"><div><span class="phone-eyebrow">COST CLARITY</span><h2>Cost for <span id="cost-period-label">today</span></h2></div><span class="phone-tiny-icon">GH₵</span></div>
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">COST CLARITY</span><h2>Cost for <span id="cost-period-label">today so far</span></h2></div><span class="phone-tiny-icon">GH₵</span></div>
+            <div class="phone-tabs phone-cost-tabs" role="tablist" aria-label="Cost period">
+              <button type="button" class="selected" data-period="today" role="tab" aria-selected="true">Today</button>
+              <button type="button" data-period="week" role="tab" aria-selected="false">7 days</button>
+              <button type="button" data-period="month" role="tab" aria-selected="false">Month</button>
+              <button type="button" data-period="cycle" role="tab" aria-selected="false">Billing cycle</button>
+            </div>
             <div class="phone-cost-line"><span>Plan time share</span><strong id="cost-plan">—</strong></div>
             <div class="phone-cost-line"><span>Electricity estimate so far</span><strong id="cost-electricity">—</strong></div>
             <div class="phone-cost-line phone-cost-total"><span>Combined period estimate</span><strong id="cost-total">—</strong></div>
-            <p class="phone-fine">Your full monthly plan: <strong id="plan-full">—</strong>. Your plan is a fixed monthly charge. Data usage changes the cost per GB, not the subscription bill. This is not a Starlink or ECG invoice.</p>
+            <p class="phone-fine">Your full monthly subscription: <strong id="plan-full">—</strong>. This is an estimated spending allocation, not a Starlink or ECG invoice.</p>
           </section>
+          <section class="phone-panel" id="data-value">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">DATA VALUE</span><h2>How much does each GB cost?</h2></div><span class="phone-tiny-icon">GH₵/GB</span></div>
+            <div class="phone-stat-grid">
+              <article class="phone-stat"><span class="phone-stat-label">EFFECTIVE STARLINK GH₵ / GB</span><strong id="starlink-per-gb">—</strong><small id="starlink-rate-note">Full-month estimate ÷ GB recorded so far</small></article>
+              <article class="phone-stat"><span class="phone-stat-label">GB PER GH₵</span><strong id="starlink-gb-per-cedi">—</strong><small>Recorded gigabytes received for every cedi so far</small></article>
+            </div>
+            <p class="phone-fine" id="value-coverage-note">The figure starts with your first recorded GB and improves as you use more data, provided your estimated monthly cost stays similar.</p>
+            <div class="phone-cost-line"><span>Saved mobile bundle</span><strong id="bundle-title">—</strong></div>
+            <div class="phone-cost-line"><span>Mobile bundle GH₵ / GB</span><strong id="bundle-per-gb">—</strong></div>
+            <p id="bundle-comparison" class="phone-fine">Set a mobile bundle price and GB in your laptop's Costs settings if you want to compare.</p>
+          </section>
+        </section>
+
+        <section data-screen="devices" aria-label="Devices" class="phone-screen" hidden>
+          <div class="phone-screen-heading"><div class="phone-eyebrow">CONNECTED HOUSEHOLD</div><h2>Who uses the most?</h2><p>Device shares are based on router counters—not the separate dish-wide traffic meter.</p></div>
+          <section class="phone-panel" id="device-shares">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">HOUSEHOLD MIX</span><h2>Usage by device</h2></div><span class="phone-chart-unit">ROUTER TOTALS</span></div>
+            <p class="phone-chart-summary" id="device-summary">Waiting for synced device totals.</p>
+            <div id="phone-device-list" class="phone-device-list"></div>
+            <p class="phone-fine">Devices may reconnect or reset their counters. Percentages describe known devices, and may not add up to total Starlink traffic.</p>
+          </section>
+        </section>
+
+        <section data-screen="connection" aria-label="Connection" class="phone-screen" hidden>
+          <div class="phone-screen-heading"><div class="phone-eyebrow">REMOTE STATUS</div><h2>Connection & sync</h2><p>See the latest saved recorder state without needing to leave your laptop running.</p></div>
           <section class="phone-panel phone-recorder-panel">
             <div class="phone-panel-head"><div><span class="phone-eyebrow">COLLECTOR</span><h2>Recording health</h2></div><span id="recorder-icon" class="phone-recorder-icon">◷</span></div>
             <div class="phone-cost-line"><span>Last reading</span><strong id="last-reading">—</strong></div>
             <div class="phone-cost-line"><span>Last upload</span><strong id="last-upload">—</strong></div>
             <div class="phone-cost-line"><span>Today's coverage</span><strong id="today-coverage">—</strong></div>
-            <p class="phone-fine" id="recorder-description">Your laptop records only while Chrome runs. An older reading is saved history, not confirmation the dish is offline.</p>
+            <p class="phone-fine" id="recorder-description">Your laptop records while Chrome runs. A previous reading is not a live signal.</p>
           </section>
-        </div>
-        <section class="phone-panel" id="data-value">
-          <div class="phone-panel-head"><div><span class="phone-eyebrow">CEDI TO DATA</span><h2>How much is a gigabyte worth?</h2></div><span class="phone-tiny-icon">GH₵/GB</span></div>
-          <div class="phone-stat-grid">
-            <div class="phone-stat"><span class="phone-stat-label">EFFECTIVE STARLINK GH₵ / GB</span><strong id="starlink-per-gb">—</strong><small id="starlink-rate-note">Based on recorded month-to-date usage</small></div>
-            <div class="phone-stat"><span class="phone-stat-label">GB PER GH₵</span><strong id="starlink-gb-per-cedi">—</strong><small>Inverse value of the estimated effective rate</small></div>
-          </div>
-          <div class="phone-cost-line"><span>Your saved mobile bundle</span><strong id="bundle-title">—</strong></div>
-          <div class="phone-cost-line"><span>Mobile bundle GH₵ / GB</span><strong id="bundle-per-gb">—</strong></div>
-          <p id="bundle-comparison" class="phone-fine">Set your mobile bundle price and GB in the extension's Costs screen to compare. For example, GH₵399 / 240 GB = GH₵1.66 per GB.</p>
-          <p class="phone-fine">An effective Starlink rate is a planning ratio, not a metered data charge. It is withheld when recording coverage is too low.</p>
-        </section>
-
-        <section class="phone-panel" id="device-shares">
-          <div class="phone-panel-head"><div><span class="phone-eyebrow">HOUSEHOLD MIX</span><h2>Who's using the most?</h2></div><span class="phone-chart-unit">ROUTER TOTALS</span></div>
-          <div class="phone-chart-summary" id="device-summary">Waiting for synced device totals.</div>
-          <div id="phone-device-list" class="phone-device-list"></div>
-          <p class="phone-fine">These percentages compare tracked router-device counters, not the Starlink dish WAN meter. Devices can reconnect, disappear or reset counters; totals will not necessarily equal dish-wide GB.</p>
-        </section>
-        <section class="phone-panel phone-history">
-          <div class="phone-panel-head"><div><span class="phone-eyebrow">DAILY JOURNAL</span><h2>Your recent days</h2></div><span class="phone-chart-unit">HISTORY</span></div>
-          <div id="phone-day-list" class="phone-day-list"></div>
-        </section>
-        <section class="phone-settings">
-          <button id="forget-monitor" type="button">Forget this monitor on this phone</button>
-          <a href="/">Public cost calculator ↗</a>
+          <section class="phone-panel">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">YOUR PHONE</span><h2>Install the app</h2></div><span class="phone-chart-unit">PWA</span></div>
+            <p class="phone-fine">Add this monitor to your home screen for a standalone, app-like experience. No App Store or account required.</p>
+            <button class="phone-button phone-button-primary phone-install-button" type="button" id="install-phone">How to install ↗</button>
+            <p id="install-instructions" class="phone-fine" role="status">On iPhone, open this page in Safari, tap Share, then Add to Home Screen.</p>
+            <p class="phone-fine">The app shell can open offline, but fresh readings still require a network connection. This phone never silently collects dish data.</p>
+          </section>
+          <section class="phone-settings">
+            <button id="forget-monitor" type="button">Forget this monitor on this phone</button>
+            <a href="/">Public cost calculator ↗</a>
+          </section>
         </section>
       </section>
     </main>
-    <footer class="phone-footer"><span>STARLINK GHANA · INDEPENDENT TOOL</span><span>Not affiliated with Starlink or SpaceX. Your local recording stays in the extension.</span></footer>
+    <footer class="phone-footer"><span>STARLINK GHANA · INDEPENDENT TOOL</span><span>Made by <a href="https://pkm.hayalows.com" rel="noopener noreferrer" target="_blank">Papa Kojo Mensah ↗</a> · Not affiliated with Starlink or SpaceX.</span></footer>
+    <nav class="phone-bottom-nav" id="phone-bottom-nav" aria-label="Mobile monitor navigation" hidden>
+      <button type="button" data-view="overview"><span aria-hidden="true">⌂</span>Overview</button>
+      <button type="button" data-view="costs"><span aria-hidden="true">◉</span>Costs</button>
+      <button type="button" data-view="devices"><span aria-hidden="true">▦</span>Devices</button>
+      <button type="button" data-view="connection"><span aria-hidden="true">⌁</span>Connection</button>
+    </nav>
   </div>
-  <script type="module" is:inline src="/phone.js"></script>
+  <script type="module" is:inline src="/phone.js?v=152"></script>
 </Base>

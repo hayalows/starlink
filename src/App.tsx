@@ -234,6 +234,17 @@ export default function App() {
                 <AppToolbar activeId={openPanel} onSelect={openNav} />
               </details>
             </main>
+            <footer className='mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-5 pb-6 pt-3 text-[11px] text-muted-foreground'>
+              <span>Starlink Ghana Monitor · Independent project</span>
+              <a
+                className='underline underline-offset-4 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4'
+                href='https://pkm.hayalows.com'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                Built by Papa Kojo Mensah ↗
+              </a>
+            </footer>
           </motion.div>
         )}
       </AnimatePresence>

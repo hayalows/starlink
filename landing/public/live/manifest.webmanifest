@@ -1,0 +1,32 @@
+{
+  "name": "Starlink Ghana — My Monitor",
+  "short_name": "Starlink Monitor",
+  "description": "Private paired Starlink monitor for Ghana: usage, costs, devices and connection.",
+  "id": "/live/",
+  "start_url": "/live/",
+  "scope": "/live/",
+  "display": "standalone",
+  "background_color": "#080b0d",
+  "theme_color": "#080b0d",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/starlink-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

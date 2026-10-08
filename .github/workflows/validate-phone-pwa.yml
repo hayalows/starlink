@@ -1,0 +1,49 @@
+name: Validate installable phone site
+on:
+  push:
+    branches: [master, feat/phone-pwa-parity-152]
+    paths:
+      - "landing/**"
+      - ".github/workflows/validate-phone-pwa.yml"
+  pull_request:
+    paths:
+      - "landing/**"
+permissions:
+  contents: read
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: landing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: landing/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Validate browser scripts
+        run: |
+          node --check public/phone.js
+          node --check public/live/sw.js
+          node -e '
+          const fs=require("fs"); const m=JSON.parse(fs.readFileSync("public/live/manifest.webmanifest","utf8"));
+          if(m.start_url!=="/live/" || m.scope!=="/live/" || m.display!=="standalone") throw new Error("Invalid phone PWA install route");
+          const sw=require("fs").readFileSync("public/live/sw.js","utf8");
+          if(!sw.includes("url.pathname.startsWith(\"/api/\")")) throw new Error("Service worker must bypass private API");
+          '
+      - run: npm run build
+      - name: Validate rendered mobile page
+        run: |
+          test -f dist/live/index.html
+          test -f dist/live/sw.js
+          test -f dist/live/manifest.webmanifest
+          node -e '
+          const html=require("fs").readFileSync("dist/live/index.html","utf8");
+          if((html.match(/rel="manifest"/g)||[]).length!==1) throw new Error("Duplicate manifests: iOS may install the public calculator instead of phone monitor");
+          if(!html.includes("/live/manifest.webmanifest")) throw new Error("Wrong PWA manifest");
+          for(const p of ["data-screen=\"overview\"","data-screen=\"costs\"","data-screen=\"devices\"","data-screen=\"connection\""]) if(!html.includes(p)) throw new Error("Missing phone section: "+p);
+          console.log("Phone PWA static build, navigation and privacy guards passed.");
+          '

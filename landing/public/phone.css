@@ -795,3 +795,185 @@
     transition: none;
   }
 }
+
+/* v1.5.2 — Four-section monitor. Navigation is real, not decorative. */
+.phone-brand-icon {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border: 1px solid #3c564c;
+  border-radius: 11px;
+  background: #0f1c16;
+}
+.phone-shell {
+  padding-bottom: 0;
+}
+.phone-section-nav {
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  background: #141b1c;
+  border: 1px solid #2f3c3a;
+  border-radius: 14px;
+  margin: 21px 0 23px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.phone-section-nav button {
+  background: transparent;
+  color: #a7b8ae;
+  border: 0;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  white-space: nowrap;
+  font-weight: 650;
+  font-size: 13px;
+  flex: 1;
+}
+.phone-section-nav button[aria-current="page"] {
+  color: #14231b;
+  background: #c2d9c7;
+}
+.phone-shell [data-screen][hidden] {
+  display: none !important;
+}
+.phone-screen {
+  animation: phone-enter 160ms ease both;
+}
+@keyframes phone-enter {
+  from {
+    opacity: 0.6;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.phone-overview-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.phone-overview-grid .phone-stat {
+  min-height: 140px;
+}
+.phone-overview-grid .phone-stat strong {
+  font-size: clamp(22px, 3.4vw, 34px);
+  overflow-wrap: anywhere;
+}
+.phone-screen-heading {
+  padding: 4px 1px 21px;
+}
+.phone-screen-heading h2 {
+  font-size: clamp(27px, 5vw, 38px);
+  letter-spacing: -0.045em;
+  margin: 6px 0 8px;
+  font-weight: 670;
+  line-height: 1.16;
+}
+.phone-screen-heading p {
+  color: #a9bdb1;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  max-width: 57ch;
+}
+.phone-hero-bottom button {
+  background: transparent;
+  color: #dceee1;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  padding: 6px 0;
+  font-size: 12px;
+}
+.phone-legacy-notice {
+  padding: 13px 15px;
+  border: 1px solid #856e43;
+  border-radius: 12px;
+  background: #2a2318;
+  color: #edd6a7;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 14px 0;
+}
+.phone-cost-tabs {
+  margin: 0 0 8px;
+}
+.phone-footer a {
+  color: #d1e9d6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.phone-install-button {
+  margin: 16px 0 4px;
+}
+.phone-bottom-nav {
+  display: none;
+}
+.phone-screen .phone-panel {
+  max-width: 100%;
+}
+@media (max-width: 680px) {
+  .phone-main {
+    padding-bottom: 110px;
+  }
+  .phone-screen {
+    min-height: 50vh;
+  }
+  .phone-section-nav {
+    display: none;
+  }
+  .phone-bottom-nav:not([hidden]) {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    background: #0b1011ef;
+    border-top: 1px solid #2d3937;
+    padding: 8px max(9px, env(safe-area-inset-right)) max(9px, env(safe-area-inset-bottom))
+      max(9px, env(safe-area-inset-left));
+    backdrop-filter: blur(18px);
+  }
+  .phone-bottom-nav button {
+    border: 0;
+    background: transparent;
+    color: #91a79c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 7px 2px 6px;
+    border-radius: 11px;
+    min-height: 55px;
+    font-size: 10px;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .phone-bottom-nav button span {
+    font-size: 19px;
+    line-height: 24px;
+  }
+  .phone-bottom-nav button[aria-current="page"] {
+    color: #d7efdb;
+    background: #1b2c23;
+  }
+  .phone-overview-grid .phone-stat {
+    padding: 17px 14px;
+  }
+  .phone-overview-grid .phone-stat strong {
+    font-size: clamp(20px, 5.6vw, 28px);
+  }
+  .phone-footer {
+    padding-bottom: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone-screen {
+    animation: none;
+  }
+}
