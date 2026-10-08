@@ -24,7 +24,7 @@ jobs:
           cd landing
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
           cd ..
-          npx prettier --write extension/lib/phoneSync.ts src/components/ghana/PhoneConnect.tsx src/components/ghana/GhanaHome.tsx extension/entrypoints/background.ts landing/api/monitor.ts landing/src/pages/live.astro landing/src/pages/privacy.astro landing/src/pages/index.astro docs/phone-sync/README.md
+          npx prettier --write extension/lib/phoneSync.ts src/components/ghana/PhoneConnect.tsx src/components/ghana/GhanaHome.tsx extension/entrypoints/background.ts landing/api/monitor.ts docs/phone-sync/README.md
           rm .github/workflows/prepare-phone-branch.yml
           git add landing/package-lock.json extension/lib/phoneSync.ts src/components/ghana/PhoneConnect.tsx src/components/ghana/GhanaHome.tsx extension/entrypoints/background.ts landing/api/monitor.ts landing/src/pages/live.astro landing/src/pages/privacy.astro landing/src/pages/index.astro docs/phone-sync/README.md .github/workflows/prepare-phone-branch.yml
           if ! git diff --cached --quiet; then
