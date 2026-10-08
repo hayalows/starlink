@@ -1,3 +1,12 @@
+Starlink Ghana Monitor 1.4.1 — Chrome Web Store readiness and account privacy.
+
+- Browser extension now persists only a connection preference, not a copy of your Starlink login cookies. Existing saved cookie strings are migrated when Chrome starts the updated extension.
+- Clearer account sign-in wording and public privacy documentation specific to this Ghana project.
+- Dedicated Store preflight for the built Chrome extension, permission explanations and publication checklist.
+- Independent, unofficial project disclaimer on the website. The Chrome Web Store listing is not yet published.
+
+---
+
 Starlink Ghana Monitor 1.4 — clearer daily checks and safer updates.
 
 - Four everyday screens: Overview, Costs, Devices and Connection. Technical tools remain under Advanced.
