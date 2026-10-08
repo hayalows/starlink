@@ -8,6 +8,7 @@ interface Props {
 }
 
 const { title, description, path = "/" } = Astro.props;
+const isPhone = path.startsWith("/live/");
 const site = Astro.site?.toString().replace(/\/$/, "") ?? "https://starlink-ghana.vercel.app";
 const canonical = new URL(path, site).toString();
 const ogImage = new URL("/og.png", site).toString();
@@ -38,14 +39,14 @@ const app = {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#13251e" />
+    <meta name="theme-color" content={isPhone ? "#080b0d" : "#13251e"} />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Starlink Ghana" />
+    <meta name="apple-mobile-web-app-status-bar-style" content={isPhone ? "black-translucent" : "default"} />
+    <meta name="apple-mobile-web-app-title" content={isPhone ? "My Starlink" : "Starlink Ghana"} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="manifest" href={isPhone ? "/live/manifest.webmanifest" : "/manifest.webmanifest"} />
     <link rel="icon" href="/starlink-mark.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
