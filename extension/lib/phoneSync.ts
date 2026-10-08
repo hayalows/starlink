@@ -1,6 +1,6 @@
 import { browser } from "wxt/browser";
 import { buildInsights } from "@core/ghanaInsights";
-import { type GhanaTariff } from "@core/ghanaCost";
+import { forecastUsage, type GhanaTariff } from "@core/ghanaCost";
 import { analyzePeriodCost, modeledWatts } from "@core/ghanaPeriodCosts";
 import { ClientTotalsCore, migrateSnapshot } from "@core/clientTotals";
 import { usageKey } from "@core/clientUsage";
@@ -101,6 +101,8 @@ export async function syncPhoneNow(): Promise<void> {
             electricityCost: costs.electricity,
             planAllocation: costs.planAllocation,
             projectedCost: costs.projectedTotal,
+            forecastGb: id === "month" ? forecastUsage(current.gb, current.trafficSeconds, costs.days) : null,
+            forecastCoverageEligible: current.trafficSeconds >= 86400,
             projectedElectricity: costs.projectedElectricity,
             modeledKwh: costs.modeledKwh,
             // Null means no observation, not zero use.
