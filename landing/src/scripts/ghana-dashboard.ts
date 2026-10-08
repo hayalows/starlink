@@ -477,7 +477,7 @@ el("refresh-data").addEventListener("click", async () => {
   }
 });
 // Keep keyboard and mobile navigation in sync with the section actually in view.
-const sectionIds = ["overview", "power", "data", "connection"] as const;
+const sectionIds = ["download", "overview", "power", "data", "connection"] as const;
 const navigationLinks = Array.from(
   document.querySelectorAll<HTMLAnchorElement>(".rail-nav a, .mobile-nav a"),
 );
