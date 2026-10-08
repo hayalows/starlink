@@ -29,7 +29,7 @@ jobs:
           node --check public/phone.js
           node --check public/live/sw.js
           node -e '
-          const m=require("./public/live/manifest.webmanifest");
+          const fs=require("fs"); const m=JSON.parse(fs.readFileSync("public/live/manifest.webmanifest","utf8"));
           if(m.start_url!=="/live/" || m.scope!=="/live/" || m.display!=="standalone") throw new Error("Invalid phone PWA install route");
           const sw=require("fs").readFileSync("public/live/sw.js","utf8");
           if(!sw.includes("url.pathname.startsWith(\"/api/\")")) throw new Error("Service worker must bypass private API");
