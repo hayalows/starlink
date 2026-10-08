@@ -45,6 +45,7 @@ const app = {
     <meta name="apple-mobile-web-app-title" content={isPhone ? "My Starlink" : "Starlink Ghana"} />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {isPhone && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     <link rel="manifest" href={isPhone ? "/live/manifest.webmanifest" : "/manifest.webmanifest"} />
     <link rel="stylesheet" href="/ui-icons.css?v=153" />
