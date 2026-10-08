@@ -20,12 +20,12 @@ function choose(data: unknown) {
   input.files = transfer.files;
   input.dispatchEvent(new Event("change", { bubbles: true }));
 }
-function open() {
-  render(<BackupRestore />);
+async function open() {
+  await render(<BackupRestore />);
   document.querySelector("summary")!.click();
 }
 it("shows a restore preview and makes no changes until the explicit restore action", async () => {
-  open();
+  await open();
   choose({
     kind: "starlink-ghana-backup",
     version: 1,
@@ -45,7 +45,7 @@ it("shows a restore preview and makes no changes until the explicit restore acti
   await expect.poll(() => document.body.textContent).toContain("Existing readings were kept");
 });
 it("rejects a malformed backup and leaves restore unavailable", async () => {
-  open();
+  await open();
   choose({
     kind: "starlink-ghana-backup",
     version: 1,
