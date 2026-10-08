@@ -259,7 +259,9 @@
     try {
       const saved = localStorage.getItem(KEY);
       if (saved) connect(saved);
-    } catch {}
+    } catch {
+      // Private browsing can deny persistent storage; pairing from the URL still works.
+    }
   }
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && state.token) void refresh();
