@@ -15,7 +15,7 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
       </a>
       <div class="rail-label">YOUR NETWORK</div>
       <nav class="rail-nav" aria-label="Main navigation">
-        <a class="active" href="#overview"><span class="nav-glyph">◈</span> Overview</a>
+        <a class="active" aria-current="location" href="#overview"><span class="nav-glyph" aria-hidden="true">◈</span> Overview</a>
         <a href="#power"><span class="nav-glyph">ϟ</span> Power & cost</a>
         <a href="#data"><span class="nav-glyph">⌁</span> Data usage</a>
         <a href="#connection"><span class="nav-glyph">⌘</span> Connection</a>
@@ -30,20 +30,20 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
       <header class="topbar">
         <div class="mobile-brand"><span class="brand-mark small">✳</span><strong>STARLINK GHANA</strong></div>
         <div class="crumbs"><span>My network</span><b>/</b><strong>Overview</strong></div>
-        <div class="top-actions"><span class="privacy-pill"><span class="privacy-dot"></span> Data stays on your devices</span><button class="icon-btn" id="install-app" hidden aria-label="Install app">↓</button><button class="icon-btn" id="refresh-data" aria-label="Refresh readings">↻</button></div>
+        <div class="top-actions"><span class="privacy-pill"><span class="privacy-dot"></span> Data stays on your devices</span><button class="icon-btn" id="install-app" hidden aria-label="Install app">↓</button><button class="icon-btn" id="refresh-data" aria-label="Refresh local collector readings" title="Refresh local collector readings">↻</button><span id="refresh-status" class="sr-only" role="status" aria-live="polite"></span></div>
       </header>
 
       <div class="content">
         <section id="overview" class="welcome-row">
           <div><div class="eyebrow"><span class="live-dot"></span><span id="connection-label">NOT CONNECTED</span><span class="eyebrow-divider">·</span><span id="local-clock">GHANA TIME</span></div>
-          <h1>Your Starlink,<br class="mobile-only"/> <em>understood.</em></h1>
-          <p class="welcome-copy">Know what it costs to run, how your data is shared, and what your dish is doing.</p></div>
-          <button class="connect-button" data-open-connect><span class="connect-icon">＋</span> Get the live monitor</button>
+          <h1>Know what your<br class="mobile-only"/> <em>Starlink costs.</em></h1>
+          <p class="welcome-copy">Estimate your monthly electricity bill in cedis, compare internet costs and see what changes when your setup changes.</p></div>
+          <button class="connect-button" data-scroll="power"><span class="connect-icon" aria-hidden="true">→</span> Calculate my cost</button>
         </section>
 
         <section class="connection-strip" id="connection-strip">
-          <div class="strip-icon">⌁</div><div class="strip-copy"><strong>Your dashboard is ready.</strong><span>Use the calculator below, or open the extension for live readings, budgets and device cost shares.</span></div>
-          <button class="text-button" data-open-connect>Set up connection <span>→</span></button>
+          <div class="strip-icon">⌁</div><div class="strip-copy"><strong>Works without connecting a device.</strong><span>Start with an estimate. Live usage and device readings require a local monitor.</span></div>
+          <button class="text-button" data-open-connect>How to get live readings <span aria-hidden="true">→</span></button>
         </section>
 
         <section class="metrics-grid" aria-label="Network summary">
@@ -60,18 +60,18 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
             <div class="metric-footer"><span class="range-pill muted" id="model-range">Starlink Mini · 25–40 W</span><button class="micro-link" data-scroll="power">Change dish ↗</button></div>
           </article>
           <article class="metric-card">
-            <div class="metric-head"><span class="metric-label">HOUSEHOLD DATA</span><span class="metric-icon blue">⌁</span></div>
+            <div class="metric-head"><span class="metric-label">MONTHLY DATA</span><span class="metric-icon blue">⌁</span></div>
             <div class="metric-main"><strong id="data-total">—</strong><span class="metric-suffix">this month</span></div>
             <div class="data-meter"><span id="data-meter-fill"></span></div>
-            <div class="metric-footer"><span class="subtle-label" id="data-footnote">Waiting for router readings</span><button class="micro-link" data-scroll="data">See devices ↗</button></div>
+            <div class="metric-footer"><span class="subtle-label" id="data-footnote">Add monthly GB below, or connect a monitor</span><button class="micro-link" data-scroll="data">See devices ↗</button></div>
           </article>
         </section>
 
         <section class="section-grid" id="power">
           <article class="panel power-panel">
-            <div class="panel-heading"><div><div class="eyebrow">GHANA · ECG · GH₵</div><h2>What it costs to run</h2></div><div class="mode-toggle" role="group" aria-label="Cost period"><button class="period active" data-period="today">Today</button><button class="period" data-period="week">7 days</button><button class="period" data-period="month">This month</button></div></div>
+            <div class="panel-heading"><div><div class="eyebrow">GHANA · ECG · GH₵</div><h2>What it costs to run</h2></div><div class="mode-toggle" role="group" aria-label="Cost period"><button type="button" class="period active" aria-pressed="true" data-period="today">Today</button><button type="button" class="period" aria-pressed="false" data-period="week">7 days</button><button type="button" class="period" aria-pressed="false" data-period="month">This month</button></div></div>
             <div class="cost-summary"><div><span class="muted-label">ESTIMATED DISH COST</span><div class="big-cost"><span>GH₵</span><strong id="selected-cost">0.00</strong></div><div class="muted-label" id="selected-period">per day · based on your setup</div></div><div class="energy-stat"><span class="energy-orb">ϟ</span><div><strong id="selected-kwh">0.78 kWh</strong><small id="selected-energy-label">energy used per day</small></div></div></div>
-            <div class="bar-visual"><div class="bar-top"><span>Energy recorded in this period</span><span id="chart-caption">modelled · not measured</span></div><div class="bars" id="cost-bars" aria-label="Estimated cost comparison"></div><div class="bar-labels"><span>Recorded buckets only</span><span id="coverage-label">No history yet</span></div></div>
+            <div class="bar-visual"><div class="bar-top"><span>Energy history</span><span id="chart-caption">modelled · not measured</span></div><div class="bars" id="cost-bars" aria-label="Estimated cost comparison"></div><div class="bar-labels"><span>History excludes missing readings</span><span id="coverage-label">No history yet</span></div></div>
             <div class="estimate-caption"><span class="info-dot">i</span><span id="estimate-explain">Estimate based on the selected dish’s typical wattage and your ECG tariff. Connect a local collector to replace the model with measured energy.</span></div>
           </article>
           <article class="panel setup-panel">
@@ -83,7 +83,7 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
             <div class="field"><label for="home-use">Other household usage (optional)</label><div class="input-wrap"><input id="home-use" type="number" min="0" max="5000" value="0" inputmode="decimal"/><span>kWh / month</span></div><small>Helps estimate whether dish usage crosses into a higher tariff band.</small></div>
             <div class="field" id="custom-rate-field" hidden><label for="custom-rate">Your electricity rate · GH₵/kWh</label><div class="input-wrap"><input id="custom-rate" type="number" min="0" step="any" value="2.037509"/><span>GH₵/kWh</span></div></div>
             <div class="field"><label for="plan-fee">Monthly Starlink plan fee</label><div class="input-wrap"><input id="plan-fee" type="number" min="0" step="0.01" value="0" inputmode="decimal"/><span>GH₵</span></div><small>Use the amount on your own bill. No plan price is assumed.</small></div>
-            <button class="save-setup" id="save-setup">Save my setup <span>→</span></button>
+            <p class="save-status" id="save-status" role="status" aria-live="polite">Changes save automatically on this device.</p>
             <div class="tariff-footnote">ECG energy charges use PURC rates effective 1 Oct 2026. <a href="https://www.purc.com.gh/attachment/545028-20260924090934.pdf" target="_blank" rel="noreferrer">Check PURC tariff decisions ↗</a>. Final bills may include other charges.</div>
           </article>
         </section>
@@ -126,9 +126,9 @@ const description = "Understand your Starlink electricity cost in Ghana, track d
       </div>
     </main>
 
-    <nav class="mobile-nav" aria-label="Mobile navigation"><a class="active" href="#overview">◈<small>Home</small></a><a href="#power">ϟ<small>Cost</small></a><a href="#data">⌁<small>Data</small></a><a href="#connection">⌘<small>Connect</small></a></nav>
+    <nav class="mobile-nav" aria-label="Mobile navigation"><a class="active" aria-current="location" href="#overview"><span aria-hidden="true">◈</span><small>Home</small></a><a href="#power">ϟ<small>Cost</small></a><a href="#data">⌁<small>Data</small></a><a href="#connection">⌘<small>Connect</small></a></nav>
 
-    <dialog id="connect-dialog" class="connect-dialog"><form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form><div class="eyebrow">DIRECT STARLINK CONNECTION</div><h2>Use Starlink Ghana Monitor</h2><p class="dialog-intro">The web page cannot reach your dish on its own. The browser extension runs on your computer and reads the dish and router directly, so there is no collector address to find and no <code>npm run historian</code> setup.</p><a class="connect-button" href="https://github.com/hayalows/starlink/releases/latest/download/starlink-ghana-monitor-chrome.zip">Download Chrome extension <span>↓</span></a><div class="connect-hint"><b>One-time Chrome install</b><span>Unzip the download, open <code>chrome://extensions</code>, turn on Developer mode, choose “Load unpacked”, and select the unzipped folder. Then click the Starlink Ghana Monitor icon to open your dashboard.</span></div><div class="connect-hint"><b>Already installed?</b><span>Replace files in the same loaded folder, then click Reload in chrome://extensions. Keep the folder and extension ID to retain history.</span></div><div class="connect-hint"><b>For live history</b><span>Use Chrome on a computer connected to your Starlink Wi-Fi. The extension reads the dish directly and stores history in your browser. Keep Chrome open to keep collecting.</span></div><details class="connect-hint"><summary>Already run a local monitor?</summary><div class="advanced-collector"><label for="collector-url">Collector address</label><input id="collector-url" type="url" value="http://127.0.0.1:8088" placeholder="https://your-computer.tailnet.ts.net" autocomplete="url"/><label for="collector-token" class="token-label">Access token <span>required for private phone access</span></label><input id="collector-token" type="password" placeholder="Paste your local collector token" autocomplete="off"/><button type="button" class="find-local" id="find-local">Find monitor on this device <span>→</span></button><p class="dialog-error" id="connect-error" role="status"></p><div class="dialog-actions"><button type="button" class="button-quiet" id="disconnect">Disconnect</button><button type="button" class="connect-button" id="test-connection">Test & connect</button></div></div></details><p class="dialog-privacy">The extension reads local Starlink telemetry and router data. It does not send your network history to this website.</p></dialog>
+    <dialog id="connect-dialog" class="connect-dialog" aria-labelledby="connect-title" aria-describedby="connect-description"><form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form><div class="eyebrow">DIRECT STARLINK CONNECTION</div><h2 id="connect-title">Use Starlink Ghana Monitor</h2><p class="dialog-intro" id="connect-description">The web page cannot reach your dish on its own. The browser extension runs on your computer and reads the dish and router directly, so there is no collector address to find and no <code>npm run historian</code> setup.</p><a class="connect-button" href="https://github.com/hayalows/starlink/releases/latest/download/starlink-ghana-monitor-chrome.zip">Download Chrome extension <span>↓</span></a><div class="connect-hint"><b>One-time Chrome install</b><span>Unzip the download, open <code>chrome://extensions</code>, turn on Developer mode, choose “Load unpacked”, and select the unzipped folder. Then click the Starlink Ghana Monitor icon to open your dashboard.</span></div><div class="connect-hint"><b>Already installed?</b><span>Replace files in the same loaded folder, then click Reload in chrome://extensions. Keep the folder and extension ID to retain history.</span></div><div class="connect-hint"><b>For live history</b><span>Use Chrome on a computer connected to your Starlink Wi-Fi. The extension reads the dish directly and stores history in your browser. Keep Chrome open to keep collecting.</span></div><details class="connect-hint"><summary>Already run a local monitor?</summary><div class="advanced-collector"><label for="collector-url">Collector address</label><input id="collector-url" type="url" value="http://127.0.0.1:8088" placeholder="https://your-computer.tailnet.ts.net" autocomplete="url"/><label for="collector-token" class="token-label">Access token <span>required for private phone access</span></label><input id="collector-token" type="password" placeholder="Paste your local collector token" autocomplete="off"/><button type="button" class="find-local" id="find-local">Find monitor on this device <span>→</span></button><p class="dialog-error" id="connect-error" role="status"></p><div class="dialog-actions"><button type="button" class="button-quiet" id="disconnect">Disconnect</button><button type="button" class="connect-button" id="test-connection">Test & connect</button></div></div></details><p class="dialog-privacy">The extension reads local Starlink telemetry and router data. It does not send your network history to this website.</p></dialog>
   </div>
 
   <script src="../scripts/ghana-dashboard.ts"></script>
