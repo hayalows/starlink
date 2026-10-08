@@ -90,6 +90,8 @@ export async function syncPhoneNow(): Promise<void> {
           trafficCoverage: current.trafficCoverage,
           latest: current.latest,
           cost: energyCost == null ? null : energyCost + settings.planFee * daysElapsed / Math.max(1, fullDays),
+          electricityCost: energyCost,
+          planAllocation: settings.planFee * daysElapsed / Math.max(1, fullDays),
           projectedCost: projectedKwh == null ? null
             : settings.planFee + electricityCost(projectedKwh, settings.tariff, settings.homeKwh, settings.customRate),
           // Null means no observation, not zero use.
