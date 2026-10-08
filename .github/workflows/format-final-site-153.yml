@@ -1,0 +1,30 @@
+name: Format final Starlink design review
+on:
+  push:
+    branches: [feat/untitled-dark-pwa-site-153]
+    paths: [.github/workflows/format-final-site-153.yml]
+permissions:
+  contents: write
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/untitled-dark-pwa-site-153
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: |
+          npx prettier --write docs/phone-pwa-design-153.md landing/public/public-dark-contrast.css landing/scripts/check-site-153.mjs
+          rm .github/workflows/format-final-site-153.yml
+          git add -u
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "Finish dark PWA design review formatting"
+            git pull --rebase origin feat/untitled-dark-pwa-site-153
+            git push origin HEAD:feat/untitled-dark-pwa-site-153
+          fi
