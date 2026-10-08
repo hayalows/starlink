@@ -120,7 +120,7 @@
       });
       const label = period === "today"
         ? new Date(b.t * 1000).getUTCHours().toString().padStart(2, "0") + ":00–" +
-          (new Date((b.t + stride) * 1000).getUTCHours().toString().padStart(2, "0") + ":00"
+          new Date((b.t + stride) * 1000).getUTCHours().toString().padStart(2, "0") + ":00"
         : displayDate(b.t, "long");
       detail.textContent = b.gb === null
         ? label + " · No recording in this interval. This is a gap, not zero usage."
