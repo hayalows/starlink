@@ -1,0 +1,23 @@
+name: Verify v1.5.1 phone payload
+on:
+  push:
+    branches: [fix/phone-cost-mobile-usage-151]
+    paths:
+      - .github/workflows/verify-phone-151.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify private backend schema
+        run: node scripts/test-phone-sync-backend.mjs
+      - name: Verify production proxy backwards compatible
+        env:
+          PHONE_SYNC_ENDPOINT: https://starlink-ghana.vercel.app/api/monitor
+        run: node scripts/test-phone-sync-backend.mjs

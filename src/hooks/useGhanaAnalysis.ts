@@ -1,5 +1,6 @@
 import type { DishStatusJson } from "@core/dishClient";
 import { electricityCost, effectiveCostPerGb, forecastUsage } from "@core/ghanaCost";
+import { analyzePeriodCost, modeledWatts } from "@core/ghanaPeriodCosts";
 import {
   buildInsights,
   comparisonPercent,
@@ -49,44 +50,27 @@ export function useGhanaAnalysis(status: DishStatusJson | null, period: ViewPeri
             ? "standard5"
             : null
       : settings.model;
-  const watts =
-    model === "mini"
-      ? 32.5
-      : model === "standard4"
-        ? 87.5
-        : model === "standard5"
-          ? 42.5
-          : model === "custom"
-            ? settings.watts
-            : null;
-  const days =
-      period === "cycle"
-        ? (selected.window.fullEnd - selected.window.start) / 86400
-        : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0)).getUTCDate(),
-    elapsed = Math.max(0, (selected.window.end - selected.window.start) / 86400);
-  const modeledKwh = watts === null ? null : (watts * settings.hours * elapsed) / 1000;
-  const kwh = energy.kWh ?? modeledKwh;
-  // Model a full month, then allocate its tiered incremental cost across time.
-  // Recorded energy is reported separately and never extrapolated as a measured total.
-  const forecastKwh =
-    energy.sampledSeconds >= 86400 && energy.kWh !== null
-      ? (energy.kWh / energy.sampledSeconds) * 86400 * days
-      : watts === null
-        ? null
-        : (watts * settings.hours * days) / 1000;
+  const watts = modeledWatts(settings.model, detected, settings.watts);
+  const calculated = analyzePeriodCost({
+    current: energy,
+    window: selected.window,
+    period,
+    inputs: settings,
+    watts,
+  });
+  const {
+    days,
+    elapsed,
+    kwh,
+    electricity,
+    planAllocation,
+    total,
+    forecastKwh,
+    projectedElectricity,
+    projectedTotal,
+  } = calculated;
   const costFor = (units: number) =>
     electricityCost(units, settings.tariff, settings.homeKwh, settings.customRate);
-  const projectedElectricity = forecastKwh === null ? null : costFor(forecastKwh);
-  const electricity =
-    kwh === null
-      ? null
-      : forecastKwh && projectedElectricity !== null
-        ? (kwh / forecastKwh) * projectedElectricity
-        : costFor(kwh);
-  const planAllocation = (settings.planFee * elapsed) / days;
-  const total = electricity === null ? null : electricity + planAllocation;
-  const projectedTotal =
-    projectedElectricity === null ? null : projectedElectricity + settings.planFee;
   const dataForecast = forecastUsage(usage.gb, usage.sampledSeconds, days);
   const perGb =
     settings.planFee > 0 && total !== null

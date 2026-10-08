@@ -42,18 +42,11 @@ import { HouseholdDevices } from "./components/ghana/HouseholdDevices";
 import "./ghana.css";
 
 import { dishModelFor } from "./lib/dishMesh";
+import { getProfiles } from "./lib/ghanaProfiles";
 
 export default function App() {
   const [ghanaSettings] = useGhanaSettings();
   const [ghanaSyncError, setGhanaSyncError] = useState("");
-  useEffect(() => {
-    void ghanaHost()
-      ?.syncBudgets(ghanaSettings)
-      .then(() => setGhanaSyncError(""))
-      .catch(() =>
-        setGhanaSyncError("Notification settings could not be saved. Reopen the monitor to retry."),
-      );
-  }, [ghanaSettings]);
   const { theme, cycleTheme } = useTheme();
   const {
     openPanel,
@@ -72,6 +65,17 @@ export default function App() {
     readNotificationsBlockedReason,
   );
   const telemetry = useDishTelemetry();
+  const detectedModel = dishModelFor(telemetry.status);
+  useEffect(() => {
+    void ghanaHost()
+      ?.syncBudgets({ ...ghanaSettings, detectedModel })
+      .then(() => setGhanaSyncError(""))
+      .catch(() => setGhanaSyncError("Monitor settings could not sync. Reopen to retry."));
+  }, [ghanaSettings, detectedModel]);
+  useEffect(() => {
+    void ghanaHost()?.syncDeviceProfiles?.(getProfiles());
+  }, []);
+
   const { observerLocation, onLocationSaved, onClearLocation } = useObserverLocation(
     telemetry.dishLocation?.lla,
   );

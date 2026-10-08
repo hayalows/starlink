@@ -30,8 +30,10 @@ const emptyPeriod = () => ({
   projectedCost: 420,
   electricityCost: 0.33,
   planAllocation: 15,
+  forecastGb: 250,
+  forecastCoverageEligible: true,
   window: { start: 1000000, end: 1003600 },
-  buckets: [{ t: 1000000, gb: 1.25, kWh: 0.42 }],
+  buckets: [{ t: 1000000, gb: 1.25, downGB: 1.1, upGB: 0.15, kWh: 0.42 }],
 });
 const snapshot = {
   version: 1,
@@ -39,6 +41,13 @@ const snapshot = {
   latestSampleAt: Math.floor(Date.now() / 1000),
   collectorOk: true,
   lastCollectorAt: Date.now(),
+  planFee: 500,
+  bundle: { price: 399, gb: 240 },
+  deviceTotalGb: 16,
+  devices: [
+    { name: "Living room phone", group: "Family", gb: 12, share: 0.75 },
+    { name: "Other devices", group: "", gb: 4, share: 0.25 },
+  ],
   periods: {
     today: emptyPeriod(),
     week: emptyPeriod(),
@@ -66,6 +75,12 @@ try {
   assert.equal(c.status, 200, JSON.stringify(c));
   assert.equal(c.snapshot.periods.month.gb, 1.25);
   assert.equal(c.snapshot.periods.month.cost, 15.33);
+  assert.equal(c.snapshot.periods.month.forecastGb, 250);
+  assert.equal(c.snapshot.periods.month.buckets[0].downGB, 1.1);
+  assert.equal(c.snapshot.planFee, 500);
+  assert.equal(c.snapshot.bundle.price, 399);
+  assert.equal(c.snapshot.devices[0].name, "Living room phone");
+  assert.equal(c.snapshot.devices[0].share, 0.75);
   assert.ok(c.updatedAt);
   const fake = await request("read", { bearer: token() });
   assert.equal(fake.status, 404, "Unknown pairing must not return telemetry");

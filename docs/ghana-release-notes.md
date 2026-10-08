@@ -1,3 +1,14 @@
+Starlink Ghana Monitor 1.5.1 — accurate phone costs and interactive usage insights.
+
+- Phone and desktop extension now share the same subscription allocation and electricity forecast logic; auto-detected Mini defaults to 32.5 W rather than 50 W.
+- Daily and seven-day plan cost is prorated over actual calendar months, including month-crossing periods. Historical meter gaps remain missing, not zero.
+- Mobile phone chart bars show download, upload and kWh on tap or keyboard activation, plus observed busy periods.
+- Phone now shows private top-device router usage shares, and a cost/GB vs a saved mobile-data bundle comparison.
+- Extension Overview surfaces phone connection, monthly recorded energy and GH₵-per-GB value more prominently.
+- Data-label privacy disclosures updated; pairings and existing history are preserved. Updating the unpacked extension in place is required; never uninstall the existing extension.
+
+---
+
 Starlink Ghana Monitor 1.5.0 — optional mobile companion and privately paired cloud sync.
 
 - Pair a phone with a private capability link from the extension Overview; no traditional sign-in.

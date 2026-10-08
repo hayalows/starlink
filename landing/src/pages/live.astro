@@ -65,16 +65,18 @@ import Base from "../layouts/Base.astro";
           </div>
           <div id="chart-summary" class="phone-chart-summary">Waiting for measurements</div>
           <div class="phone-chart-scroll"><div id="phone-chart" class="phone-chart" role="img" aria-label="Recorded download and upload usage chart"></div></div>
+          <div id="chart-point-detail" class="phone-chart-point" role="status" aria-live="polite">Tap or use Enter on a bar to inspect its download, upload and energy readings.</div>
+          <p id="chart-insight" class="phone-fine"></p>
           <div class="phone-chart-foot"><span><i class="phone-legend-live"></i> Recorded</span><span><i class="phone-legend-gap"></i> No reading / gap</span></div>
         </section>
 
         <div class="phone-two-panels">
           <section class="phone-panel">
-            <div class="phone-panel-head"><div><span class="phone-eyebrow">COST CLARITY</span><h2>What you spend</h2></div><span class="phone-tiny-icon">GH₵</span></div>
-            <div class="phone-cost-line"><span>Monthly plan allocation</span><strong id="cost-plan">—</strong></div>
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">COST CLARITY</span><h2>Cost for <span id="cost-period-label">today</span></h2></div><span class="phone-tiny-icon">GH₵</span></div>
+            <div class="phone-cost-line"><span>Plan time share</span><strong id="cost-plan">—</strong></div>
             <div class="phone-cost-line"><span>Electricity estimate so far</span><strong id="cost-electricity">—</strong></div>
-            <div class="phone-cost-line phone-cost-total"><span>Combined estimate</span><strong id="cost-total">—</strong></div>
-            <p class="phone-fine">Your plan is a fixed monthly charge. Data usage changes the cost per GB, not the subscription bill. This is not a Starlink or ECG invoice.</p>
+            <div class="phone-cost-line phone-cost-total"><span>Combined period estimate</span><strong id="cost-total">—</strong></div>
+            <p class="phone-fine">Your full monthly plan: <strong id="plan-full">—</strong>. Your plan is a fixed monthly charge. Data usage changes the cost per GB, not the subscription bill. This is not a Starlink or ECG invoice.</p>
           </section>
           <section class="phone-panel phone-recorder-panel">
             <div class="phone-panel-head"><div><span class="phone-eyebrow">COLLECTOR</span><h2>Recording health</h2></div><span id="recorder-icon" class="phone-recorder-icon">◷</span></div>
@@ -84,6 +86,24 @@ import Base from "../layouts/Base.astro";
             <p class="phone-fine" id="recorder-description">Your laptop records only while Chrome runs. An older reading is saved history, not confirmation the dish is offline.</p>
           </section>
         </div>
+        <section class="phone-panel" id="data-value">
+          <div class="phone-panel-head"><div><span class="phone-eyebrow">CEDI TO DATA</span><h2>How much is a gigabyte worth?</h2></div><span class="phone-tiny-icon">GH₵/GB</span></div>
+          <div class="phone-stat-grid">
+            <div class="phone-stat"><span class="phone-stat-label">EFFECTIVE STARLINK GH₵ / GB</span><strong id="starlink-per-gb">—</strong><small id="starlink-rate-note">Based on recorded month-to-date usage</small></div>
+            <div class="phone-stat"><span class="phone-stat-label">GB PER GH₵</span><strong id="starlink-gb-per-cedi">—</strong><small>Inverse value of the estimated effective rate</small></div>
+          </div>
+          <div class="phone-cost-line"><span>Your saved mobile bundle</span><strong id="bundle-title">—</strong></div>
+          <div class="phone-cost-line"><span>Mobile bundle GH₵ / GB</span><strong id="bundle-per-gb">—</strong></div>
+          <p id="bundle-comparison" class="phone-fine">Set your mobile bundle price and GB in the extension's Costs screen to compare. For example, GH₵399 / 240 GB = GH₵1.66 per GB.</p>
+          <p class="phone-fine">An effective Starlink rate is a planning ratio, not a metered data charge. It is withheld when recording coverage is too low.</p>
+        </section>
+
+        <section class="phone-panel" id="device-shares">
+          <div class="phone-panel-head"><div><span class="phone-eyebrow">HOUSEHOLD MIX</span><h2>Who's using the most?</h2></div><span class="phone-chart-unit">ROUTER TOTALS</span></div>
+          <div class="phone-chart-summary" id="device-summary">Waiting for synced device totals.</div>
+          <div id="phone-device-list" class="phone-device-list"></div>
+          <p class="phone-fine">These percentages compare tracked router-device counters, not the Starlink dish WAN meter. Devices can reconnect, disappear or reset counters; totals will not necessarily equal dish-wide GB.</p>
+        </section>
         <section class="phone-panel phone-history">
           <div class="phone-panel-head"><div><span class="phone-eyebrow">DAILY JOURNAL</span><h2>Your recent days</h2></div><span class="phone-chart-unit">HISTORY</span></div>
           <div id="phone-day-list" class="phone-day-list"></div>

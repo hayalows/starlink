@@ -24,6 +24,9 @@ setGhanaHost({
     await browser.storage.local.set({ ghanaReopenAfterUpdate: true });
     browser.runtime.reload();
   },
+  syncDeviceProfiles: async (profiles) => {
+    await browser.storage.local.set({ ghanaDeviceProfiles: profiles });
+  },
   syncBudgets: async (settings) => {
     await browser.storage.local.set({ ghanaBudgetSettings: settings });
   },
