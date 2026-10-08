@@ -96,10 +96,27 @@ export function GhanaHome({
             </small>
           </div>
         </div>
+        <div className='ghana-metrics'>
+          <div>
+            <span>Energy recorded this month</span>
+            <strong>{month.energy.kWh === null ? "—" : month.energy.kWh.toFixed(2) + " kWh"}</strong>
+            <small>Measured over {Math.round(month.energy.coverage * 100)}% of this month; not a full-month meter bill</small>
+          </div>
+          <div>
+            <span>Effective cost per GB so far</span>
+            <strong>{ghs(month.perGb)}</strong>
+            <small>{month.perGb === null ? "Needs reliable recorded usage and 80% coverage" : (1 / month.perGb).toFixed(2) + " GB per GH₵ · estimated costs ÷ measured GB"}</small>
+          </div>
+        </div>
+        <p className='ghana-muted'>
+          Your monthly subscription remains fixed at {ghs(s.planFee)}; usage does not create a new
+          Starlink charge per GB. Compare it with a mobile bundle in Costs.
+        </p>
         <button className='ghana-button ghana-primary' onClick={onCosts}>
           Understand my costs
         </button>
       </section>
+      {phoneSyncHost() && <PhoneConnect />}
       <section className='ghana-section'>
         <h2>What needs your attention?</h2>
         {!connected ? (
@@ -305,7 +322,7 @@ export function GhanaHome({
         </p>
       </details>
       <p role='status'>{message}</p>
-      {phoneSyncHost() && <PhoneConnect />}
+
       <BackupRestore />
       <MonitorUpdates />
     </div>
