@@ -1,0 +1,35 @@
+name: One-time phone sync dependency and formatting preparation
+on:
+  push:
+    branches: [feat/phone-monitor-sync-2026-10]
+    paths:
+      - .github/workflows/prepare-phone-branch.yml
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/phone-monitor-sync-2026-10
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Update Neon lockfile and format changes
+        run: |
+          cd landing
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          cd ..
+          npx prettier --write extension/lib/phoneSync.ts src/components/ghana/PhoneConnect.tsx src/components/ghana/GhanaHome.tsx extension/entrypoints/background.ts landing/api/monitor.ts landing/src/pages/live.astro landing/src/pages/privacy.astro landing/src/pages/index.astro docs/phone-sync/README.md
+          rm .github/workflows/prepare-phone-branch.yml
+          git add landing/package-lock.json extension/lib/phoneSync.ts src/components/ghana/PhoneConnect.tsx src/components/ghana/GhanaHome.tsx extension/entrypoints/background.ts landing/api/monitor.ts landing/src/pages/live.astro landing/src/pages/privacy.astro landing/src/pages/index.astro docs/phone-sync/README.md .github/workflows/prepare-phone-branch.yml
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Prepare phone sync dependency lock and format"
+            git push origin HEAD:feat/phone-monitor-sync-2026-10
+          fi
