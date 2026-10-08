@@ -6,15 +6,12 @@
 // wires it to the extension's session store and network, the way the dev proxy
 // wires a file and Electron the keychain:
 //
-//   • session store — our OWN captured copy in chrome.storage, not the browser's
-//     live jar. Connect reads the jar once and hands the handler that copy;
-//     disconnect deletes our copy and leaves the browser's starlink.com login
-//     untouched. This mirrors every other host: connected means we hold a copy.
-//   • token — the short-lived Access.V1 rotates, and a service worker cannot read
-//     Set-Cookie to capture the refresh (Node can, which is how the file host
-//     does it). So the fresh token is read back from the jar the refresh call
-//     populates and merged over our stored session; our stored copy stays the
-//     owned session, so disconnect still severs only what is ours.
+//   • session store — only a boolean opt-in marker persists in chrome.storage.
+//     Authentication cookies are read from the user's existing starlink.com
+//     browser session as needed, never copied into extension storage at rest.
+//     Disconnect removes the marker, not the user's normal Starlink login.
+//   • token — the short-lived Access.V1 rotates in the browser cookie jar.
+//     The service worker re-reads it when making an authenticated request.
 //   • network — the Cookie header is appended to the worker's fetches via a
 //     declarativeNetRequest rule; a cross-site service-worker fetch has cookies
 //     withheld by SameSite, so credentials alone are not enough.
@@ -41,8 +38,8 @@ import { loadSelfDeviceClientId } from "./selfDevice";
 
 const SESSION_KEY = "cloudSession";
 
-// readCookie/writeCookie are synchronous in the handler; chrome.storage is async,
-// so our copy is mirrored here and reloaded before each request is served.
+// The host's synchronous cookie API is backed by a short-lived in-memory copy.
+// Persist only a boolean connection marker, never the sensitive cookie string.
 let ourCookie: string | null = null;
 let routerPromise: Promise<DishClient> | null = null;
 let dishPromise: Promise<DishClient> | null = null;
@@ -68,7 +65,7 @@ const cloudHandler = createCloudHandler({
   readCookie: () => ourCookie,
   writeCookie: (cookie) => {
     ourCookie = cookie;
-    void browser.storage.local.set({ [SESSION_KEY]: cookie });
+    void browser.storage.local.set({ [SESSION_KEY]: true });
   },
   clearCookie: () => {
     ourCookie = null;
@@ -102,20 +99,22 @@ async function jarCookies(): Promise<{ name: string; value: string }[]> {
   return browser.cookies.getAll({ domain: "starlink.com" });
 }
 
-/** The browser's current starlink.com session as a header string — read once, at
- *  connect, to take our own copy of it. */
+/** Read the existing Starlink browser session only when explicitly connected. */
 async function captureSession(): Promise<string> {
   return (await jarCookies()).map((cookie) => `${cookie.name}=${cookie.value}`).join("; ");
 }
 
-/** Mirror our connection state into the sync cookie. The stored copy is what marks
- *  us connected and is all disconnect clears; while connected, the jar's current
- *  cookies are used verbatim, so a rotated token is always carried and the full
- *  set (the account host issues more than one Access.V1) is never mangled. Reading
- *  the jar never mutates it, so this stays non-destructive. */
+/** The marker is an explicit user choice, not a credential. Migrate older
+ * installs that persisted a raw Cookie header in chrome.storage, replacing
+ * the sensitive string with the marker on the first subsequent account read. */
 async function loadOurCookie(): Promise<void> {
-  const stored = (await browser.storage.local.get(SESSION_KEY))[SESSION_KEY] as string | undefined;
-  ourCookie = stored ? await captureSession() : null;
+  const stored = (await browser.storage.local.get(SESSION_KEY))[SESSION_KEY] as unknown;
+  const connected = stored === true || (typeof stored === "string" && stored.length > 0);
+  if (typeof stored === "string") {
+    await browser.storage.local.set({ [SESSION_KEY]: connected });
+  }
+  const session = connected ? await captureSession() : "";
+  ourCookie = /(?:^|;\s*)Starlink\.Com\.Sso=/.test(session) ? session : null;
 }
 
 // A cross-site fetch from the service worker has the starlink.com cookies withheld
@@ -213,7 +212,7 @@ export async function handleCloudRequest(request: CloudRequest): Promise<CloudRe
         return { status: 428, body: { error: "not_connected" } };
       }
       ourCookie = captured;
-      await browser.storage.local.set({ [SESSION_KEY]: captured });
+      await browser.storage.local.set({ [SESSION_KEY]: true });
       await setCookieRule(captured);
       return { status: 200, body: { ok: true } };
     }

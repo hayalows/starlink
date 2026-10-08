@@ -45,7 +45,7 @@ export default defineConfig({
   manifest: ({ manifestVersion }) => ({
     name: "Starlink Ghana Monitor",
     description:
-      "Track Starlink electricity cost in Ghana, live performance, data use and per-device network activity.",
+      "Independent tool for Starlink connection monitoring, Ghana electricity estimates and device usage.",
     // A background service worker fetching 192.168.100.1 hit a Chromium Local
     // Network Access bug fixed only in 144; below it the drain silently collects
     // nothing, which is an unreproducible bug report. Excludes Chrome 142–143.
