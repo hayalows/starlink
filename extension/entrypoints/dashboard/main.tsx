@@ -1,4 +1,6 @@
 import { browser } from "wxt/browser";
+import { setPhoneSyncHost } from "@/lib/phoneSyncHost";
+setPhoneSyncHost({ send: (action) => browser.runtime.sendMessage({ type: "phoneSync", action }) });
 import { IndexedDbHistory } from "../../lib/history";
 import { setGhanaHost } from "@/lib/ghanaHost";
 setGhanaHost({
