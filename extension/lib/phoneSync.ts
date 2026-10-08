@@ -160,6 +160,8 @@ export async function syncPhoneNow(): Promise<void> {
       {
         snapshot: {
           version: 1,
+          calculationVersion: 2,
+          sourceVersion: "1.5.2",
           recordedAt: now.getTime(),
           latestSampleAt: Math.max(
             ...Object.values(insights.periods).map((p) => p.current.latest),
