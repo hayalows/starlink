@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { phoneSyncHost } from "../../lib/phoneSyncHost";
 
 type PhoneState = {
   paired: boolean;
@@ -7,7 +8,9 @@ type PhoneState = {
   error?: string;
 };
 const send = async (action: "status" | "create" | "sync" | "disconnect"): Promise<PhoneState> => {
-  const result = await chrome.runtime.sendMessage({ type: "phoneSync", action });
+  const host = phoneSyncHost();
+  if (!host) return { paired: false, error: "Phone pairing works in the Chrome extension." };
+  const result = await host.send(action);
   return result as PhoneState;
 };
 
