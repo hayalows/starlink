@@ -76,7 +76,7 @@ function SignInConnect({
 
       <p className='m-0 text-[11.5px] text-muted-foreground'>
         Sign in on starlink.com in your browser. The extension can then read your account
-        details from Starlink. <a href='https://starlink-ghana.vercel.app/privacy/' target='_blank' rel='noopener noreferrer' className='underline underline-offset-2'>Privacy policy</a>
+        details directly from Starlink.
       </p>
     </div>
   );
