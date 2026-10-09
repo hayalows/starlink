@@ -1,0 +1,60 @@
+# Publish a verified Chrome ZIP with the exact checksum expected by the
+# in-place update helper, only after the main-branch CI gate succeeds.
+name: Publish Ghana Monitor Chrome
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [master]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  chrome:
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run zip:extension
+      - run: node scripts/check-store-readiness.mjs
+      - name: Prepare published update and SHA-256 checksum
+        run: |
+          mkdir -p release-chrome
+          cp .output/*-chrome.zip release-chrome/starlink-ghana-monitor-chrome.zip
+          cd release-chrome
+          sha256sum starlink-ghana-monitor-chrome.zip > starlink-ghana-monitor-chrome.zip.sha256
+          test -s starlink-ghana-monitor-chrome.zip
+          test -s starlink-ghana-monitor-chrome.zip.sha256
+      - name: Publish new verified version if this remains main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUILT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          tag="monitor-v$(node -p "require('./package.json').version")"
+          head="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/master" --jq '.object.sha')"
+          if [ "$BUILT_SHA" != "$head" ]; then
+            echo "A newer master commit exists. Leaving publication to its CI run."
+            exit 0
+          fi
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $tag already exists. No duplicate publication."
+            exit 0
+          fi
+          gh release create "$tag" \
+            release-chrome/starlink-ghana-monitor-chrome.zip \
+            release-chrome/starlink-ghana-monitor-chrome.zip.sha256 \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$BUILT_SHA" \
+            --title "Starlink Ghana Monitor v$(node -p "require('./package.json').version")" \
+            --notes-file docs/ghana-release-notes.md \
+            --latest
