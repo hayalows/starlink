@@ -40,11 +40,13 @@ function Budget({
   value,
   target,
   money = false,
+  forecast = false,
 }: {
   label: string;
   value: number | null;
   target: number;
   money?: boolean;
+  forecast?: boolean;
 }) {
   const ratio = target && value !== null ? value / target : 0;
   return (
@@ -82,7 +84,10 @@ function Budget({
         <p className='mt-1 text-[13px] text-muted-foreground'>
           {ratio >= 1
             ? "Target passed. This is a planning alert; it does not stop devices."
-            : Math.round(ratio * 100) + "% of your target used"}
+            : Math.round(ratio * 100) +
+              (forecast
+                ? "% of your target forecast for month-end"
+                : "% of your target recorded so far")}
         </p>
       )}
     </div>
@@ -127,6 +132,14 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
     </label>
   );
   const energyMeasured = a.energy.kWh !== null;
+  const selectedLabel =
+    period === "today"
+      ? "today so far"
+      : period === "week"
+        ? "the selected seven-day period so far"
+        : period === "month"
+          ? "the calendar month's elapsed time so far"
+          : "the billing cycle's elapsed time so far";
   const offline = a.stale;
   const savingsKwh =
     a.watts === null ? null : (a.watts * Math.min(s.sleepHours, s.hours) * a.days) / 1000;
@@ -149,7 +162,8 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
       ["Plan allocation GHS", a.planAllocation],
       ["Combined cost GHS", a.total],
       ["Recorded traffic GB", a.usage.gb],
-      ["Effective GHS per GB", a.perGb],
+      ["Full-month forecast GHS per observed GB", a.perGb],
+      ["Full-month forecast GHS per projected GB", month.projectedPerGb],
       ["Full month forecast GHS", month.projectedTotal],
       [],
       ["Bucket timestamp", "Download GB", "Upload GB", "Sampled seconds"],
@@ -194,9 +208,13 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
         {offline
           ? "Recorder unavailable. Last recorded figures may be stale. Keep Chrome open on your Starlink Wi-Fi, or check your desktop recorder."
           : energyMeasured
-            ? "Recorded energy covers " +
+            ? "Energy recorded for " +
               Math.round(a.energy.coverage * 100) +
-              "% of this period. Missing time is excluded from recorded totals."
+              "% of " +
+              selectedLabel +
+              " (" +
+              (a.energy.sampledSeconds / 3600).toFixed(1) +
+              " recorded hours). This is not coverage of the entire calendar period. Missing time is excluded."
             : "No energy recorded yet. Choose your dish model below for an estimate. Keep Chrome running on your Starlink Wi-Fi to collect history."}
       </Callout>
       <p className='text-sm text-muted-foreground'>
@@ -235,18 +253,43 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
         <Metric
           label='Data recorded'
           value={gb(a.usage.gb)}
-          note={Math.round(a.usage.coverage * 100) + "% recorded · download + upload"}
+          note={
+            Math.round(a.usage.coverage * 100) +
+            "% of elapsed time sampled (" +
+            (a.usage.sampledSeconds / 3600).toFixed(1) +
+            " h) · download + upload"
+          }
         />
         <Metric
-          label='Effective cost per GB'
+          label='Full-month cost ÷ recorded GB'
           value={ghs(a.perGb)}
           note={
             a.perGb === null
-              ? "Needs a plan fee, traffic, and at least 80% coverage."
-              : "Cost so far ÷ recorded GB. This is not a per-GB charge."
+              ? "Waiting for recorded traffic and a usable monthly cost forecast."
+              : "Same monthly forecast in every tab, divided by GB captured so far. Not an extra charge."
           }
         />
       </div>
+      <Section title='What will each GB effectively cost?'>
+        <div className='grid gap-3 sm:grid-cols-2'>
+          <div>
+            <p className='text-[12px] text-muted-foreground'>Early-month ratio · limited history</p>
+            <p className='text-[22px] font-bold'>{ghs(month.perGb)} / recorded GB</p>
+            <p className='mt-1 text-[12px] text-muted-foreground'>
+              Full month's predicted bill ÷ only the GB recorded so far. This usually falls as
+              recording continues.
+            </p>
+          </div>
+          <div>
+            <p className='text-[12px] text-muted-foreground'>Projected full-month effective rate</p>
+            <p className='text-[22px] font-bold'>{ghs(month.projectedPerGb)} / projected GB</p>
+            <p className='mt-1 text-[12px] text-muted-foreground'>
+              Full month's predicted bill ÷ predicted full-month usage.{" "}
+              {month.monthlyDataQuality.label}: {month.monthlyDataQuality.explanation}
+            </p>
+          </div>
+        </div>
+      </Section>
       <div className='grid gap-3 lg:grid-cols-2'>
         <Section title='How much data, and when?'>
           {a.usage.gb === null ? (
@@ -293,14 +336,22 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
             </div>
           </div>
           <p className='mt-2 text-[13px] text-muted-foreground'>
-            Cost uses sampled average power after 24 recorded hours, otherwise your model settings.
-            Data needs 24 recorded hours and assumes the sampled rate continues.
+            Cost basis:{" "}
+            {month.monthlyPowerBasis === "recorded"
+              ? "sampled dish power"
+              : "dish model assumption"}{" "}
+            ({month.monthlyEnergyQuality.hours.toFixed(1)} recorded hours). Data forecast:{" "}
+            {month.monthlyDataQuality.label.toLowerCase()} from{" "}
+            {month.monthlyDataQuality.hours.toFixed(1)} recorded hours.{" "}
+            {month.monthlyDataQuality.explanation} Electricity forecasts can change as more samples
+            arrive; this is not a Starlink or ECG bill.
           </p>
           <Budget
             label='Monthly spending target · forecast'
             value={month.projectedTotal}
             target={s.costBudget}
             money
+            forecast
           />
           <Budget
             label='Monthly data target · recorded'
@@ -312,14 +363,14 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
               {Math.max(0, s.dataBudget - month.usage.gb).toFixed(1)} GB left in your personal
               target.{" "}
               {Math.max(0, s.dataBudget - month.usage.gb) /
-                Math.max(1, a.days - a.now.getDate() + 1) >
+                Math.max(1, month.days - a.now.getDate() + 1) >
               0
                 ? "About " +
                   (
                     Math.max(0, s.dataBudget - month.usage.gb) /
                     Math.max(1, a.days - a.now.getDate() + 1)
                   ).toFixed(1) +
-                  " GB/day for the rest of this month."
+                  " GB/day available against your personal target for the remaining calendar days, including today."
                 : ""}
             </p>
           )}
@@ -414,13 +465,15 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
               </span>
             </p>
             <p className='mt-2 text-[13px] text-muted-foreground'>
-              {bundleRate !== null && a.perGb !== null
-                ? "Your recorded Starlink effective rate is " +
-                  ghs(Math.abs(bundleRate - a.perGb)) +
+              {bundleRate !== null && month.projectedPerGb !== null
+                ? "Your early full-month Starlink projection is " +
+                  ghs(Math.abs(bundleRate - month.projectedPerGb)) +
                   "/GB " +
-                  (a.perGb < bundleRate ? "lower" : "higher") +
+                  (month.projectedPerGb < bundleRate ? "lower" : "higher") +
+                  ". Forecast quality: " +
+                  month.monthlyDataQuality.label.toLowerCase() +
                   "."
-                : "Enter a current bundle offer to compare it with Starlink’s effective cost."}{" "}
+                : "Enter a current bundle offer; a Starlink comparison also needs 24 recorded hours of usage."}{" "}
               Bundle expiry, network coverage and speed also matter.
             </p>
           </Section>
@@ -435,20 +488,23 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
             )}
           </strong>{" "}
           per person across {s.people} {s.people === 1 ? "person" : "people"}. Device cost shares
-          below split the same forecast by recorded router traffic. They are planning allocations,
-          not bills or measured electricity per device.
+          below divide that forecast using the router's tracked device traffic. The router counters
+          are separate from the dish's {gb(month.usage.gb)} recorded WAN usage, so the two totals
+          may differ. These are hypothetical planning shares, not device bills or measured power.
         </p>
         <DeviceUsageList allocatedCost={month.projectedTotal} />
       </Section>
       <Explainer title='What is measured, and what is estimated?'>
-        Recorded GB and kWh cover sampled time only. Forecasts include assumptions about missing and
-        future hours. Effective cost per GB is plan allocation plus electricity divided by recorded
-        traffic, shown only with at least 80% coverage. Starlink may use a different billing cycle;
-        choose Billing cycle for your saved plan dates. Daily cost views use Ghana time. Device
-        allocations and the monthly targets remain calendar-month estimates. ECG/NEDCo residential
-        energy rates use the same PURC schedule. Fixed charges, taxes, levies, router power and mesh
-        power are excluded. Lifeline applies only if total household usage stays within 30 kWh; tier
-        crossings can raise the estimate.
+        Recorded GB and kWh cover sampled time only. Coverage is measured against elapsed time, not
+        the entire calendar day or month. Forecasts extrapolate recorded hours to future and missing
+        hours. The observed GH₵/GB metric divides the full-month estimate by confirmed monthly GB;
+        the projected rate divides the same full-month estimate by projected monthly GB. Neither is
+        an extra per-GB charge. No 80% coverage threshold is required to display the observed ratio.
+        Starlink may use a different billing cycle; choose Billing cycle for your saved plan dates.
+        Daily cost views use Ghana time. Device allocations and the monthly targets remain
+        calendar-month estimates. ECG/NEDCo residential energy rates use the same PURC schedule.
+        Fixed charges, taxes, levies, router power and mesh power are excluded. Lifeline applies
+        only if total household usage stays within 30 kWh; tier crossings can raise the estimate.
         <a className='ml-1 underline' href={TARIFF_SOURCE} target='_blank' rel='noreferrer'>
           PURC tariff source · effective 1 Oct 2026
         </a>

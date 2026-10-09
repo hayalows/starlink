@@ -27,6 +27,14 @@ export function GhanaHome({
   );
   const [showSetup, setShowSetup] = useState(!s.setupDone);
   const [message, setMessage] = useState("");
+  const [secretTaps, setSecretTaps] = useState(0);
+  const recordedTodayHours = a.usage.sampledSeconds / 3600;
+  const elapsedTodayHours = Math.max(0, (a.window.end - a.window.start) / 3600);
+  const monthLabel = month.now.toLocaleDateString("en-GH", {
+    month: "long",
+    year: "numeric",
+    timeZone: "Africa/Accra",
+  });
   function next() {
     try {
       localStorage.setItem("starlink.ghana.setupStep", String(step + 1));
@@ -60,7 +68,21 @@ export function GhanaHome({
       <section className='ghana-section ghana-hero'>
         <div className='ghana-split'>
           <div>
-            <p className='ghana-eyebrow'>YOUR STARLINK · GHANA</p>
+            <button
+              type='button'
+              className='ghana-eyebrow'
+              aria-label='Starlink Ghana monitor'
+              onClick={() => setSecretTaps((n) => Math.min(n + 1, 5))}
+              style={{
+                cursor: "default",
+                border: 0,
+                background: "none",
+                padding: 0,
+                textAlign: "left",
+              }}
+            >
+              YOUR STARLINK · GHANA
+            </button>
             <h1>Your internet today</h1>
             <p role='status'>{statusText}</p>
           </div>
@@ -70,9 +92,15 @@ export function GhanaHome({
         </div>
         <p className='ghana-muted'>
           {a.energy.latest
-            ? `Last recorded ${new Date(a.energy.latest * 1000).toLocaleTimeString("en-GH", { timeZone: "Africa/Accra", hour: "2-digit", minute: "2-digit" })} · ${Math.round(a.energy.coverage * 100)}% of today recorded.`
+            ? `Last recorded ${new Date(a.energy.latest * 1000).toLocaleTimeString("en-GH", { timeZone: "Africa/Accra", hour: "2-digit", minute: "2-digit" })} · ${Math.round(a.usage.coverage * 100)}% of today's elapsed time sampled (${recordedTodayHours.toFixed(1)} of ${elapsedTodayHours.toFixed(1)} hours). Not 24-hour coverage.`
             : "Keep Chrome open on your Starlink Wi-Fi to collect readings. The website calculator has separate settings."}
         </p>
+        {secretTaps >= 5 && (
+          <p className='ghana-muted' role='status'>
+            🛰️ Ground control checking in. You found the hidden signal. Keep the monitor running to
+            make the next forecast smarter.
+          </p>
+        )}
         <div className='ghana-metrics'>
           <div>
             <span>Data recorded today</span>
@@ -103,8 +131,8 @@ export function GhanaHome({
               {month.energy.kWh === null ? "—" : month.energy.kWh.toFixed(2) + " kWh"}
             </strong>
             <small>
-              Measured over {Math.round(month.energy.coverage * 100)}% of this month; not a
-              full-month meter bill
+              {Math.round(month.energy.coverage * 100)}% of elapsed {monthLabel} time sampled (
+              {(month.energy.sampledSeconds / 3600).toFixed(1)} h). Not a full-month ECG bill
             </small>
           </div>
           <div>
@@ -113,16 +141,37 @@ export function GhanaHome({
             <small>
               {month.perGb === null
                 ? "Waiting for the first recorded GB"
-                : (1 / month.perGb).toFixed(3) +
-                  " GB per GH₵ · month-end cost ÷ GB recorded so far"}
+                : "Full-month estimate ÷ captured monthly GB. Not an extra usage fee."}
             </small>
           </div>
         </div>
         <p className='ghana-muted'>
-          This effective ratio uses the full month's estimated cost and the{" "}
-          {Math.round(month.dataValueCoverage * 100)}% of the month recorded so far. It becomes more
-          representative as more data is measured.
+          The monitor sampled {Math.round(month.dataValueCoverage * 100)}% of the time elapsed in{" "}
+          {monthLabel}, not of the entire calendar month. The recorded-GB ratio is especially high
+          when history is incomplete. Projected full-month effective cost:{" "}
+          {ghs(month.projectedPerGb)}/GB ({month.monthlyDataQuality.label.toLowerCase()}).
         </p>
+        <details className='ghana-section ghana-inset'>
+          <summary>Why did my estimate change?</summary>
+          <p>
+            Your {ghs(s.planFee)} subscription remains fixed. The additional{" "}
+            {ghs(month.monthlyProjectedElectricity)} is projected dish electricity for the full
+            month, calculated using{" "}
+            {month.monthlyPowerBasis === "recorded"
+              ? "the average of recorded power readings"
+              : "your dish model's assumed watts"}
+            . Recorded power covers {month.monthlyEnergyQuality.hours.toFixed(1)} hours so far.
+          </p>
+          <p className='ghana-muted'>
+            {month.monthlyEnergyQuality.label}. {month.monthlyEnergyQuality.explanation}
+            The amount may change as more hours are sampled. Router power, other household
+            equipment, ECG levies and fixed charges are excluded.
+          </p>
+          <p className='ghana-muted'>
+            The data projection also depends on which hours were sampled.{" "}
+            {month.monthlyDataQuality.explanation}
+          </p>
+        </details>
         <p className='ghana-muted'>
           Your monthly subscription remains fixed at {ghs(s.planFee)}; GB usage does not create an
           additional Starlink charge.{" "}

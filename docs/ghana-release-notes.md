@@ -1,3 +1,16 @@
+Starlink Ghana Monitor 1.5.3 — trustworthy cost and coverage explanations
+
+- Fix monthly GH₵ per observed GB changing when Today, Week or Billing cycle is selected: all views now use the same month-wide forecast and measured monthly GB.
+- Add a separate projected full-month GH₵/GB metric, clearly distinguishing a forecast-to-forecast comparison from partial recording. Neither is a metered Starlink charge.
+- Explain daily coverage as a percentage of time elapsed today, and monthly coverage as a percentage of time elapsed this month. Show sampled hours instead of implying full-period measurements.
+- Distinguish predicted spending against a budget from actual recorded GB against a personal target. Clarify the remaining daily data target and differing router/WAN counters.
+- Label power/data predictions with evidence-based recording confidence, and explain how a GH₵500 subscription plus estimated dish electricity becomes the changing monthly total.
+- Update the paired phone PWA's coverage, per-GB explanation and mobile bundle comparison to match the desktop's monthly mathematics.
+- Add a compact estimate explainer, detailed early-month comparison and a small hidden Ground Control Easter egg in Overview.
+- Keep personal data, pairing tokens, existing monitor history and the same extension ID unchanged. Existing installations should be updated in place, never removed.
+
+---
+
 Starlink Ghana Monitor 1.5.2 — mobile app and desktop-parity navigation
 
 - Mobile companion is now an installable dark-theme PWA with Overview, Costs, Devices and Connection views. Adds a dedicated home screen manifest and network-first service worker caching only the public app shell, never account tokens, readings or API responses.

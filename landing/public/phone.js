@@ -238,7 +238,7 @@
       ? amount(month.gb) + " GB"
       : "—";
     el("hero-coverage").textContent =
-      Math.round((today?.trafficCoverage || 0) * 100) + "% of today measured";
+      Math.round((today?.trafficCoverage || 0) * 100) + "% of today's elapsed time sampled";
     el("metric-cost").textContent = money(month?.projectedCost);
     el("metric-energy").textContent = Number.isFinite(month?.kWh)
       ? amount(month.kWh, 2) + " kWh"
@@ -250,7 +250,8 @@
     el("cost-total").textContent = money(period?.cost);
     el("last-reading").textContent = ago(latest);
     el("last-upload").textContent = ago(updated);
-    el("today-coverage").textContent = Math.round((today?.coverage || 0) * 100) + "%";
+    el("today-coverage").textContent =
+      Math.round((today?.coverage || 0) * 100) + "% of elapsed day";
     el("recorder-icon").classList.toggle("is-stale", !fresh);
     el("recorder-icon").setAttribute(
       "aria-label",
@@ -278,13 +279,37 @@
     el("starlink-per-gb").textContent = Number.isFinite(rate) ? money(rate) : "—";
     el("starlink-gb-per-cedi").textContent = rate > 0 ? amount(1 / rate, 3) + " GB" : "—";
     const completeness = Math.round((month?.trafficCoverage || 0) * 100);
+    const forecastRate =
+      Number.isFinite(month?.projectedCost) &&
+      Number.isFinite(month?.forecastGb) &&
+      month.forecastGb > 0
+        ? month.projectedCost / month.forecastGb
+        : null;
+    const updateDate = new Date(state.payload.updatedAt);
+    const daysInMonth = new Date(
+      Date.UTC(updateDate.getUTCFullYear(), updateDate.getUTCMonth() + 1, 0),
+    ).getUTCDate();
+    const forecastHours =
+      Number.isFinite(month?.forecastGb) && month.forecastGb > 0 && month.gb > 0
+        ? (month.gb / month.forecastGb) * daysInMonth * 24
+        : 0;
+    const forecastCaution =
+      forecastHours < 72 || completeness < 50
+        ? "Early estimate: limited recorded hours."
+        : forecastHours < 168 || completeness < 80
+          ? "Developing estimate: additional days will improve it."
+          : "Better supported estimate, but still a projection.";
     el("starlink-rate-note").textContent = rate
-      ? "Month-end estimate ÷ " + amount(month.gb) + " GB observed"
+      ? "Full-month estimate ÷ " + amount(month.gb) + " recorded GB; not an extra charge."
       : "Waiting for your first recorded GB";
     el("value-coverage-note").textContent = rate
-      ? "Based on " +
+      ? "The monitor sampled " +
         completeness +
-        "% of the month recorded so far. As more usage is captured, the effective GH₵/GB normally falls while GB per cedi rises. Unobserved traffic is not treated as zero."
+        "% of time elapsed this month, not the entire calendar month. Full-month projected effective rate: " +
+        (forecastRate === null ? "waiting for 24 hours of data" : money(forecastRate) + "/GB") +
+        ". " +
+        forecastCaution +
+        " Missing time is not treated as zero."
       : "The rate appears as soon as your monitor records some usage.";
     const bundle = current.bundle ?? {};
     const bundleRate = bundle.price > 0 && bundle.gb > 0 ? bundle.price / bundle.gb : null;
@@ -293,11 +318,13 @@
       : "Not configured";
     el("bundle-per-gb").textContent = bundleRate ? money(bundleRate) : "—";
     el("bundle-comparison").textContent =
-      bundleRate && rate
-        ? "At these estimated rates, your saved mobile bundle costs " +
-          amount(bundleRate / rate, 2) +
-          "× the Starlink effective GH₵/GB rate. They have different coverage, portability and billing rules."
-        : "Optional: enter your own mobile bundle price and volume under Costs on your laptop. This is not an MTN price quote.";
+      bundleRate && forecastRate
+        ? "Your saved bundle costs " +
+          amount(bundleRate / forecastRate, 2) +
+          "× the projected full-month Starlink cost/GB. " +
+          forecastCaution +
+          " They have different coverage, portability and billing rules."
+        : "A comparison needs your saved bundle and at least 24 hours of recorded data. Edit the bundle under Costs on your laptop.";
 
     const devices = Array.isArray(current.devices) ? current.devices : [];
     const holder = el("phone-device-list");
@@ -307,7 +334,9 @@
       ? amount(trackedGb) +
         " GB counted across " +
         devices.length +
-        " device groups this month. Shares are based on router counters."
+        " device groups this month. Dish WAN readings show " +
+        (Number.isFinite(month?.gb) ? amount(month.gb) + " GB" : "a separate total") +
+        ". These meters can differ, so device shares are estimates."
       : "No synced router-device history yet. Check the Devices panel on your laptop.";
     for (const [i, device] of devices.entries()) {
       const row = document.createElement("div");
