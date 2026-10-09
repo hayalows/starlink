@@ -73,7 +73,13 @@ export function GhanaHome({
               className='ghana-eyebrow'
               aria-label='Starlink Ghana monitor'
               onClick={() => setSecretTaps((n) => Math.min(n + 1, 5))}
-              style={{ cursor: "default", border: 0, background: "none", padding: 0, textAlign: "left" }}
+              style={{
+                cursor: "default",
+                border: 0,
+                background: "none",
+                padding: 0,
+                textAlign: "left",
+              }}
             >
               YOUR STARLINK · GHANA
             </button>
@@ -91,8 +97,8 @@ export function GhanaHome({
         </p>
         {secretTaps >= 5 && (
           <p className='ghana-muted' role='status'>
-            🛰️ Ground control checking in. You found the hidden signal. Keep the monitor running
-            to make the next forecast smarter.
+            🛰️ Ground control checking in. You found the hidden signal. Keep the monitor running to
+            make the next forecast smarter.
           </p>
         )}
         <div className='ghana-metrics'>
@@ -125,8 +131,8 @@ export function GhanaHome({
               {month.energy.kWh === null ? "—" : month.energy.kWh.toFixed(2) + " kWh"}
             </strong>
             <small>
-              {Math.round(month.energy.coverage * 100)}% of elapsed {monthLabel} time sampled
-              ({(month.energy.sampledSeconds / 3600).toFixed(1)} h). Not a full-month ECG bill
+              {Math.round(month.energy.coverage * 100)}% of elapsed {monthLabel} time sampled (
+              {(month.energy.sampledSeconds / 3600).toFixed(1)} h). Not a full-month ECG bill
             </small>
           </div>
           <div>
@@ -140,21 +146,21 @@ export function GhanaHome({
           </div>
         </div>
         <p className='ghana-muted'>
-          The monitor sampled {Math.round(month.dataValueCoverage * 100)}% of the time elapsed in
-          {" "}{monthLabel}, not of the entire calendar month. The recorded-GB ratio is especially high when
-          history is incomplete. Projected full-month effective cost: {ghs(month.projectedPerGb)}/GB
-          ({month.monthlyDataQuality.label.toLowerCase()}).
+          The monitor sampled {Math.round(month.dataValueCoverage * 100)}% of the time elapsed in{" "}
+          {monthLabel}, not of the entire calendar month. The recorded-GB ratio is especially high
+          when history is incomplete. Projected full-month effective cost:{" "}
+          {ghs(month.projectedPerGb)}/GB ({month.monthlyDataQuality.label.toLowerCase()}).
         </p>
         <details className='ghana-section ghana-inset'>
           <summary>Why did my estimate change?</summary>
           <p>
-            Your {ghs(s.planFee)} subscription remains fixed. The additional
-            {" "}{ghs(month.monthlyProjectedElectricity)} is projected dish electricity for the
-            full month, calculated using
-            {" "}{month.monthlyPowerBasis === "recorded"
+            Your {ghs(s.planFee)} subscription remains fixed. The additional{" "}
+            {ghs(month.monthlyProjectedElectricity)} is projected dish electricity for the full
+            month, calculated using{" "}
+            {month.monthlyPowerBasis === "recorded"
               ? "the average of recorded power readings"
-              : "your dish model's assumed watts"}.
-            Recorded power covers {month.monthlyEnergyQuality.hours.toFixed(1)} hours so far.
+              : "your dish model's assumed watts"}
+            . Recorded power covers {month.monthlyEnergyQuality.hours.toFixed(1)} hours so far.
           </p>
           <p className='ghana-muted'>
             {month.monthlyEnergyQuality.label}. {month.monthlyEnergyQuality.explanation}
@@ -162,8 +168,8 @@ export function GhanaHome({
             equipment, ECG levies and fixed charges are excluded.
           </p>
           <p className='ghana-muted'>
-            The data projection also depends on which hours were sampled.
-            {" "}{month.monthlyDataQuality.explanation}
+            The data projection also depends on which hours were sampled.{" "}
+            {month.monthlyDataQuality.explanation}
           </p>
         </details>
         <p className='ghana-muted'>

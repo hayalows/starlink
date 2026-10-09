@@ -25,7 +25,8 @@ export function forecastQuality(sampledSeconds: number, elapsedCoverage: number)
     return {
       level: "developing" as const,
       label: "Developing estimate",
-      explanation: "More recording time, including busy and quiet days, will improve this forecast.",
+      explanation:
+        "More recording time, including busy and quiet days, will improve this forecast.",
       hours,
     };
   }

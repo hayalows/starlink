@@ -113,8 +113,8 @@ export function useGhanaAnalysis(status: DishStatusJson | null, period: ViewPeri
   );
   const monthlyPowerBasis =
     monthly.current.kWh !== null && monthly.current.sampledSeconds >= 86400
-      ? "recorded" as const
-      : "model" as const;
+      ? ("recorded" as const)
+      : ("model" as const);
   return {
     settings,
     update,

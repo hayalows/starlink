@@ -85,7 +85,9 @@ function Budget({
           {ratio >= 1
             ? "Target passed. This is a planning alert; it does not stop devices."
             : Math.round(ratio * 100) +
-              (forecast ? "% of your target forecast for month-end" : "% of your target recorded so far")}
+              (forecast
+                ? "% of your target forecast for month-end"
+                : "% of your target recorded so far")}
         </p>
       )}
     </div>
@@ -282,8 +284,8 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
             <p className='text-[12px] text-muted-foreground'>Projected full-month effective rate</p>
             <p className='text-[22px] font-bold'>{ghs(month.projectedPerGb)} / projected GB</p>
             <p className='mt-1 text-[12px] text-muted-foreground'>
-              Full month's predicted bill ÷ predicted full-month usage. {month.monthlyDataQuality.label}:
-              {" "}{month.monthlyDataQuality.explanation}
+              Full month's predicted bill ÷ predicted full-month usage.{" "}
+              {month.monthlyDataQuality.label}: {month.monthlyDataQuality.explanation}
             </p>
           </div>
         </div>
@@ -334,13 +336,15 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
             </div>
           </div>
           <p className='mt-2 text-[13px] text-muted-foreground'>
-            Cost basis: {month.monthlyPowerBasis === "recorded"
+            Cost basis:{" "}
+            {month.monthlyPowerBasis === "recorded"
               ? "sampled dish power"
-              : "dish model assumption"} ({month.monthlyEnergyQuality.hours.toFixed(1)}
-            {" "}recorded hours). Data forecast: {month.monthlyDataQuality.label.toLowerCase()}
-            {" "}from {month.monthlyDataQuality.hours.toFixed(1)} recorded hours.
-            {" "}{month.monthlyDataQuality.explanation} Electricity forecasts can change as more
-            samples arrive; this is not a Starlink or ECG bill.
+              : "dish model assumption"}{" "}
+            ({month.monthlyEnergyQuality.hours.toFixed(1)} recorded hours). Data forecast:{" "}
+            {month.monthlyDataQuality.label.toLowerCase()} from{" "}
+            {month.monthlyDataQuality.hours.toFixed(1)} recorded hours.{" "}
+            {month.monthlyDataQuality.explanation} Electricity forecasts can change as more samples
+            arrive; this is not a Starlink or ECG bill.
           </p>
           <Budget
             label='Monthly spending target · forecast'
@@ -491,17 +495,16 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
         <DeviceUsageList allocatedCost={month.projectedTotal} />
       </Section>
       <Explainer title='What is measured, and what is estimated?'>
-        Recorded GB and kWh cover sampled time only. Coverage is measured against elapsed time,
-        not the entire calendar day or month. Forecasts extrapolate recorded hours to future and
-        missing hours. The observed GH₵/GB metric divides the full-month estimate by confirmed
-        monthly GB; the projected rate divides the same full-month estimate by projected monthly GB.
-        Neither is an extra per-GB charge. No 80% coverage threshold is required to display the
-        observed ratio. Starlink may use a different billing cycle; choose Billing cycle for your
-        saved plan dates. Daily cost views use Ghana time. Device allocations and the monthly
-        targets remain calendar-month estimates. ECG/NEDCo residential
-        energy rates use the same PURC schedule. Fixed charges, taxes, levies, router power and mesh
-        power are excluded. Lifeline applies only if total household usage stays within 30 kWh; tier
-        crossings can raise the estimate.
+        Recorded GB and kWh cover sampled time only. Coverage is measured against elapsed time, not
+        the entire calendar day or month. Forecasts extrapolate recorded hours to future and missing
+        hours. The observed GH₵/GB metric divides the full-month estimate by confirmed monthly GB;
+        the projected rate divides the same full-month estimate by projected monthly GB. Neither is
+        an extra per-GB charge. No 80% coverage threshold is required to display the observed ratio.
+        Starlink may use a different billing cycle; choose Billing cycle for your saved plan dates.
+        Daily cost views use Ghana time. Device allocations and the monthly targets remain
+        calendar-month estimates. ECG/NEDCo residential energy rates use the same PURC schedule.
+        Fixed charges, taxes, levies, router power and mesh power are excluded. Lifeline applies
+        only if total household usage stays within 30 kWh; tier crossings can raise the estimate.
         <a className='ml-1 underline' href={TARIFF_SOURCE} target='_blank' rel='noreferrer'>
           PURC tariff source · effective 1 Oct 2026
         </a>
