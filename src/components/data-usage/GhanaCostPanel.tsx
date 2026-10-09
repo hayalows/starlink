@@ -136,7 +136,7 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
       : period === "week"
         ? "the selected seven-day period so far"
         : period === "month"
-          ? "October's elapsed time so far"
+          ? "the calendar month's elapsed time so far"
           : "the billing cycle's elapsed time so far";
   const offline = a.stale;
   const savingsKwh =
@@ -160,7 +160,8 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
       ["Plan allocation GHS", a.planAllocation],
       ["Combined cost GHS", a.total],
       ["Recorded traffic GB", a.usage.gb],
-      ["Effective GHS per GB", a.perGb],
+      ["Full-month forecast GHS per observed GB", a.perGb],
+      ["Full-month forecast GHS per projected GB", month.projectedPerGb],
       ["Full month forecast GHS", month.projectedTotal],
       [],
       ["Bucket timestamp", "Download GB", "Upload GB", "Sampled seconds"],
