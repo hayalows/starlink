@@ -282,7 +282,12 @@
       Number.isFinite(month?.projectedCost) && Number.isFinite(month?.forecastGb) && month.forecastGb > 0
         ? month.projectedCost / month.forecastGb
         : null;
-    const forecastHours = Math.max(0, Number(month?.trafficSeconds) || 0) / 3600;
+    const updateDate = new Date(state.payload.updatedAt);
+    const daysInMonth = new Date(Date.UTC(updateDate.getUTCFullYear(), updateDate.getUTCMonth() + 1, 0)).getUTCDate();
+    const forecastHours =
+      Number.isFinite(month?.forecastGb) && month.forecastGb > 0 && month.gb > 0
+        ? (month.gb / month.forecastGb) * daysInMonth * 24
+        : 0;
     const forecastCaution = forecastHours < 72 || completeness < 50
       ? "Early estimate: limited recorded hours."
       : forecastHours < 168 || completeness < 80
