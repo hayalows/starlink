@@ -44,28 +44,42 @@ async function syncRelease() {
     }
 
     const version = parsed.version;
-    releaseLabels.forEach((label) => { label.textContent = version; });
+    releaseLabels.forEach((label) => {
+      label.textContent = version;
+    });
     releaseDownloads.forEach((link) => {
       link.href = packageUrl;
-      link.setAttribute("aria-label", "Download Starlink Ghana Monitor " + version + " for Chrome (ZIP)");
+      link.setAttribute(
+        "aria-label",
+        "Download Starlink Ghana Monitor " + version + " for Chrome (ZIP)",
+      );
     });
-    releaseNotes.forEach((link) => { link.href = release.html_url?.startsWith(RELEASES_URL + "/tag/") ? release.html_url : RELEASES_URL; });
+    releaseNotes.forEach((link) => {
+      link.href = release.html_url?.startsWith(RELEASES_URL + "/tag/")
+        ? release.html_url
+        : RELEASES_URL;
+    });
     document.querySelectorAll<HTMLElement>("[data-release-size]").forEach((label) => {
       label.textContent = (asset.size! / 1_000_000).toFixed(1) + " MB ZIP";
     });
     if (release.published_at && Number.isFinite(Date.parse(release.published_at))) {
       document.querySelectorAll<HTMLElement>("[data-release-date]").forEach((label) => {
         label.textContent = new Date(release.published_at!).toLocaleDateString("en-GH", {
-          day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Accra",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          timeZone: "Africa/Accra",
         });
       });
     }
-    if (releaseFeedback) releaseFeedback.textContent = "Latest published Chrome ZIP matched to its GitHub release.";
+    if (releaseFeedback)
+      releaseFeedback.textContent = "Latest published Chrome ZIP matched to its GitHub release.";
   } catch {
     // Keep the specific release linked and named in static HTML, not a
     // vague "latest" URL whose contents could differ from the displayed version.
-    if (releaseFeedback) releaseFeedback.textContent =
-      "Showing the published v1.5.3 Chrome ZIP. Check GitHub releases for newer versions.";
+    if (releaseFeedback)
+      releaseFeedback.textContent =
+        "Showing the published v1.5.3 Chrome ZIP. Check GitHub releases for newer versions.";
     const link = document.createElement("a");
     link.href = RELEASES_URL;
     link.target = "_blank";
@@ -102,8 +116,12 @@ sampleTabs.forEach((tab, index) => {
   tab.addEventListener("keydown", (event: KeyboardEvent) => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const destination = event.key === "Home" ? 0 : event.key === "End" ? sampleTabs.length - 1 :
-      (index + (event.key === "ArrowRight" ? 1 : -1) + sampleTabs.length) % sampleTabs.length;
+    const destination =
+      event.key === "Home"
+        ? 0
+        : event.key === "End"
+          ? sampleTabs.length - 1
+          : (index + (event.key === "ArrowRight" ? 1 : -1) + sampleTabs.length) % sampleTabs.length;
     const next = sampleTabs[destination];
     activateSample(next);
     next.focus();

@@ -10,9 +10,7 @@ export function parseMonitorReleaseTag(tag) {
   if (typeof tag !== "string") return null;
   const match = /^monitor-v(\d+)\.(\d+)\.(\d+)(?:-[a-zA-Z0-9]+)?$/.exec(tag);
   if (!match) return null;
-  const numbers = /** @type {[number, number, number]} */ (
-    match.slice(1, 4).map(Number)
-  );
+  const numbers = /** @type {[number, number, number]} */ (match.slice(1, 4).map(Number));
   if (!numbers.every(Number.isSafeInteger)) return null;
   return { version: "v" + numbers.join("."), numbers };
 }

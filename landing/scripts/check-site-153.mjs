@@ -84,7 +84,10 @@ const bundledTags = [
   ),
 ].map((match) => match[1]);
 assert.ok(bundledTags.length >= 4, "Some static ZIP download links are missing");
-assert.ok(bundledTags.every((tag) => tag === "monitor-v1.5.3"), "A ZIP points to an old release");
+assert.ok(
+  bundledTags.every((tag) => tag === "monitor-v1.5.3"),
+  "A ZIP points to an old release",
+);
 assert.match(publicHome, /data-release-version>v1\.5\.3/, "Release badge shows an old version");
 assert.ok(!publicHome.includes("v1.5.2-ecdc4d3"), "Old release notes/download fallback found");
 console.log(
