@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { isMonitorReleaseAtLeast, parseMonitorReleaseTag } from "../src/lib/releaseTags.mjs";
 const root = process.cwd();
 const read = (path) => readFileSync(resolve(root, path), "utf8");
 const phone = read("dist/live/index.html");
@@ -65,6 +66,27 @@ for (const icon of [
   );
   assert.ok(iconCss.includes(icon), "Missing icon mapping " + icon);
 }
+// Both historically published release tag formats must work, and a stale
+// GitHub API result must not downgrade the confirmed static download.
+assert.equal(parseMonitorReleaseTag("monitor-v1.5.2-ecdc4d3")?.version, "v1.5.2");
+assert.equal(parseMonitorReleaseTag("monitor-v1.5.3")?.version, "v1.5.3");
+assert.equal(parseMonitorReleaseTag("monitor-v1.5.4-a1b2c3d")?.version, "v1.5.4");
+assert.equal(parseMonitorReleaseTag("monitor-v1.5.3-invalid-tag"), null);
+assert.equal(parseMonitorReleaseTag("v1.5.3"), null);
+assert.ok(isMonitorReleaseAtLeast("monitor-v1.5.3", "monitor-v1.5.3"));
+assert.ok(isMonitorReleaseAtLeast("monitor-v1.6.0-ab12cd3", "monitor-v1.5.3"));
+assert.ok(!isMonitorReleaseAtLeast("monitor-v1.5.2-ecdc4d3", "monitor-v1.5.3"));
+assert.ok(!isMonitorReleaseAtLeast("monitor-v1.5.3-unsafe/path", "monitor-v1.5.3"));
+
+const bundledTags = [
+  ...publicHome.matchAll(
+    /https:\/\/github\.com\/hayalows\/starlink\/releases\/download\/(monitor-v[^/" ]+)\/starlink-ghana-monitor-chrome\.zip/g,
+  ),
+].map((match) => match[1]);
+assert.ok(bundledTags.length >= 4, "Some static ZIP download links are missing");
+assert.ok(bundledTags.every((tag) => tag === "monitor-v1.5.3"), "A ZIP points to an old release");
+assert.match(publicHome, /data-release-version>v1\.5\.3/, "Release badge shows an old version");
+assert.ok(!publicHome.includes("v1.5.2-ecdc4d3"), "Old release notes/download fallback found");
 console.log(
-  "PASS: dark public site, PWA safe areas, real icons, preserved app behavior, private-data caching guards.",
+  "PASS: dark site, PWA privacy, validated v1.5.3 download links and both release tag formats.",
 );
