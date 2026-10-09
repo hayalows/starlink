@@ -141,7 +141,7 @@ export function GhanaHome({
         </div>
         <p className='ghana-muted'>
           The monitor sampled {Math.round(month.dataValueCoverage * 100)}% of the time elapsed in
-          {" "}{monthLabel}, not of all 31 days. The recorded-GB ratio is especially high when
+          {" "}{monthLabel}, not of the entire calendar month. The recorded-GB ratio is especially high when
           history is incomplete. Projected full-month effective cost: {ghs(month.projectedPerGb)}/GB
           ({month.monthlyDataQuality.label.toLowerCase()}).
         </p>
