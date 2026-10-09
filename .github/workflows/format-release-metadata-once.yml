@@ -1,0 +1,34 @@
+# One-time branch housekeeping. This workflow deletes itself in its formatting
+# commit, so no maintenance or permissions remain on the production branch.
+name: Format release metadata fix
+on:
+  push:
+    branches: ["fix/website-release-v153-fallback"]
+    paths: [".github/workflows/format-release-metadata-once.yml"]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/website-release-v153-fallback
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Use repository Prettier settings on edited files
+        run: |
+          npx prettier --write landing/scripts/check-site-153.mjs landing/src/lib/releaseTags.mjs landing/src/scripts/release-download.ts
+          git diff --check
+      - name: Commit formatting and remove the temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add landing/scripts/check-site-153.mjs landing/src/lib/releaseTags.mjs landing/src/scripts/release-download.ts
+          git rm .github/workflows/format-release-metadata-once.yml
+          git commit -m "Format release checker and remove temporary formatting workflow"
+          git push origin HEAD:fix/website-release-v153-fallback
