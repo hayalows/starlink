@@ -1,3 +1,5 @@
+import { isMonitorReleaseAtLeast, parseMonitorReleaseTag } from "../lib/releaseTags.mjs";
+
 // The release label and ZIP link always come from the same GitHub release.
 // A pinned, confirmed published release in HTML remains available if the GitHub API is offline.
 type GithubRelease = {
@@ -10,6 +12,8 @@ type GithubRelease = {
 const ZIP_NAME = "starlink-ghana-monitor-chrome.zip";
 const KNOWN_BASE = "https://github.com/hayalows/starlink/releases/download/";
 const RELEASES_URL = "https://github.com/hayalows/starlink/releases";
+// Confirmed public GitHub release, also pinned in index.astro for offline fallback.
+const PINNED_TAG = "monitor-v1.5.3";
 const releaseLabels = document.querySelectorAll<HTMLElement>("[data-release-version]");
 const releaseDownloads = document.querySelectorAll<HTMLAnchorElement>("[data-release-download]");
 const releaseNotes = document.querySelectorAll<HTMLAnchorElement>("[data-release-notes]");
@@ -25,15 +29,21 @@ async function syncRelease() {
     if (!response.ok) throw new Error("Release check unavailable");
     const release = (await response.json()) as GithubRelease;
     const tag = release.tag_name ?? "";
-    const match = /^monitor-v(\d+\.\d+\.\d+)-[a-zA-Z0-9]+$/.exec(tag);
+    const parsed = parseMonitorReleaseTag(tag);
     const asset = release.assets?.find((entry) => entry.name === ZIP_NAME);
     const packageUrl = asset?.browser_download_url ?? "";
     const expectedUrl = KNOWN_BASE + encodeURIComponent(tag) + "/" + ZIP_NAME;
-    if (!match || packageUrl !== expectedUrl || !asset?.size || asset.size <= 0) {
+    if (
+      !parsed ||
+      !isMonitorReleaseAtLeast(tag, PINNED_TAG) ||
+      packageUrl !== expectedUrl ||
+      !asset?.size ||
+      asset.size <= 0
+    ) {
       throw new Error("Release has no verified Chrome package");
     }
 
-    const version = "v" + match[1];
+    const version = parsed.version;
     releaseLabels.forEach((label) => { label.textContent = version; });
     releaseDownloads.forEach((link) => {
       link.href = packageUrl;
@@ -55,7 +65,7 @@ async function syncRelease() {
     // Keep the specific release linked and named in static HTML, not a
     // vague "latest" URL whose contents could differ from the displayed version.
     if (releaseFeedback) releaseFeedback.textContent =
-      "Showing the published v1.4.0 ZIP. Check GitHub releases for newer versions.";
+      "Showing the published v1.5.3 Chrome ZIP. Check GitHub releases for newer versions.";
     const link = document.createElement("a");
     link.href = RELEASES_URL;
     link.target = "_blank";
