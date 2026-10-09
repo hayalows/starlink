@@ -13,6 +13,7 @@ const ZIP_NAME = "starlink-ghana-monitor-chrome.zip";
 const KNOWN_BASE = "https://github.com/hayalows/starlink/releases/download/";
 const RELEASES_URL = "https://github.com/hayalows/starlink/releases";
 // Confirmed public GitHub release, also pinned in index.astro for offline fallback.
+// A new published release may use either a plain version tag or the older hash-suffixed form.
 const PINNED_TAG = "monitor-v1.5.3";
 const releaseLabels = document.querySelectorAll<HTMLElement>("[data-release-version]");
 const releaseDownloads = document.querySelectorAll<HTMLAnchorElement>("[data-release-download]");
