@@ -250,7 +250,7 @@
     el("cost-total").textContent = money(period?.cost);
     el("last-reading").textContent = ago(latest);
     el("last-upload").textContent = ago(updated);
-    el("today-coverage").textContent = Math.round((today?.coverage || 0) * 100) + "%";
+    el("today-coverage").textContent = Math.round((today?.coverage || 0) * 100) + "% of elapsed day";
     el("recorder-icon").classList.toggle("is-stale", !fresh);
     el("recorder-icon").setAttribute(
       "aria-label",
@@ -325,7 +325,9 @@
       ? amount(trackedGb) +
         " GB counted across " +
         devices.length +
-        " device groups this month. Shares are based on router counters."
+        " device groups this month. Dish WAN readings show " +
+        (Number.isFinite(month?.gb) ? amount(month.gb) + " GB" : "a separate total") +
+        ". These meters can differ, so device shares are estimates."
       : "No synced router-device history yet. Check the Devices panel on your laptop.";
     for (const [i, device] of devices.entries()) {
       const row = document.createElement("div");
