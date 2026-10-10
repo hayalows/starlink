@@ -132,29 +132,3 @@ jobs:
           name: dishylink-windows-installer
           path: release/*.exe
           if-no-files-found: error
-
-  # Temporary trusted one-time formatter, removed before merging this branch.
-  format-rescue-final:
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feat/ghana-v160-recovery-vault' }}
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: feat/ghana-v160-recovery-vault
-          persist-credentials: true
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci --no-audit --no-fund
-      - run: |
-          npx prettier --write core/ghanaArchive.ts core/ghanaRescue.ts core/ghanaRescue.test.ts extension/lib/archiveVault.ts extension/lib/localRescue.ts extension/entrypoints/background.ts extension/entrypoints/dashboard/main.tsx src/components/ghana/HistoryVault.tsx src/components/ghana/PhoneConnect.tsx src/lib/ghanaRescueHost.ts supabase/functions/starlink-history-vault/index.ts
-          git config user.name "starlink-v160-format"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "Format completed v1.6 local and cloud resilience code"
-            git push origin HEAD:feat/ghana-v160-recovery-vault
-          fi
