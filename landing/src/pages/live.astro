@@ -124,6 +124,12 @@ import Base from "../layouts/Base.astro";
             <div class="phone-cost-line"><span>Today's coverage</span><strong id="today-coverage">—</strong></div>
             <p class="phone-fine" id="recorder-description">Your laptop records while Chrome runs. A previous reading is not a live signal.</p>
           </section>
+          <section class="phone-panel" aria-label="Download history backup">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">HISTORY SAFETY</span><h2>Your recovery copy</h2></div><span class="phone-chart-unit"><span class="ui-icon ui-icon--shield-01" aria-hidden="true"></span> VAULT</span></div>
+            <p class="phone-fine">If you enable History vault in the desktop extension, your paired phone can download a complete backup of archived minute readings. Keep it outside Chrome to protect against browser storage loss.</p>
+            <p id="phone-vault-status" class="phone-fine" role="status">Checking archived history…</p>
+            <button class="phone-button phone-button-primary" type="button" id="download-vault" disabled><span class="ui-icon ui-icon--download-01" aria-hidden="true"></span> Download archived minutes</button>
+          </section>
           <section class="phone-panel">
             <div class="phone-panel-head"><div><span class="phone-eyebrow">YOUR PHONE</span><h2>Install the app</h2></div><span class="phone-chart-unit"><span class="ui-icon ui-icon--monitor-01" aria-hidden="true"></span> PWA</span></div>
             <p class="phone-fine">Add this monitor to your home screen for a standalone, app-like experience. No App Store or account required.</p>
@@ -146,5 +152,5 @@ import Base from "../layouts/Base.astro";
       <button type="button" data-view="connection"><span aria-hidden="true"><span class="ui-icon ui-icon--wifi" aria-hidden="true"></span></span>Connection</button>
     </nav>
   </div>
-  <script type="module" is:inline src="/phone.js?v=153"></script>
+  <script type="module" is:inline src="/phone.js?v=160"></script>
 </Base>
