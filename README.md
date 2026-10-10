@@ -4,11 +4,13 @@ A Ghana-focused extension and calculator built on [Dishylink](https://github.com
 
 **[Open the Ghana calculator](https://starlink-ghana.vercel.app)** · [Privacy policy](https://starlink-ghana.vercel.app/privacy/) · [Chrome Web Store preparation](docs/chrome-web-store/README.md) · **[Download the latest Chrome extension](https://github.com/hayalows/starlink/releases/latest/download/starlink-ghana-monitor-chrome.zip)** · [Release notes and update instructions](docs/ghana-release-notes.md)
 
-## Phone companion (v1.5.2)
+## Phone companion and history recovery (v1.6.0)
 
 Open [the installable mobile dashboard](https://starlink-ghana.vercel.app/live/) on your iPhone or any browser. Use Safari's Share → Add to Home Screen to install as a PWA. The companion now has Overview, Costs, Devices and Connection tabs. No sign-in: from the **Chrome extension → Overview → Phone companion**, select **Connect my phone**, then open the private pairing link on your phone. Summary usage, energy and cedi cost estimates sync approximately every ten minutes while Chrome is running. When the laptop is off, the phone accurately shows the last saved snapshot instead of claiming live connectivity.
 
-Pairing is protected by separate long random read/write tokens. Only aggregated metrics are uploaded, not Starlink sign-in cookies or household device names. Phone cloud storage is an isolated table in the owner's existing free PostgreSQL project. Full setup, limitations, revocation and component reference notes: [Phone sync documentation](docs/phone-sync/README.md).
+Pairing is protected by separate long random read/write tokens. Normal phone snapshots upload aggregated metrics, including opted-in device display names but not Starlink sign-in cookies or MAC addresses. Phone cloud storage is an isolated table in the owner's existing free PostgreSQL project.
+
+**History protection added in v1.6.0:** The Chrome extension now also maintains a rolling, independent `chrome.storage.local` copy of recent genuine minute measurements while Chrome runs; it can recover from an IndexedDB-only reset, but not an entire Chrome-profile loss. The new **History vault** in Overview provides an optional off-device Supabase minute archive, independently protected with the existing private pairing capability. Backups are append-only and only finalized minutes are uploaded; restoring merges missing minutes without overwriting current history. A paired phone can download a portable archive JSON. Enable the vault explicitly because detailed minute readings can reveal household activity. The old Oct 8 CSV is an aggregate, not an invented minute-level record. [Release details](docs/ghana-release-notes.md). Full setup, limitations, revocation and component reference notes: [Phone sync documentation](docs/phone-sync/README.md).
 
 ## What Ghana Monitor adds
 
@@ -18,7 +20,7 @@ Pairing is protected by separate long random read/write tokens. Only aggregated 
 - Your own mobile-bundle comparison, a night-time power scenario and CSV exports.
 - Version checking and a repeatable extension release workflow.
 
-The public website is a calculator and optional local-collector viewer. It cannot directly read your dish or the extension's private history. For live readings, open the Chrome extension on a computer connected to the Starlink LAN. Keep Chrome running to record. The extension writes history to local IndexedDB. Its manual version check contacts the public website, without sending readings or account details.
+The public website is a calculator and optional local-collector viewer. It cannot directly read your dish or the extension's private history. For live readings, open the Chrome extension on a computer connected to the Starlink LAN. Keep Chrome running to record. The extension records primarily to local IndexedDB, mirrors recent data in a separate local storage area and supports optional off-device archive if explicitly enabled. Its manual version check contacts the public website without sharing readings or account details.
 
 ## Install or update
 
