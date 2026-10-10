@@ -59,6 +59,12 @@ export default defineConfig({
     permissions: [
       "alarms",
       "storage",
+      // Independent 14-day rescue mirror can grow as history accumulates,
+      // especially when the primary IndexedDB has been lost. Chrome's default
+      // storage.local quota is 10 MB. Do not allow a quota limit to silently
+      // disable crash-recovery protection. This also protects IndexedDB from
+      // normal storage quota eviction, per Chrome extension storage guidance.
+      "unlimitedStorage",
       "cookies",
       "notifications",
       "declarativeNetRequestWithHostAccess",
