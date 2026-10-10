@@ -5,7 +5,7 @@
 create table if not exists public.starlink_archive_minutes (
   monitor_id uuid not null,
   minute bigint not null,
-  samples smallint not null check (samples between 0 and 120),
+  samples smallint not null check (samples between 0 and 62),
   watt_seconds double precision not null check (watt_seconds >= 0 and watt_seconds <= 600000),
   downlink_bits double precision check (downlink_bits is null or (downlink_bits >= 0 and downlink_bits <= 1e16)),
   uplink_bits double precision check (uplink_bits is null or (uplink_bits >= 0 and uplink_bits <= 1e16)),
