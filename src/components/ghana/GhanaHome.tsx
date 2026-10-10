@@ -7,6 +7,7 @@ import { ghanaHost } from "../../lib/ghanaHost";
 import { BackupRestore } from "./BackupRestore";
 import { MonitorUpdates } from "../data-usage/MonitorUpdates";
 import { PhoneConnect } from "./PhoneConnect";
+import { HistoryVault } from "./HistoryVault";
 import { phoneSyncHost } from "../../lib/phoneSyncHost";
 export function GhanaHome({
   status,
@@ -184,6 +185,7 @@ export function GhanaHome({
         </button>
       </section>
       {phoneSyncHost() && <PhoneConnect />}
+      {phoneSyncHost() && <HistoryVault />}
       <section className='ghana-section'>
         <h2>What needs your attention?</h2>
         {!connected ? (
