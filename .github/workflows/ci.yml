@@ -132,3 +132,30 @@ jobs:
           name: dishylink-windows-installer
           path: release/*.exe
           if-no-files-found: error
+
+  # Temporary workflow used ONLY on this feature branch. Remove before merge.
+  format-recovery-once:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'feat/ghana-v160-recovery-vault' }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/ghana-v160-recovery-vault
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: |
+          npx prettier --write core/ghanaArchive.ts extension/entrypoints/dashboard/main.tsx extension/lib/archiveVault.ts landing/api/archive.ts landing/public/phone.js src/components/ghana/HistoryVault.tsx supabase/functions/starlink-history-vault/index.ts
+          rm -f .github/workflows/recovery-format-once.yml
+          git config user.name "starlink-v160-format"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Format v1.6 recovery source safely"
+            git push origin HEAD:feat/ghana-v160-recovery-vault
+          fi
