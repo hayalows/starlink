@@ -3,6 +3,13 @@ export interface GhanaHistoryBackup {
   minutes: MinuteBucket[];
   months: MonthBucket[];
 }
+
+// The recorder can persist 61–62 samples in a wall-clock minute when a drain
+// crosses timestamp boundaries. Treat those as recoverable originals, not as
+// evidence that the archive should be normalized or re-scaled. Coverage
+// calculations already cap a minute at 60 seconds. Larger anomalies still
+// require a separate integrity investigation before restoration.
+const MAX_RECOVERABLE_MINUTE_SAMPLES = 62;
 export function validateHistory(value: unknown, now = Date.now()): GhanaHistoryBackup {
   if (!value || typeof value !== "object") throw Error("This file has no supported history.");
   const v = value as Partial<GhanaHistoryBackup>;
@@ -22,7 +29,7 @@ export function validateHistory(value: unknown, now = Date.now()): GhanaHistoryB
       !number(b.minute, now / 1000 + 60) ||
       b.minute % 60 !== 0 ||
       keys.has(b.minute) ||
-      !number(b.samples, 60) ||
+      !number(b.samples, MAX_RECOVERABLE_MINUTE_SAMPLES) ||
       !number(b.wattSeconds, 600000) ||
       !number(b.downlinkBits ?? 0, 1e16) ||
       !number(b.uplinkBits ?? 0, 1e16)

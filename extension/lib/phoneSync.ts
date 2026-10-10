@@ -15,7 +15,7 @@ type SyncResult = { paired: boolean; url?: string; lastSync?: number; error?: st
 const num = (value: unknown) =>
   typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
 
-async function readPair(): Promise<Pair | null> {
+export async function readPair(): Promise<Pair | null> {
   const record = (await browser.storage.local.get(STORAGE_KEY))[STORAGE_KEY] as Pair | undefined;
   return record?.writeToken && record?.viewToken ? record : null;
 }
@@ -161,7 +161,7 @@ export async function syncPhoneNow(): Promise<void> {
         snapshot: {
           version: 1,
           calculationVersion: 2,
-          sourceVersion: "1.5.2",
+          sourceVersion: "1.6.0",
           recordedAt: now.getTime(),
           latestSampleAt: Math.max(
             ...Object.values(insights.periods).map((p) => p.current.latest),

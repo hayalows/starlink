@@ -1,3 +1,18 @@
+Starlink Ghana Monitor 1.6.0 — history vault and recovery protection
+
+- Add a rolling 14-day local safety copy in Chrome extension settings storage, independent of IndexedDB and written every ten minutes even without phone pairing. Old rescue days are pruned only after the primary database is verified to contain at least the same readings; restore only missing minutes.
+- Add a private, separately enabled minute-by-minute history vault independent of Chrome IndexedDB. Reads and writes require the existing 256-bit phone pairing capability; uploads contain traffic/energy measurements only, never account credentials, MACs, device labels or browser history.
+- Back up finalized minute records every ten minutes while Chrome is running. Send recent settled minutes even during initial history backfill; archive writes are append-only and cannot erase earlier remote history if local Chrome storage resets.
+- Add Overview → History vault showing local/remote minute counts, latest archived timestamp, successful upload time, explicit opt-in, manual backup continuation, and a merge-only restore for missing minutes.
+- Add an independent phone companion download of the private cloud archive as a validated Starlink backup JSON. Keep that file outside Chrome to recover after a profile or extension-ID loss.
+- Restore by adding only missing verified timestamps; preserve new recordings, current collector cursor, settings and phone pairing. Never invent a minute from an old summary or screenshot.
+- Accept observed 61–62 sample minute records during backup validation without truncating energy or traffic, and reject abnormal larger sample counts. Add regression tests for this behavior and settled-minute batching.
+- Keep the current Chrome extension ID unchanged. Update in place by replacing files in the same installation folder and reloading the existing card. Never uninstall or clear browser data to update.
+- Add a separate RLS-protected Supabase archive table and Edge Function. Cloud archival is optional and uses the existing free Supabase project; large histories consume quota and are not end-to-end encrypted.
+- Do not claim full recovery of the October 1–9 readings. The October 8 CSV preserves real aggregates but cannot recreate absent minute measurements. The archive begins protecting minute records after it is enabled.
+
+---
+
 Starlink Ghana Monitor 1.5.3 — trustworthy cost and coverage explanations
 
 - Fix monthly GH₵ per observed GB changing when Today, Week or Billing cycle is selected: all views now use the same month-wide forecast and measured monthly GB.

@@ -1,4 +1,6 @@
 import { handlePhoneSync, startPhoneSync, syncPhoneNow } from "../lib/phoneSync";
+import { handleVaultAction, vaultUploadNow } from "../lib/archiveVault";
+import { handleRescueAction, rescueNow } from "../lib/localRescue";
 import { checkGhanaBudgetAlerts } from "../lib/ghanaBudgetAlerts";
 import { defineBackground } from "#imports";
 import { browser } from "wxt/browser";
@@ -274,6 +276,14 @@ export default defineBackground(() => {
     // worker is the only context with chrome.notifications — so a real alert and
     // the toggle's confirmation take the exact same path. One fixed key, so
     // toggling on repeatedly replaces the confirmation rather than stacking it.
+    if (request.type === "ghanaRescue") {
+      const rescueRequest = message as { action?: string };
+      return handleRescueAction(rescueRequest.action ?? "status");
+    }
+    if (request.type === "ghanaVault") {
+      const vaultRequest = message as { action?: string };
+      return handleVaultAction(vaultRequest.action ?? "status");
+    }
     if (request.type === "phoneSync") {
       const syncRequest = message as { action?: string };
       return handlePhoneSync(syncRequest.action ?? "status");
@@ -393,6 +403,8 @@ export default defineBackground(() => {
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "drain") void runDrain();
     if (alarm.name === "ghanaPhoneSync") void syncPhoneNow().catch(() => {});
+    if (alarm.name === "ghanaPhoneSync") void vaultUploadNow().catch(() => {});
+    if (alarm.name === "ghanaPhoneSync") void rescueNow().catch(() => {});
     if (alarm.name === "compactEnergy") void runCompactEnergy();
   });
   // A worker that just started (install, browser launch, or wake) drains at once
