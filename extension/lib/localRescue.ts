@@ -22,8 +22,11 @@ const dayStart = (key: string) => Date.parse(key + "T00:00:00.000Z") / 1000;
 async function indexDays(): Promise<string[]> {
   const data = (await browser.storage.local.get(INDEX))[INDEX];
   return Array.isArray(data)
-    ? [...new Set(data.filter((d): d is string => typeof d === "string" &&
-        /^\d{4}-\d{2}-\d{2}$/.test(d)))].sort()
+    ? [
+        ...new Set(
+          data.filter((d): d is string => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)),
+        ),
+      ].sort()
     : [];
 }
 async function readDay(key: string): Promise<MinuteBucket[]> {
@@ -71,32 +74,49 @@ export async function rescueNow(): Promise<RescueState> {
       const cutoff = nowSec - LOCAL_RESCUE_DAYS * DAY;
       const remaining: string[] = [];
       for (const key of keys) {
-        if (dayStart(key) >= cutoff) { remaining.push(key); continue; }
+        if (dayStart(key) >= cutoff) {
+          remaining.push(key);
+          continue;
+        }
         const rescued = await readDay(key);
         const original = await db.readMinutes(dayStart(key), dayStart(key) + DAY - 1);
         const inPrimary = new Map(original.map((r) => [r.minute, r]));
         // A coincident timestamp is not enough: verify that the primary still
         // holds at least the energy and traffic evidence we're about to prune.
-        const verified = rescued.length > 0 && rescued.every((row) => {
-          const stored = inPrimary.get(row.minute);
-          return stored && stored.samples >= row.samples &&
-            stored.wattSeconds >= row.wattSeconds &&
-            (stored.downlinkBits ?? 0) >= (row.downlinkBits ?? 0) &&
-            (stored.uplinkBits ?? 0) >= (row.uplinkBits ?? 0);
-        });
+        const verified =
+          rescued.length > 0 &&
+          rescued.every((row) => {
+            const stored = inPrimary.get(row.minute);
+            return (
+              stored &&
+              stored.samples >= row.samples &&
+              stored.wattSeconds >= row.wattSeconds &&
+              (stored.downlinkBits ?? 0) >= (row.downlinkBits ?? 0) &&
+              (stored.uplinkBits ?? 0) >= (row.uplinkBits ?? 0)
+            );
+          });
         if (verified) {
           await browser.storage.local.remove(PREFIX + key);
         } else remaining.push(key);
       }
       await browser.storage.local.set({ [INDEX]: remaining, [LAST]: Date.now() });
       return rescueStatus();
-    } finally { db.close(); }
-  })().catch(async (error): Promise<RescueState> => ({
-    ...(await rescueStatus().catch(() => ({
-      count: 0, days: 0, newest: null, lastGood: 0,
-    }))),
-    error: error instanceof Error ? error.message : "Local safety copy failed",
-  })).finally(() => { pending = null; });
+    } finally {
+      db.close();
+    }
+  })()
+    .catch(async (error): Promise<RescueState> => ({
+      ...(await rescueStatus().catch(() => ({
+        count: 0,
+        days: 0,
+        newest: null,
+        lastGood: 0,
+      }))),
+      error: error instanceof Error ? error.message : "Local safety copy failed",
+    }))
+    .finally(() => {
+      pending = null;
+    });
   return pending;
 }
 export async function rescueRestore(): Promise<RescueState> {
@@ -109,9 +129,14 @@ export async function rescueRestore(): Promise<RescueState> {
       if (rows.length) added += await db.mergeGhanaHistory({ minutes: rows, months: [] });
     }
   } catch (error) {
-    return { ...(await rescueStatus()), restored: added,
-      error: error instanceof Error ? error.message : "Local restore failed" };
-  } finally { db.close(); }
+    return {
+      ...(await rescueStatus()),
+      restored: added,
+      error: error instanceof Error ? error.message : "Local restore failed",
+    };
+  } finally {
+    db.close();
+  }
   return { ...(await rescueStatus()), restored: added };
 }
 export async function handleRescueAction(action: string): Promise<RescueState> {

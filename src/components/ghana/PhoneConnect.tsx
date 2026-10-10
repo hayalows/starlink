@@ -49,9 +49,13 @@ export function PhoneConnect() {
     };
   }, []);
   async function run(action: "create" | "sync" | "disconnect") {
-    if (action === "disconnect" && !window.confirm(
-      "Disconnecting revokes your phone pairing and may leave any optional History vault backup inaccessible. Download your cloud archive on your paired phone before disconnecting. Continue?",
-    )) return;
+    if (
+      action === "disconnect" &&
+      !window.confirm(
+        "Disconnecting revokes your phone pairing and may leave any optional History vault backup inaccessible. Download your cloud archive on your paired phone before disconnecting. Continue?",
+      )
+    )
+      return;
     setBusy(true);
     setMessage("");
     try {

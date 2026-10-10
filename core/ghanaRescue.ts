@@ -20,7 +20,8 @@ export function mergeRescueMinutes(
       incoming.wattSeconds >= existing.wattSeconds &&
       (incoming.downlinkBits ?? 0) >= (existing.downlinkBits ?? 0) &&
       (incoming.uplinkBits ?? 0) >= (existing.uplinkBits ?? 0)
-    ) rows.set(incoming.minute, incoming);
+    )
+      rows.set(incoming.minute, incoming);
   }
   return [...rows.values()].sort((a, b) => a.minute - b.minute);
 }

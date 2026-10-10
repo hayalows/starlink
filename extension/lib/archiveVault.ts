@@ -121,10 +121,14 @@ export async function vaultUploadNow(backfill = false): Promise<VaultState> {
         const plan = archiveBatchPlan(rows, Date.now() / 1000, cursor);
         rejected = Math.max(rejected, plan.rejectedCount);
         if (i === 0) {
-          const lastSent = Number((await browser.storage.local.get(LAST_SUCCESS))[LAST_SUCCESS]) || 0;
+          const lastSent =
+            Number((await browser.storage.local.get(LAST_SUCCESS))[LAST_SUCCESS]) || 0;
           const fresh = plan.recent.filter((row) => row.minute >= lastSent / 1000 - 300);
           for (let offset = 0; offset < fresh.length; offset += VAULT_BATCH_LIMIT) {
-            uploaded += await uploadBatch(pair.writeToken, fresh.slice(offset, offset + VAULT_BATCH_LIMIT));
+            uploaded += await uploadBatch(
+              pair.writeToken,
+              fresh.slice(offset, offset + VAULT_BATCH_LIMIT),
+            );
           }
         }
         if (plan.older.length) {

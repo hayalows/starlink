@@ -11,5 +11,9 @@ export interface RescueHost {
   send(action: RescueAction): Promise<RescueState>;
 }
 let host: RescueHost | null = null;
-export function setRescueHost(next: RescueHost) { host = next; }
-export function rescueHost(): RescueHost | null { return host; }
+export function setRescueHost(next: RescueHost) {
+  host = next;
+}
+export function rescueHost(): RescueHost | null {
+  return host;
+}
