@@ -160,6 +160,13 @@ export function HistoryVault() {
           </div>
         </>
       )}
+      {local && state && state.localMinutes !== undefined && local.count > state.localMinutes && (
+        <p className='ghana-muted' role='alert'>
+          A local safety copy contains more minute records than the main history database.
+          Your history may have reset. Choose Restore local missing minutes below before
+          replacing the extension or deleting any files.
+        </p>
+      )}
       <div className='ghana-inset' aria-label='Independent local rescue copy'>
         <h3>Local safety copy</h3>
         <p className='ghana-muted'>
