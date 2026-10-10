@@ -19,6 +19,7 @@ assert.ok(existsSync(join(build, "icon/128.png")), "128px icon missing");
 const allowed = new Set([
   "alarms",
   "storage",
+  "unlimitedStorage", // Reviewed: keep independent 14-day recovery mirror from hitting 10 MB limit.
   "cookies",
   "notifications",
   "declarativeNetRequestWithHostAccess",
