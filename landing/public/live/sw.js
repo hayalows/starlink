@@ -1,10 +1,10 @@
 /* Minimal private-monitor PWA shell, versioned separately from public site.
  * Cache STATIC APP ASSETS only; never monitor API requests, credentials,
  * private response bodies or URLs that could contain pairing tokens. */
-const CACHE = "starlink-phone-shell-153";
+const CACHE = "starlink-phone-shell-160";
 const STATIC = [
   "/live/",
-  "/phone.js?v=153",
+  "/phone.js?v=160",
   "/phone.css?v=153",
   "/phone-refine.css?v=153",
   "/ui-icons.css?v=153",
