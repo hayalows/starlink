@@ -1,0 +1,33 @@
+# One-time correction of duplicate v1.6.0 release; workflow deletes itself.
+name: Promote canonical v1.6.0 release
+on:
+  push:
+    branches: [master]
+    paths: [".github/workflows/promote-v160-once.yml"]
+permissions:
+  contents: write
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Confirm verified package assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view monitor-v1.6.0 --json assets --jq '.assets[].name' | grep -Fx 'starlink-ghana-monitor-chrome.zip'
+          gh release view monitor-v1.6.0 --json assets --jq '.assets[].name' | grep -Fx 'starlink-ghana-monitor-chrome.zip.sha256'
+      - name: Mark canonical package latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit monitor-v1.6.0 --latest
+      - name: Remove temporary workflow
+        run: |
+          rm .github/workflows/promote-v160-once.yml
+          git config user.name "starlink-release-automation"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/promote-v160-once.yml
+          git commit -m "Finalize canonical 1.6.0 release selection"
+          git push origin HEAD:master
