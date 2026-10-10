@@ -1,5 +1,6 @@
 Starlink Ghana Monitor 1.6.0 — history vault and recovery protection
 
+- Add a rolling 14-day local safety copy in Chrome extension settings storage, independent of IndexedDB and written every ten minutes even without phone pairing. Old rescue days are pruned only after the primary database is verified to contain at least the same readings; restore only missing minutes.
 - Add a private, separately enabled minute-by-minute history vault independent of Chrome IndexedDB. Reads and writes require the existing 256-bit phone pairing capability; uploads contain traffic/energy measurements only, never account credentials, MACs, device labels or browser history.
 - Back up finalized minute records every ten minutes while Chrome is running. Send recent settled minutes even during initial history backfill; archive writes are append-only and cannot erase earlier remote history if local Chrome storage resets.
 - Add Overview → History vault showing local/remote minute counts, latest archived timestamp, successful upload time, explicit opt-in, manual backup continuation, and a merge-only restore for missing minutes.
