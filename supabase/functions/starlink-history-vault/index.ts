@@ -80,7 +80,7 @@ function normalizedRow(value: unknown, nowSec: number) {
   if (
     !valid(r.minute, nowSec + 60) ||
     (r.minute as number) % 60 !== 0 ||
-    !valid(r.samples, 120) ||
+    !valid(r.samples, 62) ||
     !Number.isInteger(r.samples) ||
     !valid(r.wattSeconds, 600000) ||
     (r.downlinkBits != null && !valid(r.downlinkBits, 1e16)) ||
