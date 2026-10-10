@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { ghanaVaultHost, type VaultAction, type VaultState } from "../../lib/ghanaVaultHost";
+import { rescueHost, type RescueAction, type RescueState } from "../../lib/ghanaRescueHost";
 
 export function HistoryVault() {
   const host = ghanaVaultHost();
+  const rescue = rescueHost();
+  const [local, setLocal] = useState<RescueState | null>(null);
+  const [localBusy, setLocalBusy] = useState(false);
+  const [localMessage, setLocalMessage] = useState("");
   const [state, setState] = useState<VaultState | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -22,6 +27,32 @@ export function HistoryVault() {
       alive = false;
     };
   }, [host]);
+  useEffect(() => {
+    let alive = true;
+    if (rescue) void rescue.send("status").then((result) => {
+      if (alive) setLocal(result);
+    }).catch(() => {
+      if (alive) setLocalMessage("Could not inspect local rescue storage.");
+    });
+    return () => { alive = false; };
+  }, [rescue]);
+  async function localAct(action: RescueAction) {
+    if (action === "restore" && !window.confirm(
+      "Merge missing minute records from the independent Chrome safety copy? Existing readings and recent recordings will not be overwritten.",
+    )) return;
+    setLocalBusy(true);
+    try {
+      const result = await rescue!.send(action);
+      setLocal(result);
+      setLocalMessage(result.error
+        ? "Local protection needs attention: " + result.error
+        : action === "restore"
+          ? `Restored ${result.restored ?? 0} missing minute records without replacing current history.`
+          : `Protected ${result.count.toLocaleString()} minutes across ${result.days} days.`);
+    } catch {
+      setLocalMessage("Could not complete the local recovery operation.");
+    } finally { setLocalBusy(false); }
+  }
   if (!host) return null;
   async function act(action: VaultAction) {
     if (
@@ -129,6 +160,32 @@ export function HistoryVault() {
           </div>
         </>
       )}
+      <div className='ghana-inset' aria-label='Independent local rescue copy'>
+        <h3>Local safety copy</h3>
+        <p className='ghana-muted'>
+          Automatic every ten minutes while Chrome runs. A rolling copy of recent actual
+          readings is stored separately from IndexedDB in Chrome's extension settings
+          storage. It can survive an isolated IndexedDB reset but not a whole-profile wipe.
+        </p>
+        <p className='ghana-muted' role='status'>
+          {local === null ? "Checking local safety…" :
+            `${local.count.toLocaleString()} saved minute records · ${local.days} protected days`}
+          {local?.lastGood ? " · Last checked " +
+            new Date(local.lastGood).toLocaleString("en-GH") : ""}
+        </p>
+        <div className='ghana-actions'>
+          <button className='ghana-button' type='button'
+            disabled={localBusy || !rescue} onClick={() => void localAct("sync")}>
+            Save local safety copy now
+          </button>
+          <button className='ghana-button' type='button'
+            disabled={localBusy || !rescue || !local?.count}
+            onClick={() => void localAct("restore")}>
+            Restore local missing minutes
+          </button>
+        </div>
+        {localMessage && <p role='status' className='ghana-muted'>{localMessage}</p>}
+      </div>
       <p className='ghana-muted'>
         Opt-in privacy: the vault stores raw minute-level usage, timestamps and dish energy, not
         device names, account credentials or browsing history. Access is guarded by your existing
