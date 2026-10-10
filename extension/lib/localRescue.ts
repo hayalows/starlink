@@ -74,8 +74,17 @@ export async function rescueNow(): Promise<RescueState> {
         if (dayStart(key) >= cutoff) { remaining.push(key); continue; }
         const rescued = await readDay(key);
         const original = await db.readMinutes(dayStart(key), dayStart(key) + DAY - 1);
-        const inPrimary = new Set(original.map((r) => r.minute));
-        if (rescued.length && rescued.every((row) => inPrimary.has(row.minute))) {
+        const inPrimary = new Map(original.map((r) => [r.minute, r]));
+        // A coincident timestamp is not enough: verify that the primary still
+        // holds at least the energy and traffic evidence we're about to prune.
+        const verified = rescued.length > 0 && rescued.every((row) => {
+          const stored = inPrimary.get(row.minute);
+          return stored && stored.samples >= row.samples &&
+            stored.wattSeconds >= row.wattSeconds &&
+            (stored.downlinkBits ?? 0) >= (row.downlinkBits ?? 0) &&
+            (stored.uplinkBits ?? 0) >= (row.uplinkBits ?? 0);
+        });
+        if (verified) {
           await browser.storage.local.remove(PREFIX + key);
         } else remaining.push(key);
       }
