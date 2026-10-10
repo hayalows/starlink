@@ -49,6 +49,7 @@
       el("phone-bottom-nav").hidden = false;
       showView("overview");
       void refresh();
+      void checkVault();
       if (!state.timer) state.timer = setInterval(() => void refresh(), 60_000);
     } catch (e) {
       note(e instanceof Error ? e.message : "Could not pair this phone.");
@@ -428,6 +429,85 @@
       clearTimeout(timeout);
     }
   }
+  // Separate, opt-in, append-only minute archive. The private read capability
+  // stays in the Authorization header and is NEVER put into a download.
+  async function vaultRequest(action, before) {
+    const params = new URLSearchParams({ action });
+    if (before !== undefined) params.set("before", String(before));
+    if (action === "read") params.set("limit", "150");
+    const response = await fetch("/api/archive?" + params, {
+      headers: { Authorization: "Bearer " + state.token },
+      credentials: "omit",
+      cache: "no-store",
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!response.ok) throw Error("Archive request failed (" + response.status + ")");
+    return response.json();
+  }
+  async function checkVault() {
+    const label = el("phone-vault-status");
+    if (!state.token || !label) return;
+    try {
+      const summary = await vaultRequest("summary");
+      const count = summary.count;
+      label.textContent = summary.downloadable
+        ? (typeof count === "number" ? count.toLocaleString() : "Saved") +
+          " minute records available. Save an independent copy before replacing Chrome or changing profiles."
+        : "No archived minutes yet. Open Overview → History vault in the laptop extension to enable protection.";
+      el("download-vault").disabled = !summary.downloadable;
+    } catch {
+      label.textContent = "Could not check your history archive. Your laptop's local records are unaffected.";
+      el("download-vault").disabled = true;
+    }
+  }
+  el("download-vault").addEventListener("click", async () => {
+    const button = el("download-vault");
+    const label = el("phone-vault-status");
+    if (!state.token) return;
+    button.disabled = true;
+    try {
+      const all = [];
+      let before = 4102444800;
+      let done = false;
+      // Do not produce a seemingly complete backup if a page fails or if the
+      // browser cannot hold the full archive. Each page is capped by the server.
+      for (let page = 0; page < 2000; page++) {
+        const next = await vaultRequest("read", before);
+        if (!Array.isArray(next.minutes)) throw Error("Invalid archive response");
+        all.push(...next.minutes);
+        label.textContent = "Preparing recovery backup: " + all.length.toLocaleString() + " minutes read…";
+        if (!next.hasMore || !next.minutes.length) {
+          done = true;
+          break;
+        }
+        const cursor = Number(next.nextBefore);
+        if (!Number.isFinite(cursor) || cursor >= before) throw Error("Invalid archive cursor");
+        before = cursor;
+      }
+      if (!done) throw Error("Archive exceeds phone download limit. Use the desktop recovery tool for very large histories.");
+      if (!all.length) throw Error("No archived minutes found");
+      const file = {
+        kind: "starlink-ghana-backup",
+        version: 1,
+        createdAt: new Date().toISOString(),
+        settings: {},
+        profiles: {},
+        history: { minutes: all.reverse(), months: [] },
+      };
+      const url = URL.createObjectURL(new Blob([JSON.stringify(file)], { type: "application/json" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "starlink-ghana-vault-" + new Date().toISOString().slice(0, 10) + ".json";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      label.textContent = "Backup prepared: " + all.length.toLocaleString() +
+        " recorded minutes. Keep the file private and outside your browser profile.";
+    } catch (error) {
+      label.textContent = "Download not completed: " + (error instanceof Error ? error.message : "Try again.");
+    } finally {
+      button.disabled = false;
+    }
+  });
   el("pair-form").addEventListener("submit", (event) => {
     event.preventDefault();
     connect(el("pair-code").value);
