@@ -14,7 +14,7 @@ const KNOWN_BASE = "https://github.com/hayalows/starlink/releases/download/";
 const RELEASES_URL = "https://github.com/hayalows/starlink/releases";
 // Confirmed public GitHub release, also pinned in index.astro for offline fallback.
 // A new published release may use either a plain version tag or the older hash-suffixed form.
-const PINNED_TAG = "monitor-v1.5.3";
+const PINNED_TAG = "monitor-v1.6.0";
 const releaseLabels = document.querySelectorAll<HTMLElement>("[data-release-version]");
 const releaseDownloads = document.querySelectorAll<HTMLAnchorElement>("[data-release-download]");
 const releaseNotes = document.querySelectorAll<HTMLAnchorElement>("[data-release-notes]");
@@ -80,7 +80,7 @@ async function syncRelease() {
     // vague "latest" URL whose contents could differ from the displayed version.
     if (releaseFeedback)
       releaseFeedback.textContent =
-        "Showing the published v1.5.3 Chrome ZIP. Check GitHub releases for newer versions.";
+        "Showing the published v1.6.0 Chrome ZIP. Check GitHub releases for newer versions.";
     const link = document.createElement("a");
     link.href = RELEASES_URL;
     link.target = "_blank";
