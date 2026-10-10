@@ -36,7 +36,7 @@ export function archiveBatchPlan(rows: MinuteBucket[], nowSec: number, cursor: n
   const recent = eligible.filter((row) => row.minute >= recentStart);
   return {
     older: older.slice(0, VAULT_BATCH_LIMIT),
-    recent: recent.slice(-VAULT_BATCH_LIMIT),
+    recent,
     olderRemaining: older.length > VAULT_BATCH_LIMIT,
     eligibleCount: eligible.length,
     rejectedCount: Math.max(
