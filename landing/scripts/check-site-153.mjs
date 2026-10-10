@@ -50,7 +50,9 @@ assert.match(
   "SW may intercept private sync requests",
 );
 assert.ok(!sw.includes('"/api/monitor"'), "SW must never cache paired readings");
-assert.ok(sw.includes("shell-153"), "Stale service worker cache");
+assert.ok(sw.includes("shell-160"), "PWA history protection shell is stale");
+assert.match(phone, /id="download-vault"/, "Phone recovery download is unavailable");
+assert.match(phone, /\/phone\.js\?v=160/, "Phone is not running the new recovery code");
 for (const icon of [
   "home-02",
   "coins-01",
