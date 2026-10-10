@@ -50,7 +50,9 @@ async function request(action: string, token: string, body?: unknown, cursor?: n
   if (!response.ok) throw Error(String(data.error || "Vault service HTTP " + response.status));
   return data;
 }
-async function cloudSummary(token: string): Promise<Pick<VaultState, "remoteMinutes" | "oldest" | "newest">> {
+async function cloudSummary(
+  token: string,
+): Promise<Pick<VaultState, "remoteMinutes" | "oldest" | "newest">> {
   const data = await request("summary", token);
   return {
     remoteMinutes: typeof data.count === "number" ? data.count : null,
@@ -70,7 +72,9 @@ export async function vaultStatus(): Promise<VaultState> {
     try {
       const history = await db.exportGhanaHistory();
       state.localMinutes = history.minutes.length;
-    } finally { db.close(); }
+    } finally {
+      db.close();
+    }
     if (pair) Object.assign(state, await cloudSummary(pair.writeToken));
   } catch (error) {
     state.error = error instanceof Error ? error.message : "History check failed";
@@ -79,7 +83,8 @@ export async function vaultStatus(): Promise<VaultState> {
 }
 
 export async function vaultSetEnabled(value: boolean): Promise<VaultState> {
-  if (value && !(await readPair())) return { enabled: false, paired: false, error: "Pair your phone first." };
+  if (value && !(await readPair()))
+    return { enabled: false, paired: false, error: "Pair your phone first." };
   await browser.storage.local.set({ [ENABLED]: value });
   if (value) return vaultUploadNow(true);
   return vaultStatus();
@@ -99,7 +104,8 @@ export async function vaultUploadNow(backfill = false): Promise<VaultState> {
   uploading = (async () => {
     if (!(await enabled())) return { enabled: false, paired: Boolean(await readPair()) };
     const pair = await readPair();
-    if (!pair) return { enabled: true, paired: false, error: "Pair your phone to enable cloud protection." };
+    if (!pair)
+      return { enabled: true, paired: false, error: "Pair your phone to enable cloud protection." };
     const db = await IndexedDbHistory.open();
     let uploaded = 0;
     let rejected = 0;
@@ -125,15 +131,26 @@ export async function vaultUploadNow(backfill = false): Promise<VaultState> {
       }
       const updated = Date.now();
       await browser.storage.local.set({ [LAST_SUCCESS]: updated });
-      return { enabled: true, paired: true, received: uploaded, rejected, more, lastSuccess: updated };
+      return {
+        enabled: true,
+        paired: true,
+        received: uploaded,
+        rejected,
+        more,
+        lastSuccess: updated,
+      };
     } finally {
       db.close();
     }
-  })().catch(async (error): Promise<VaultState> => ({
-    enabled: await enabled(),
-    paired: Boolean(await readPair()),
-    error: error instanceof Error ? error.message : "Cloud archive failed",
-  })).finally(() => { uploading = null; });
+  })()
+    .catch(async (error): Promise<VaultState> => ({
+      enabled: await enabled(),
+      paired: Boolean(await readPair()),
+      error: error instanceof Error ? error.message : "Cloud archive failed",
+    }))
+    .finally(() => {
+      uploading = null;
+    });
   return uploading;
 }
 
@@ -141,8 +158,14 @@ export async function vaultUploadNow(backfill = false): Promise<VaultState> {
  * never overwritten, and the current 30-minute collector window is untouched. */
 export async function vaultRestore(): Promise<VaultState> {
   const pair = await readPair();
-  if (!pair) return { enabled: await enabled(), paired: false, error: "Pairing key unavailable. Download the vault from your previously paired phone." };
-  let cursor = Number((await browser.storage.local.get(RESTORE_CURSOR))[RESTORE_CURSOR]) || 4102444800;
+  if (!pair)
+    return {
+      enabled: await enabled(),
+      paired: false,
+      error: "Pairing key unavailable. Download the vault from your previously paired phone.",
+    };
+  let cursor =
+    Number((await browser.storage.local.get(RESTORE_CURSOR))[RESTORE_CURSOR]) || 4102444800;
   let restored = 0;
   let more = false;
   try {
@@ -151,7 +174,10 @@ export async function vaultRestore(): Promise<VaultState> {
       for (let i = 0; i < MAX_RESTORE_BATCHES; i++) {
         const response = await request("read", pair.writeToken, undefined, cursor);
         const raw = Array.isArray(response.minutes) ? response.minutes : [];
-        if (!raw.length) { more = false; break; }
+        if (!raw.length) {
+          more = false;
+          break;
+        }
         // mergeGhanaHistory validates every numeric field and restores missing
         // rows only. Never silently clip malformed cloud rows.
         const minutes = raw as MinuteBucket[];
@@ -161,22 +187,39 @@ export async function vaultRestore(): Promise<VaultState> {
         await browser.storage.local.set({ [RESTORE_CURSOR]: cursor });
         if (!more) break;
       }
-    } finally { db.close(); }
+    } finally {
+      db.close();
+    }
     if (!more) await browser.storage.local.remove(RESTORE_CURSOR);
     return { enabled: await enabled(), paired: true, restored, more };
   } catch (error) {
-    return { enabled: await enabled(), paired: true, restored, more: true,
-      error: error instanceof Error ? error.message : "Could not restore vault history" };
+    return {
+      enabled: await enabled(),
+      paired: true,
+      restored,
+      more: true,
+      error: error instanceof Error ? error.message : "Could not restore vault history",
+    };
   }
 }
 
 export async function handleVaultAction(action: string): Promise<VaultState> {
   switch (action) {
-    case "status": return vaultStatus();
-    case "enable": return vaultSetEnabled(true);
-    case "disable": return vaultSetEnabled(false);
-    case "sync": return vaultUploadNow(true);
-    case "restore": return vaultRestore();
-    default: return { enabled: await enabled(), paired: Boolean(await readPair()), error: "Unknown vault action" };
+    case "status":
+      return vaultStatus();
+    case "enable":
+      return vaultSetEnabled(true);
+    case "disable":
+      return vaultSetEnabled(false);
+    case "sync":
+      return vaultUploadNow(true);
+    case "restore":
+      return vaultRestore();
+    default:
+      return {
+        enabled: await enabled(),
+        paired: Boolean(await readPair()),
+        error: "Unknown vault action",
+      };
   }
 }

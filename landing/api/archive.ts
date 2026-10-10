@@ -14,8 +14,10 @@ async function forward(request: Request) {
   const action = url.searchParams.get("action");
   if (!["health", "summary", "read", "push"].includes(action ?? ""))
     return Response.json({ error: "not_found" }, { status: 404, headers: HEADERS });
-  if ((request.method === "GET" && action === "push") ||
-      (request.method === "POST" && action !== "push"))
+  if (
+    (request.method === "GET" && action === "push") ||
+    (request.method === "POST" && action !== "push")
+  )
     return Response.json({ error: "method_not_allowed" }, { status: 405, headers: HEADERS });
   if (request.method === "POST" && Number(request.headers.get("content-length") ?? 0) > 90000)
     return Response.json({ error: "payload_too_large" }, { status: 413, headers: HEADERS });
@@ -31,7 +33,8 @@ async function forward(request: Request) {
       method: request.method,
       headers: {
         ...(request.headers.get("authorization")
-          ? { Authorization: request.headers.get("authorization")! } : {}),
+          ? { Authorization: request.headers.get("authorization")! }
+          : {}),
         ...(request.method === "POST" ? { "Content-Type": "application/json" } : {}),
       },
       body: request.method === "POST" ? await request.text() : undefined,

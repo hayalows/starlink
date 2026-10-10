@@ -2,7 +2,9 @@ import { browser } from "wxt/browser";
 import { setPhoneSyncHost } from "@/lib/phoneSyncHost";
 import { setGhanaVaultHost } from "@/lib/ghanaVaultHost";
 setPhoneSyncHost({ send: (action) => browser.runtime.sendMessage({ type: "phoneSync", action }) });
-setGhanaVaultHost({ send: (action) => browser.runtime.sendMessage({ type: "ghanaVault", action }) });
+setGhanaVaultHost({
+  send: (action) => browser.runtime.sendMessage({ type: "ghanaVault", action }),
+});
 import { IndexedDbHistory } from "../../lib/history";
 import { setGhanaHost } from "@/lib/ghanaHost";
 setGhanaHost({

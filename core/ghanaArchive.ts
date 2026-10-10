@@ -7,10 +7,7 @@ export const VAULT_BATCH_LIMIT = 150;
 export const VAULT_SETTLE_SECONDS = 180;
 export const VAULT_RECENT_SECONDS = 6 * 3600;
 
-export function eligibleArchiveMinutes(
-  rows: MinuteBucket[],
-  nowSec: number,
-): MinuteBucket[] {
+export function eligibleArchiveMinutes(rows: MinuteBucket[], nowSec: number): MinuteBucket[] {
   const cutoff = Math.floor(nowSec / 60) * 60 - VAULT_SETTLE_SECONDS;
   return rows
     .filter(
@@ -27,8 +24,7 @@ export function eligibleArchiveMinutes(
         b.wattSeconds <= 600000 &&
         (b.downlinkBits === undefined ||
           (Number.isFinite(b.downlinkBits) && b.downlinkBits >= 0)) &&
-        (b.uplinkBits === undefined ||
-          (Number.isFinite(b.uplinkBits) && b.uplinkBits >= 0)),
+        (b.uplinkBits === undefined || (Number.isFinite(b.uplinkBits) && b.uplinkBits >= 0)),
     )
     .sort((a, b) => a.minute - b.minute);
 }
@@ -43,6 +39,10 @@ export function archiveBatchPlan(rows: MinuteBucket[], nowSec: number, cursor: n
     recent: recent.slice(-VAULT_BATCH_LIMIT),
     olderRemaining: older.length > VAULT_BATCH_LIMIT,
     eligibleCount: eligible.length,
-    rejectedCount: Math.max(0, rows.filter((r) => r.minute < Math.floor(nowSec / 60) * 60 - VAULT_SETTLE_SECONDS).length - eligible.length),
+    rejectedCount: Math.max(
+      0,
+      rows.filter((r) => r.minute < Math.floor(nowSec / 60) * 60 - VAULT_SETTLE_SECONDS).length -
+        eligible.length,
+    ),
   };
 }

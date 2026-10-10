@@ -456,7 +456,8 @@
         : "No archived minutes yet. Open Overview → History vault in the laptop extension to enable protection.";
       el("download-vault").disabled = !summary.downloadable;
     } catch {
-      label.textContent = "Could not check your history archive. Your laptop's local records are unaffected.";
+      label.textContent =
+        "Could not check your history archive. Your laptop's local records are unaffected.";
       el("download-vault").disabled = true;
     }
   }
@@ -475,7 +476,8 @@
         const next = await vaultRequest("read", before);
         if (!Array.isArray(next.minutes)) throw Error("Invalid archive response");
         all.push(...next.minutes);
-        label.textContent = "Preparing recovery backup: " + all.length.toLocaleString() + " minutes read…";
+        label.textContent =
+          "Preparing recovery backup: " + all.length.toLocaleString() + " minutes read…";
         if (!next.hasMore || !next.minutes.length) {
           done = true;
           break;
@@ -484,7 +486,10 @@
         if (!Number.isFinite(cursor) || cursor >= before) throw Error("Invalid archive cursor");
         before = cursor;
       }
-      if (!done) throw Error("Archive exceeds phone download limit. Use the desktop recovery tool for very large histories.");
+      if (!done)
+        throw Error(
+          "Archive exceeds phone download limit. Use the desktop recovery tool for very large histories.",
+        );
       if (!all.length) throw Error("No archived minutes found");
       const file = {
         kind: "starlink-ghana-backup",
@@ -494,16 +499,21 @@
         profiles: {},
         history: { minutes: all.reverse(), months: [] },
       };
-      const url = URL.createObjectURL(new Blob([JSON.stringify(file)], { type: "application/json" }));
+      const url = URL.createObjectURL(
+        new Blob([JSON.stringify(file)], { type: "application/json" }),
+      );
       const link = document.createElement("a");
       link.href = url;
       link.download = "starlink-ghana-vault-" + new Date().toISOString().slice(0, 10) + ".json";
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 30000);
-      label.textContent = "Backup prepared: " + all.length.toLocaleString() +
+      label.textContent =
+        "Backup prepared: " +
+        all.length.toLocaleString() +
         " recorded minutes. Keep the file private and outside your browser profile.";
     } catch (error) {
-      label.textContent = "Download not completed: " + (error instanceof Error ? error.message : "Try again.");
+      label.textContent =
+        "Download not completed: " + (error instanceof Error ? error.message : "Try again.");
     } finally {
       button.disabled = false;
     }
