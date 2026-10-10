@@ -1,21 +1,9 @@
-name: Build Starlink Ghana Chrome extension
+# Legacy manual packaging workflow. The canonical automatic GitHub release
+# uses publish-ghana-chrome.yml only after full main CI succeeds. Avoid
+# duplicate same-version tags (monitor-vX.Y.Z and monitor-vX.Y.Z-hash).
+name: Manually build legacy Starlink Chrome package
 on:
   workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - ".github/workflows/extension-release.yml"
-      - "package*.json"
-      - "wxt.config.ts"
-      - "extension/**"
-      - "scripts/check-store-readiness.mjs"
-      - "PRIVACY.md"
-      - "docs/chrome-web-store/**"
-      - "src/**"
-      - "core/**"
-      - "cloud/**"
-      - "public/**"
-      - "tsconfig*.json"
 permissions:
   contents: write
 concurrency:
