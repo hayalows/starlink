@@ -37,6 +37,10 @@ async function syncRelease() {
     if (
       !parsed ||
       !isMonitorReleaseAtLeast(tag, PINNED_TAG) ||
+      // Older hash-suffixed v1.6.0 packages predate the final quota/permission
+      // fix. Never let an equally-versioned legacy release replace the exact,
+      // fully tested pinned canonical package.
+      (parsed.version === parseMonitorReleaseTag(PINNED_TAG)?.version && tag !== PINNED_TAG) ||
       packageUrl !== expectedUrl ||
       !asset?.size ||
       asset.size <= 0
