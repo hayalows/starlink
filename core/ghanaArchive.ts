@@ -43,7 +43,6 @@ export function archiveBatchPlan(rows: MinuteBucket[], nowSec: number, cursor: n
     recent: recent.slice(-VAULT_BATCH_LIMIT),
     olderRemaining: older.length > VAULT_BATCH_LIMIT,
     eligibleCount: eligible.length,
-    rejectedCount: rows.length - eligible.length -
-      rows.filter((r) => r.minute >= Math.floor(nowSec / 60) * 60 - VAULT_SETTLE_SECONDS).length,
+    rejectedCount: Math.max(0, rows.filter((r) => r.minute < Math.floor(nowSec / 60) * 60 - VAULT_SETTLE_SECONDS).length - eligible.length),
   };
 }
