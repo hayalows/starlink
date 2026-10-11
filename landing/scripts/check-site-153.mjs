@@ -99,7 +99,7 @@ assert.ok(
   bundledTags.every((tag) => tag === "monitor-v1.6.1"),
   "A ZIP points to an old release",
 );
-assert.match(publicHome, /data-release-version>v1\.6\.0/, "Release badge shows an old version");
+assert.match(publicHome, /data-release-version>v1\.6\.1/, "Release badge shows an old version");
 assert.ok(!publicHome.includes("monitor-v1.5.3"), "Old static download found");
 console.log(
   "PASS: dark site, PWA privacy, validated v1.6.1 download links and both release tag formats.",
