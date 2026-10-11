@@ -96,8 +96,8 @@ export default defineConfig(({ command }) => ({
           // Each worker holds its own real Chromium context; too many
           // rendering canvas/WebGL at once starve each other and fail at
           // random. Capped below the default worker count for a
-          // deterministic run, at the cost of wall-clock time.
-          maxWorkers: 3,
+          // deterministic run, at the cost of wall-clock time. Two workers also\n          // leave headroom for Vite to serve dynamically imported modules in CI.
+          maxWorkers: 2,
           sequence: { groupOrder: 1 },
           browser: {
             enabled: true,

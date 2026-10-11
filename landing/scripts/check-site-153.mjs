@@ -50,9 +50,17 @@ assert.match(
   "SW may intercept private sync requests",
 );
 assert.ok(!sw.includes('"/api/monitor"'), "SW must never cache paired readings");
-assert.ok(sw.includes("shell-160"), "PWA history protection shell is stale");
+const shellVersion = sw.match(/const CACHE = "starlink-phone-shell-(\d+)";/)?.[1];
+assert.ok(shellVersion && Number(shellVersion) >= 161, "PWA history protection shell is stale");
+assert.ok(
+  sw.includes(`"/phone.js?v=${shellVersion}"`),
+  "Service worker is caching a different phone script version",
+);
 assert.match(phone, /id="download-vault"/, "Phone recovery download is unavailable");
-assert.match(phone, /\/phone\.js\?v=160/, "Phone is not running the new recovery code");
+assert.ok(
+  phone.includes(`/phone.js?v=${shellVersion}`),
+  "Phone page is loading a different script version than the recovery shell",
+);
 for (const icon of [
   "home-02",
   "coins-01",
