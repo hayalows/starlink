@@ -83,10 +83,11 @@ assert.equal(parseMonitorReleaseTag("monitor-v1.5.3")?.version, "v1.5.3");
 assert.equal(parseMonitorReleaseTag("monitor-v1.5.4-a1b2c3d")?.version, "v1.5.4");
 assert.equal(parseMonitorReleaseTag("monitor-v1.5.3-invalid-tag"), null);
 assert.equal(parseMonitorReleaseTag("v1.5.3"), null);
-assert.ok(isMonitorReleaseAtLeast("monitor-v1.6.0", "monitor-v1.6.0"));
-assert.ok(isMonitorReleaseAtLeast("monitor-v1.6.0-ab12cd3", "monitor-v1.6.0"));
-assert.ok(!isMonitorReleaseAtLeast("monitor-v1.5.3", "monitor-v1.6.0"));
-assert.ok(!isMonitorReleaseAtLeast("monitor-v1.6.0-unsafe/path", "monitor-v1.6.0"));
+assert.ok(isMonitorReleaseAtLeast("monitor-v1.6.1", "monitor-v1.6.1"));
+assert.ok(isMonitorReleaseAtLeast("monitor-v1.6.1-ab12cd3", "monitor-v1.6.1"));
+assert.ok(!isMonitorReleaseAtLeast("monitor-v1.5.3", "monitor-v1.6.1"));
+assert.ok(!isMonitorReleaseAtLeast("monitor-v1.6.0", "monitor-v1.6.1"));
+assert.ok(!isMonitorReleaseAtLeast("monitor-v1.6.1-unsafe/path", "monitor-v1.6.1"));
 
 const bundledTags = [
   ...publicHome.matchAll(
@@ -95,11 +96,11 @@ const bundledTags = [
 ].map((match) => match[1]);
 assert.ok(bundledTags.length >= 4, "Some static ZIP download links are missing");
 assert.ok(
-  bundledTags.every((tag) => tag === "monitor-v1.6.0"),
+  bundledTags.every((tag) => tag === "monitor-v1.6.1"),
   "A ZIP points to an old release",
 );
 assert.match(publicHome, /data-release-version>v1\.6\.0/, "Release badge shows an old version");
 assert.ok(!publicHome.includes("monitor-v1.5.3"), "Old static download found");
 console.log(
-  "PASS: dark site, PWA privacy, validated v1.6.0 download links and both release tag formats.",
+  "PASS: dark site, PWA privacy, validated v1.6.1 download links and both release tag formats.",
 );
