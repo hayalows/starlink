@@ -44,7 +44,7 @@ export function modeledWatts(
       : actual === "standard5"
         ? 42.5
         : actual === "custom" && Number.isFinite(customWatts)
-          ? Math.max(0, customWatts)
+          ? Math.min(500, Math.max(0, customWatts))
           : null;
 }
 
@@ -102,14 +102,21 @@ export function analyzePeriodCost({
           ),
         ).getUTCDate();
   const elapsed = Math.max(0, (window.end - window.start) / DAY);
-  const modeledKwh = watts === null ? null : (watts * inputs.hours * elapsed) / 1000;
+  const modelWatts =
+    watts === null || !Number.isFinite(watts) ? null : Math.min(500, Math.max(0, watts));
+  const hoursPerDay = Number.isFinite(inputs.hours) ? Math.min(24, Math.max(0, inputs.hours)) : 0;
+  const planFee = Number.isFinite(inputs.planFee) ? Math.max(0, inputs.planFee) : 0;
+  const modeledKwh = modelWatts === null ? null : (modelWatts * hoursPerDay * elapsed) / 1000;
   const kwh = current.kWh ?? modeledKwh;
   const forecastKwh =
     current.sampledSeconds >= DAY && current.kWh !== null
-      ? (current.kWh / current.sampledSeconds) * DAY * days
-      : watts === null
+      ? Math.max(
+          period === "month" || period === "cycle" ? current.kWh : 0,
+          (current.kWh / current.sampledSeconds) * hoursPerDay * 3600 * days,
+        )
+      : modelWatts === null
         ? null
-        : (watts * inputs.hours * days) / 1000;
+        : (modelWatts * hoursPerDay * days) / 1000;
   const costFor = (units: number) =>
     electricityCost(units, inputs.tariff, inputs.homeKwh, inputs.customRate);
   const projectedElectricity = forecastKwh === null ? null : costFor(forecastKwh);
@@ -119,10 +126,9 @@ export function analyzePeriodCost({
       : forecastKwh && projectedElectricity !== null
         ? (kwh / forecastKwh) * projectedElectricity
         : costFor(kwh);
-  const planAllocation = allocatedPlanFee(inputs.planFee, window, period);
+  const planAllocation = allocatedPlanFee(planFee, window, period);
   const total = electricity === null ? null : electricity + planAllocation;
-  const projectedTotal =
-    projectedElectricity === null ? null : projectedElectricity + inputs.planFee;
+  const projectedTotal = projectedElectricity === null ? null : projectedElectricity + planFee;
   return {
     days,
     elapsed,

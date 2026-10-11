@@ -313,16 +313,20 @@ export default defineBackground(() => {
       });
     }
     if (request.type !== "api") return false;
-    return IndexedDbHistory.open().then((store) =>
-      routeApiRequest(
-        store,
-        request.path!,
-        new Date(),
-        request.method ?? "GET",
-        request.body as string | undefined,
-        meterHost,
-      ),
-    );
+    return IndexedDbHistory.open().then(async (store) => {
+      try {
+        return await routeApiRequest(
+          store,
+          request.path!,
+          new Date(),
+          request.method ?? "GET",
+          request.body as string | undefined,
+          meterHost,
+        );
+      } finally {
+        store.close();
+      }
+    });
   });
 
   // Saved bounds are restored on the next open, so the window returns where the
@@ -380,14 +384,20 @@ export default defineBackground(() => {
   // faster however this is set, and asking for less only logs a warning. Half a
   // minute, because the alarm is what makes an alert reach anyone: nothing else
   // in the browser is awake to notice.
-  browser.alarms.create("drain", { periodInMinutes: 0.5 });
+  void browser.alarms.get("drain").then((existing) => {
+    if (!existing) void browser.alarms.create("drain", { periodInMinutes: 0.5 });
+  });
   // Keeps the minute store from growing forever — same trade as the historian's
   // server-side EnergyStore, folding anything older than the current calendar
   // year into monthly rows. Daily is plenty; nothing about this is time-critical
   // the way the drain is.
   const runCompactEnergy = async () => {
     const store = await IndexedDbHistory.open();
-    await store.compactEnergy();
+    try {
+      await store.compactEnergy();
+    } finally {
+      store.close();
+    }
   };
   // This whole function body re-runs on every service-worker wake — every ~30s,
   // driven by the drain alarm above — and alarms.create() resets an existing
@@ -410,5 +420,4 @@ export default defineBackground(() => {
   // A worker that just started (install, browser launch, or wake) drains at once
   // rather than idling until the first alarm a minute later.
   void runDrain();
-  void runCompactEnergy();
 });

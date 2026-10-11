@@ -17,10 +17,17 @@ export interface UsageSummary {
   range: EnergyRange;
   totalDownGB: number;
   totalUpGB: number;
+  trafficCoverage?: { sampledSeconds: number; expectedSeconds: number; fraction: number };
   coverage: { sampledSeconds: number; expectedSeconds: number; fraction: number };
   buckets: UsageBucket[];
 }
 
 export function useDataUsage(range: EnergyRange, active: boolean) {
-  return usePersistedHistory<UsageSummary>(`/api/usage?range=${range}`, active);
+  const state = usePersistedHistory<UsageSummary>(`/api/usage?range=${range}`, active);
+  return {
+    ...state,
+    data: state.data
+      ? { ...state.data, coverage: state.data.trafficCoverage ?? state.data.coverage }
+      : state.data,
+  };
 }

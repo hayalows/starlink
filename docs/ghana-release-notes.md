@@ -1,3 +1,17 @@
+Starlink Ghana Monitor 1.6.1: clearer costs and safer sync
+
+- Keep cloud calculation metadata and reject delayed uploads that would replace newer snapshots.
+- Keep separate backup and restore checkpoints for each monitor pairing; show failed uploads in the extension.
+- Save both computer links on the phone and switch recorders without combining overlapping dish totals. New uploads identify Windows or Mac. Old links remain valid.
+- Show a saved snapshot's actual date, improve recording/coverage wording, and keep period tabs aligned. Failed refreshes preserve the current screen's readings.
+- Respect configured daily operating hours when projecting measured power, clamp invalid power inputs, and link the current PURC tariff schedule. Fixed household charges and levies remain excluded.
+- Preserve missing throughput as gaps in newly recorded minutes instead of measured zeros. Partially missing minutes are excluded from traffic summaries; old zero-filled records cannot be reconstructed. Energy continues recording.
+- Show how many GB at the saved mobile bundle's unit price would equal the estimated monthly Starlink cost. This is a price comparison, not a promised saving.
+- Close history database handles after API/sync work and keep background alarm schedules stable.
+- Update the existing extension folder in place on BOTH computers and reload the same extension card. Do not uninstall or clear storage. Enable History vault separately on each recorder and keep a downloaded recovery copy outside Chrome.
+
+---
+
 Starlink Ghana Monitor 1.6.0 — history vault and recovery protection
 
 - Add a rolling 14-day local safety copy in Chrome extension settings storage, independent of IndexedDB and written every ten minutes even without phone pairing. Old rescue days are pruned only after the primary database is verified to contain at least the same readings; restore only missing minutes.

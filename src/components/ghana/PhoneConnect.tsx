@@ -95,12 +95,13 @@ export function PhoneConnect() {
       <p className='ghana-muted'>
         No account or sign-in. Pair this computer once, then open its private link on your phone.
         The public site stays open, but your usage requires the link. Readings sync every 10 minutes
-        while Chrome runs; your phone shows the last saved reading when the laptop is off.
+        while Chrome runs and this computer stays awake. With two computers, pair each one and use
+        the recorder selector on your phone. Their histories stay separate to avoid double-counting.
       </p>
       {cloudReady === false && (
         <p role='status' className='ghana-muted'>
-          The phone website is ready, but cloud storage still needs to be connected before pairing
-          can work. Your existing local monitor is unaffected.
+          The sync service could not be reached. Check your internet connection and try again. Your
+          existing local monitor is unaffected.
         </p>
       )}
       {value?.paired ? (
@@ -174,6 +175,11 @@ export function PhoneConnect() {
             View phone site
           </a>
         </div>
+      )}
+      {value?.error && !message && (
+        <p role='status' className='ghana-muted'>
+          Last upload failed: {value.error}. Recording continues locally. Choose Sync now to retry.
+        </p>
       )}
       {message && (
         <p role='status' className='ghana-muted'>

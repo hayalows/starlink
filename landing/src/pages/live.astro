@@ -37,6 +37,7 @@ import Base from "../layouts/Base.astro";
           <div id="sync-badge" class="phone-sync-badge" role="status">Checking…</div>
         </div>
         <p class="phone-sync-copy" id="sync-copy" aria-live="polite">Connecting to your last saved monitor reading…</p>
+        <div class="phone-pair-form"><label for="recorder-select">Viewing recorder</label><select id="recorder-select" class="phone-button" aria-label="Viewing recorder"></select></div>
         <div id="legacy-notice" class="phone-legacy-notice" role="status" hidden></div>
         <nav class="phone-section-nav" aria-label="Monitor sections">
           <button type="button" data-view="overview" aria-current="page"><span class="ui-icon ui-icon--home-02" aria-hidden="true"></span>Overview</button>
@@ -47,12 +48,12 @@ import Base from "../layouts/Base.astro";
         
         <section data-screen="overview" aria-label="Overview" class="phone-screen">
           <div class="phone-hero-metric">
-            <div class="phone-hero-top"><span>Data recorded today</span><span class="phone-traffic-arrows" aria-label="Download and upload"><span class="ui-icon ui-icon--activity" aria-hidden="true"></span></span></div>
+            <div class="phone-hero-top"><span id="hero-period-label">Data recorded today</span><span class="phone-traffic-arrows" aria-label="Download and upload"><span class="ui-icon ui-icon--activity" aria-hidden="true"></span></span></div>
             <div class="phone-hero-number"><strong id="hero-gb">—</strong><span>GB</span></div>
             <div class="phone-hero-bottom"><span id="hero-coverage">Waiting for readings</span><button type="button" data-open="history">View history <span class="ui-icon ui-icon--arrow-up-right ui-icon--sm" aria-hidden="true"></span></button></div>
           </div>
           <section class="phone-stat-grid phone-overview-grid" aria-label="Your internet at a glance">
-            <article class="phone-stat"><span class="phone-stat-label">ESTIMATED COST TODAY</span><strong id="overview-today-cost">—</strong><small>Plan time share + electricity</small></article>
+            <article class="phone-stat"><span class="phone-stat-label" id="today-cost-label">ESTIMATED COST TODAY</span><strong id="overview-today-cost">—</strong><small>Plan time share + electricity</small></article>
             <article class="phone-stat"><span class="phone-stat-label">MONTH-END ESTIMATE</span><strong id="metric-cost">—</strong><small id="metric-cost-note">Plan + projected electricity</small></article>
             <article class="phone-stat"><span class="phone-stat-label">DATA THIS MONTH</span><strong id="overview-month-gb">—</strong><small>Measured download + upload</small></article>
             <article class="phone-stat"><span class="phone-stat-label">ENERGY THIS MONTH</span><strong id="metric-energy">—</strong><small id="metric-energy-note">Recorded kWh · gaps excluded</small></article>
@@ -96,11 +97,12 @@ import Base from "../layouts/Base.astro";
             <div class="phone-panel-head"><div><span class="phone-eyebrow">DATA VALUE</span><h2>How much does each GB cost?</h2></div><span class="phone-tiny-icon"><span class="ui-icon ui-icon--bar-chart-02" aria-hidden="true"></span></span></div>
             <div class="phone-stat-grid">
               <article class="phone-stat"><span class="phone-stat-label">EFFECTIVE STARLINK GH₵ / GB</span><strong id="starlink-per-gb">—</strong><small id="starlink-rate-note">Full-month estimate ÷ GB recorded so far</small></article>
-              <article class="phone-stat"><span class="phone-stat-label">GB PER GH₵</span><strong id="starlink-gb-per-cedi">—</strong><small>Recorded gigabytes received for every cedi so far</small></article>
+              <article class="phone-stat"><span class="phone-stat-label">GB PER GH₵</span><strong id="starlink-gb-per-cedi">—</strong><small>Recorded download + upload ÷ estimated full-month cedis</small></article>
             </div>
             <p class="phone-fine" id="value-coverage-note">The figure starts with your first recorded GB and improves as you use more data, provided your estimated monthly cost stays similar.</p>
             <div class="phone-cost-line"><span>Saved mobile bundle</span><strong id="bundle-title">—</strong></div>
             <div class="phone-cost-line"><span>Mobile bundle GH₵ / GB</span><strong id="bundle-per-gb">—</strong></div>
+            <p id="break-even-note" class="phone-fine"></p>
             <p id="bundle-comparison" class="phone-fine">Set a mobile bundle price and GB in your laptop's Costs settings if you want to compare.</p>
           </section>
         </section>
@@ -116,9 +118,10 @@ import Base from "../layouts/Base.astro";
         </section>
 
         <section data-screen="connection" aria-label="Connection" class="phone-screen" hidden>
-          <div class="phone-screen-heading"><div class="phone-eyebrow">REMOTE STATUS</div><h2>Connection & sync</h2><p>See the latest saved recorder state without needing to leave your laptop running.</p></div>
+          <div class="phone-screen-heading"><div class="phone-eyebrow">REMOTE STATUS</div><h2>Connection & sync</h2><p>Your phone reads saved history. The recording computer must stay awake with Chrome running to collect new readings.</p></div>
           <section class="phone-panel phone-recorder-panel">
             <div class="phone-panel-head"><div><span class="phone-eyebrow">COLLECTOR</span><h2>Recording health</h2></div><span id="recorder-icon" class="phone-recorder-icon"><span class="ui-icon ui-icon--activity" aria-hidden="true"></span></span></div>
+            <div class="phone-cost-line"><span>Recorder</span><strong id="recorder-name">Computer recorder</strong></div>
             <div class="phone-cost-line"><span>Last reading</span><strong id="last-reading">—</strong></div>
             <div class="phone-cost-line"><span>Last upload</span><strong id="last-upload">—</strong></div>
             <div class="phone-cost-line"><span>Today's coverage</span><strong id="today-coverage">—</strong></div>
@@ -138,6 +141,7 @@ import Base from "../layouts/Base.astro";
             <p class="phone-fine">The app shell can open offline, but fresh readings still require a network connection. This phone never silently collects dish data.</p>
           </section>
           <section class="phone-settings">
+            <button id="add-monitor" type="button">Add another computer</button>
             <button id="forget-monitor" type="button">Forget this monitor on this phone</button>
             <a href="/">Public cost calculator ↗</a>
           </section>
@@ -152,5 +156,5 @@ import Base from "../layouts/Base.astro";
       <button type="button" data-view="connection"><span aria-hidden="true"><span class="ui-icon ui-icon--wifi" aria-hidden="true"></span></span>Connection</button>
     </nav>
   </div>
-  <script type="module" is:inline src="/phone.js?v=160"></script>
+  <script type="module" is:inline src="/phone.js?v=161"></script>
 </Base>

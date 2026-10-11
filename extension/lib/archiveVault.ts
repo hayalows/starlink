@@ -65,8 +65,9 @@ export async function vaultStatus(): Promise<VaultState> {
   const isEnabled = await enabled();
   const pair = await readPair();
   const state: VaultState = { enabled: isEnabled, paired: Boolean(pair) };
-  const data = await browser.storage.local.get(LAST_SUCCESS);
-  state.lastSuccess = Number(data[LAST_SUCCESS]) || 0;
+  const successKey = LAST_SUCCESS + ":" + (pair?.monitorId ?? "");
+  const data = await browser.storage.local.get(successKey);
+  state.lastSuccess = Number(data[successKey]) || 0;
   try {
     const db = await IndexedDbHistory.open();
     try {
@@ -112,8 +113,10 @@ export async function vaultUploadNow(backfill = false): Promise<VaultState> {
     let more = false;
     try {
       const rows = await db.readMinutes(0, Date.now() / 1000);
-      const stored = await browser.storage.local.get(CURSOR);
-      let cursor = Math.max(0, Number(stored[CURSOR]) || 0);
+      const cursorKey = CURSOR + ":" + pair.monitorId;
+      const successKey = LAST_SUCCESS + ":" + pair.monitorId;
+      const stored = await browser.storage.local.get(cursorKey);
+      let cursor = Math.max(0, Number(stored[cursorKey]) || 0);
       // Do not advance a checkpoint until the remote service confirms the batch.
       // Prioritize fresh readings so a prolonged backfill never puts today at risk.
       const rounds = backfill ? MAX_BACKFILL_BATCHES : 1;
@@ -121,8 +124,7 @@ export async function vaultUploadNow(backfill = false): Promise<VaultState> {
         const plan = archiveBatchPlan(rows, Date.now() / 1000, cursor);
         rejected = Math.max(rejected, plan.rejectedCount);
         if (i === 0) {
-          const lastSent =
-            Number((await browser.storage.local.get(LAST_SUCCESS))[LAST_SUCCESS]) || 0;
+          const lastSent = Number((await browser.storage.local.get(successKey))[successKey]) || 0;
           const fresh = plan.recent.filter((row) => row.minute >= lastSent / 1000 - 300);
           for (let offset = 0; offset < fresh.length; offset += VAULT_BATCH_LIMIT) {
             uploaded += await uploadBatch(
@@ -134,13 +136,13 @@ export async function vaultUploadNow(backfill = false): Promise<VaultState> {
         if (plan.older.length) {
           uploaded += await uploadBatch(pair.writeToken, plan.older);
           cursor = plan.older[plan.older.length - 1].minute + 60;
-          await browser.storage.local.set({ [CURSOR]: cursor });
+          await browser.storage.local.set({ [cursorKey]: cursor });
         }
         more = plan.olderRemaining;
         if (!more) break;
       }
       const updated = Date.now();
-      await browser.storage.local.set({ [LAST_SUCCESS]: updated });
+      await browser.storage.local.set({ [successKey]: updated });
       return {
         enabled: true,
         paired: true,
@@ -174,8 +176,8 @@ export async function vaultRestore(): Promise<VaultState> {
       paired: false,
       error: "Pairing key unavailable. Download the vault from your previously paired phone.",
     };
-  let cursor =
-    Number((await browser.storage.local.get(RESTORE_CURSOR))[RESTORE_CURSOR]) || 4102444800;
+  const restoreKey = RESTORE_CURSOR + ":" + pair.monitorId;
+  let cursor = Number((await browser.storage.local.get(restoreKey))[restoreKey]) || 4102444800;
   let restored = 0;
   let more = false;
   try {
@@ -192,15 +194,18 @@ export async function vaultRestore(): Promise<VaultState> {
         // rows only. Never silently clip malformed cloud rows.
         const minutes = raw as MinuteBucket[];
         restored += await db.mergeGhanaHistory({ minutes, months: [] });
-        cursor = Number(response.nextBefore);
+        const next = Number(response.nextBefore);
+        if (!Number.isSafeInteger(next) || next <= 0 || next >= cursor)
+          throw Error("Invalid archive cursor; restore stopped without deleting local history.");
+        cursor = next;
         more = response.hasMore === true;
-        await browser.storage.local.set({ [RESTORE_CURSOR]: cursor });
+        await browser.storage.local.set({ [restoreKey]: cursor });
         if (!more) break;
       }
     } finally {
       db.close();
     }
-    if (!more) await browser.storage.local.remove(RESTORE_CURSOR);
+    if (!more) await browser.storage.local.remove(restoreKey);
     return { enabled: await enabled(), paired: true, restored, more };
   } catch (error) {
     return {

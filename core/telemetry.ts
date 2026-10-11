@@ -10,6 +10,8 @@ export interface TelemetrySample {
   dropRate: number;
   downlinkBps: number;
   uplinkBps: number;
+  /** False when throughput was absent; numeric chart fallbacks are not measurements. */
+  trafficAvailable?: boolean;
   powerW: number;
   /** The router's own ping to the PoP — a second opinion on the same round trip.
    *  The router keeps no ring buffer for it (its history RPC is
@@ -300,6 +302,9 @@ export function decodeHistoryWindow(
       dropRate: history.popPingDropRate?.[ringIndex] ?? 0,
       downlinkBps: history.downlinkThroughputBps?.[ringIndex] ?? 0,
       uplinkBps: history.uplinkThroughputBps?.[ringIndex] ?? 0,
+      trafficAvailable:
+        Number.isFinite(history.downlinkThroughputBps?.[ringIndex]) &&
+        Number.isFinite(history.uplinkThroughputBps?.[ringIndex]),
       powerW: history.powerIn?.[ringIndex] ?? 0,
       routerLatencyMs: null,
       routerPingSuccessPercent: null,

@@ -28,8 +28,15 @@ export function addMinuteBucket(base: MinuteBucket | undefined, delta: MinuteBuc
     minute: delta.minute,
     wattSeconds: base.wattSeconds + delta.wattSeconds,
     samples: base.samples + delta.samples,
-    downlinkBits: (base.downlinkBits ?? 0) + (delta.downlinkBits ?? 0),
-    uplinkBits: (base.uplinkBits ?? 0) + (delta.uplinkBits ?? 0),
+    ...(base.downlinkBits != null &&
+    base.uplinkBits != null &&
+    delta.downlinkBits != null &&
+    delta.uplinkBits != null
+      ? {
+          downlinkBits: base.downlinkBits + delta.downlinkBits,
+          uplinkBits: base.uplinkBits + delta.uplinkBits,
+        }
+      : {}),
   };
 }
 
@@ -47,8 +54,19 @@ export function foldSamplesToMinutes(samples: TelemetrySample[]): Map<number, Mi
     };
     bucket.wattSeconds += sample.powerW ?? 0;
     // per-second sample: bps over one second ≈ bits transferred
-    bucket.downlinkBits = (bucket.downlinkBits ?? 0) + (sample.downlinkBps ?? 0);
-    bucket.uplinkBits = (bucket.uplinkBits ?? 0) + (sample.uplinkBps ?? 0);
+    // A minute with missing throughput is a gap, not a measured zero.
+    // Omitted optional fields survive backup/cloud round trips unchanged.
+    if (
+      sample.trafficAvailable === false ||
+      !Number.isFinite(sample.downlinkBps) ||
+      !Number.isFinite(sample.uplinkBps)
+    ) {
+      delete bucket.downlinkBits;
+      delete bucket.uplinkBits;
+    } else if (bucket.downlinkBits != null && bucket.uplinkBits != null) {
+      bucket.downlinkBits += sample.downlinkBps;
+      bucket.uplinkBits += sample.uplinkBps;
+    }
     bucket.samples += 1;
     buckets.set(minute, bucket);
   }

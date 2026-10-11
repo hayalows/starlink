@@ -1,6 +1,9 @@
 (() => {
   const API = "/api/monitor?action=read";
   const KEY = "starlink.ghana.phone.view.v1";
+  const MONITORS = "starlink.ghana.phone.monitors.v1";
+  let known = [];
+  let refreshSequence = 0;
   const el = (id) => document.getElementById(id);
   const state = { token: "", payload: null, period: "today", view: "overview", timer: null };
   const money = (n) =>
@@ -31,6 +34,25 @@
     badge.textContent = text;
     badge.className = "phone-sync-badge" + (type ? " is-" + type : "");
   };
+  try {
+    const saved = JSON.parse(localStorage.getItem(MONITORS) || "[]");
+    known = Array.isArray(saved)
+      ? saved.filter((item) => valid(item?.token) && typeof item.label === "string")
+      : [];
+  } catch {
+    /* A corrupt preference must not prevent pairing. */
+  }
+  const renderRecorders = () => {
+    const select = el("recorder-select");
+    select.replaceChildren();
+    known.forEach((item, index) => {
+      const option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = item.label;
+      option.selected = item.token === state.token;
+      select.append(option);
+    });
+  };
   const connect = (candidate) => {
     try {
       let token = candidate.trim();
@@ -42,12 +64,27 @@
           "That doesn't look like a valid pairing link. Copy the complete link from your laptop.",
         );
       state.token = token;
-      localStorage.setItem(KEY, token);
+      state.payload = null;
+      el("monitor-section")
+        .querySelectorAll("[data-screen]")
+        .forEach((section) => {
+          section.hidden = true;
+        });
+      setStatus("Checking recorder…");
+      try {
+        if (!known.some((item) => item.token === token))
+          known.push({ token, label: "Computer " + (known.length + 1) });
+        localStorage.setItem(KEY, token);
+        localStorage.setItem(MONITORS, JSON.stringify(known));
+      } catch {
+        note("Connected for this visit. Browser storage is unavailable.");
+      }
+      renderRecorders();
       history.replaceState(null, "", location.pathname + location.search);
       el("pair-section").hidden = true;
       el("monitor-section").hidden = false;
       el("phone-bottom-nav").hidden = false;
-      showView("overview");
+      // Do not display the previous computer’s measurements while loading.
       void refresh();
       void checkVault();
       if (!state.timer) state.timer = setInterval(() => void refresh(), 60_000);
@@ -56,7 +93,7 @@
     }
   };
 
-  const showView = (next) => {
+  const showView = (next, scroll = true) => {
     const allowed = ["overview", "costs", "devices", "connection"];
     state.view = allowed.includes(next) ? next : "overview";
     document.querySelectorAll("[data-screen]").forEach((section) => {
@@ -67,10 +104,10 @@
       if (active) button.setAttribute("aria-current", "page");
       else button.removeAttribute("aria-current");
     });
-    window.scrollTo({ top: 0, behavior: "instant" });
+    if (scroll) window.scrollTo({ top: 0, behavior: "instant" });
   };
   const monthPlanEstimate = (snapshot, month) => {
-    if (Number.isFinite(snapshot.planFee) && snapshot.planFee > 0) return snapshot.planFee;
+    if (Number.isFinite(snapshot.planFee) && snapshot.planFee >= 0) return snapshot.planFee;
     if (!month?.window || !Number.isFinite(month.planAllocation)) return null;
     const start = new Date(month.window.start * 1000);
     const days = new Date(
@@ -219,6 +256,27 @@
     const month = current.periods.month;
     const today = current.periods.today;
     const period = current.periods[state.period];
+    const snapshotDay = new Date((today?.window?.start || 0) * 1000).toISOString().slice(0, 10);
+    const isToday = snapshotDay === new Date().toISOString().slice(0, 10);
+    const savedDate = displayDate(today?.window?.start || 0, "long");
+    el("hero-period-label").textContent = isToday
+      ? "Data recorded today"
+      : "Data recorded " + savedDate;
+    el("today-cost-label").textContent = isToday
+      ? "ESTIMATED COST TODAY"
+      : "SAVED COST · " + savedDate;
+    const recorder = current.recorderLabel || "Computer recorder";
+    el("recorder-name").textContent = recorder;
+    const entry = known.find((item) => item.token === state.token);
+    if (entry && current.recorderLabel) {
+      entry.label = recorder + " · " + (known.indexOf(entry) + 1);
+      try {
+        localStorage.setItem(MONITORS, JSON.stringify(known));
+      } catch {
+        /* Session only. */
+      }
+      renderRecorders();
+    }
     const latest = Number(current.latestSampleAt || 0) * 1000;
     const updated = Number(new Date(state.payload.updatedAt));
     const age = Date.now() - updated;
@@ -227,32 +285,39 @@
       age >= 0 &&
       age < 20 * 60_000 &&
       latest > 0 &&
-      Date.now() - latest < 20 * 60_000;
+      Date.now() - latest >= 0 &&
+      Date.now() - latest < 20 * 60_000 &&
+      current.collectorOk === true;
     setStatus(fresh ? "Recent readings" : "Saved history", fresh ? "" : "stale");
     el("sync-copy").textContent =
       "Last synced " +
       ago(updated) +
-      " · Laptop uploads approximately every 10 minutes while Chrome is running.";
+      " · " +
+      recorder +
+      " uploads about every 10 minutes while Chrome runs. Each computer has separate history; overlapping readings are not added.";
     el("hero-gb").textContent = amount(today?.gb);
     el("overview-today-cost").textContent = money(today?.cost);
     el("overview-month-gb").textContent = Number.isFinite(month?.gb)
       ? amount(month.gb) + " GB"
       : "—";
     el("hero-coverage").textContent =
-      Math.round((today?.trafficCoverage || 0) * 100) + "% of today's elapsed time sampled";
+      Math.round((today?.trafficCoverage || 0) * 100) + "% of elapsed time sampled at upload";
     el("metric-cost").textContent = money(month?.projectedCost);
     el("metric-energy").textContent = Number.isFinite(month?.kWh)
       ? amount(month.kWh, 2) + " kWh"
       : "—";
     el("metric-energy-note").textContent = "Measured during recorded time · gaps excluded";
-    el("metric-cost-note").textContent = "Full-month projection · plan + energy";
+    el("metric-cost-note").textContent =
+      Number.isFinite(month?.sampledSeconds) && month.sampledSeconds >= 86400
+        ? "Plan + projected dish energy · still an estimate"
+        : "Plan + modelled dish energy · limited history";
     el("cost-plan").textContent = money(period?.planAllocation);
     el("cost-electricity").textContent = money(period?.electricityCost);
     el("cost-total").textContent = money(period?.cost);
     el("last-reading").textContent = ago(latest);
     el("last-upload").textContent = ago(updated);
     el("today-coverage").textContent =
-      Math.round((today?.coverage || 0) * 100) + "% of elapsed day";
+      Math.round((today?.coverage || 0) * 100) + "% at the last upload";
     el("recorder-icon").classList.toggle("is-stale", !fresh);
     el("recorder-icon").setAttribute(
       "aria-label",
@@ -260,13 +325,14 @@
     );
     el("recorder-description").textContent = fresh
       ? "The saved readings are recent. This does not guarantee that the laptop will remain online."
-      : "These are saved readings, not a live network connection. Open Chrome on your laptop to resume collection.";
-    el("cost-period-label").textContent = {
-      today: "today so far",
-      week: "the last 7 days",
-      month: "this month so far",
-      cycle: "this billing cycle so far",
-    }[state.period];
+      : "These are saved readings. Keep the selected computer awake, on the Starlink network, with Chrome running. Check its extension if readings stop.";
+    el("cost-period-label").textContent =
+      {
+        today: "today so far",
+        week: "the last 7 days",
+        month: "this month so far",
+        cycle: "this billing cycle so far",
+      }[state.period] + (isToday ? "" : " (snapshot dated " + savedDate + ")");
     el("plan-full").textContent = money(monthPlanEstimate(current, month));
     showLegacyWarning(current);
     chart(period, state.period);
@@ -290,8 +356,9 @@
     const daysInMonth = new Date(
       Date.UTC(updateDate.getUTCFullYear(), updateDate.getUTCMonth() + 1, 0),
     ).getUTCDate();
-    const forecastHours =
-      Number.isFinite(month?.forecastGb) && month.forecastGb > 0 && month.gb > 0
+    const forecastHours = Number.isFinite(month?.trafficSeconds)
+      ? month.trafficSeconds / 3600
+      : Number.isFinite(month?.forecastGb) && month.forecastGb > 0 && month.gb > 0
         ? (month.gb / month.forecastGb) * daysInMonth * 24
         : 0;
     const forecastCaution =
@@ -314,6 +381,14 @@
       : "The rate appears as soon as your monitor records some usage.";
     const bundle = current.bundle ?? {};
     const bundleRate = bundle.price > 0 && bundle.gb > 0 ? bundle.price / bundle.gb : null;
+    const breakEvenGb =
+      bundleRate && Number.isFinite(month?.projectedCost) ? month.projectedCost / bundleRate : null;
+    el("break-even-note").textContent =
+      breakEvenGb === null
+        ? ""
+        : "At the saved mobile bundle's price per GB, " +
+          amount(breakEvenGb, 1) +
+          " GB would cost the same as your estimated Starlink month. This is a price comparison, not proof of savings or a usage target.";
     el("bundle-title").textContent = bundleRate
       ? money(bundle.price) + " / " + amount(bundle.gb) + " GB"
       : "Not configured";
@@ -392,25 +467,28 @@
   };
   async function refresh() {
     if (!state.token) return;
+    const token = state.token;
+    const sequence = ++refreshSequence;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 12000);
     try {
       const response = await fetch(API, {
-        headers: { Authorization: "Bearer " + state.token },
+        headers: { Authorization: "Bearer " + token },
         cache: "no-store",
         credentials: "omit",
         signal: controller.signal,
       });
       const data = await response.json();
+      if (token !== state.token || sequence !== refreshSequence) return;
       if (!response.ok) {
-        if (response.status === 503) setStatus("Sync not configured", "error");
+        if (response.status === 503) setStatus("Sync temporarily unavailable", "error");
         else if (response.status === 401 || response.status === 404)
           setStatus("Pairing expired", "error");
         else setStatus("Could not refresh", "error");
         el("sync-copy").textContent =
           data.error === "sync_not_configured"
             ? "The cloud database has not been connected to this site yet. Your extension will continue recording locally."
-            : "Could not retrieve readings. Reconnect from the laptop extension or try again.";
+            : "Could not refresh. Your saved readings remain visible. Try again; reconnect only if the pairing has expired.";
         return;
       }
       state.payload = data;
@@ -421,7 +499,9 @@
         return;
       }
       render();
+      showView(state.view, false);
     } catch {
+      if (token !== state.token || sequence !== refreshSequence) return;
       setStatus("Offline", "error");
       el("sync-copy").textContent =
         "Cannot reach the sync service. Existing data remains on the laptop.";
@@ -431,12 +511,12 @@
   }
   // Separate, opt-in, append-only minute archive. The private read capability
   // stays in the Authorization header and is NEVER put into a download.
-  async function vaultRequest(action, before) {
+  async function vaultRequest(action, before, token = state.token) {
     const params = new URLSearchParams({ action });
     if (before !== undefined) params.set("before", String(before));
     if (action === "read") params.set("limit", "150");
     const response = await fetch("/api/archive?" + params, {
-      headers: { Authorization: "Bearer " + state.token },
+      headers: { Authorization: "Bearer " + token },
       credentials: "omit",
       cache: "no-store",
       signal: AbortSignal.timeout(20000),
@@ -446,9 +526,11 @@
   }
   async function checkVault() {
     const label = el("phone-vault-status");
+    const token = state.token;
     if (!state.token || !label) return;
     try {
       const summary = await vaultRequest("summary");
+      if (token !== state.token) return;
       const count = summary.count;
       label.textContent = summary.downloadable
         ? (typeof count === "number" ? count.toLocaleString() : "Saved") +
@@ -456,6 +538,7 @@
         : "No archived minutes yet. Open Overview → History vault in the laptop extension to enable protection.";
       el("download-vault").disabled = !summary.downloadable;
     } catch {
+      if (token !== state.token) return;
       label.textContent =
         "Could not check your history archive. Your laptop's local records are unaffected.";
       el("download-vault").disabled = true;
@@ -464,6 +547,7 @@
   el("download-vault").addEventListener("click", async () => {
     const button = el("download-vault");
     const label = el("phone-vault-status");
+    const token = state.token;
     if (!state.token) return;
     button.disabled = true;
     try {
@@ -473,7 +557,7 @@
       // Do not produce a seemingly complete backup if a page fails or if the
       // browser cannot hold the full archive. Each page is capped by the server.
       for (let page = 0; page < 2000; page++) {
-        const next = await vaultRequest("read", before);
+        const next = await vaultRequest("read", before, token);
         if (!Array.isArray(next.minutes)) throw Error("Invalid archive response");
         all.push(...next.minutes);
         label.textContent =
@@ -522,6 +606,16 @@
     event.preventDefault();
     connect(el("pair-code").value);
   });
+  el("recorder-select").addEventListener("change", (event) => {
+    const entry = known[Number(event.target.value)];
+    if (entry) connect(entry.token);
+  });
+  el("add-monitor").addEventListener("click", () => {
+    el("pair-section").hidden = false;
+    el("pair-code").value = "";
+    el("pair-code").focus();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
   el("phone-refresh").addEventListener("click", () => void refresh());
   el("forget-monitor").addEventListener("click", () => {
     if (
@@ -530,7 +624,13 @@
       )
     )
       return;
-    localStorage.removeItem(KEY);
+    known = known.filter((item) => item.token !== state.token);
+    try {
+      localStorage.removeItem(KEY);
+      localStorage.setItem(MONITORS, JSON.stringify(known));
+    } catch {
+      /* Clear the session even when storage is unavailable. */
+    }
     state.token = "";
     state.payload = null;
     clearInterval(state.timer);
@@ -538,13 +638,17 @@
     el("pair-section").hidden = false;
     el("monitor-section").hidden = true;
     el("phone-bottom-nav").hidden = true;
+    if (known.length) {
+      connect(known[0].token);
+      return;
+    }
     note("Phone access forgotten. Pair again using your extension if needed.");
   });
   document.querySelectorAll("[data-period]").forEach((tab) =>
     tab.addEventListener("click", () => {
       state.period = tab.getAttribute("data-period");
       document.querySelectorAll("[data-period]").forEach((b) => {
-        const selected = b === tab;
+        const selected = b.getAttribute("data-period") === state.period;
         b.classList.toggle("selected", selected);
         b.setAttribute("aria-selected", String(selected));
       });

@@ -476,6 +476,14 @@ export function GhanaCostPanel({ status }: { status: DishStatusJson | null }) {
                 : "Enter a current bundle offer; a Starlink comparison also needs 24 recorded hours of usage."}{" "}
               Bundle expiry, network coverage and speed also matter.
             </p>
+            {bundleRate !== null && month.projectedTotal !== null && (
+              <p className='mt-2 text-[13px] text-muted-foreground'>
+                At your saved bundle's price per GB,{" "}
+                {(month.projectedTotal / bundleRate).toFixed(1)} GB would cost the same as your
+                estimated Starlink month. This compares prices; it is not proof of savings or a
+                target to use more data.
+              </p>
+            )}
           </Section>
         </div>
       </details>

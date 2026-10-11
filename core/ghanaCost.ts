@@ -7,7 +7,7 @@ export const GHANA_TARIFFS = {
 } as const;
 export type GhanaTariff = keyof typeof GHANA_TARIFFS;
 export type GhanaPeriod = "today" | "week" | "month";
-export const TARIFF_SOURCE = "https://www.purc.com.gh/attachment/545028-20260924090934.pdf";
+export const TARIFF_SOURCE = "https://www.purc.com.gh/attachment/67864-20261001121001.pdf";
 export const nonNegative = (n: number) => (Number.isFinite(n) ? Math.max(0, n) : 0);
 
 /** Incremental energy charge, excluding fixed household charges and levies.

@@ -123,15 +123,32 @@ export function summarizeEnergy(buckets: MinuteBucket[], range: Range, now: Date
 
   const groups = new Map<
     number,
-    { wattSeconds: number; samples: number; downlinkBits: number; uplinkBits: number }
+    {
+      wattSeconds: number;
+      samples: number;
+      downlinkBits: number;
+      uplinkBits: number;
+      trafficSeconds: number;
+    }
   >();
   let totalWattSeconds = 0;
   let sampledSeconds = 0;
   let totalDownlinkBits = 0;
   let totalUplinkBits = 0;
+  let trafficSeconds = 0;
   for (const bucket of buckets) {
     const key = groupKeyOf(bucket.minute, spec);
-    const group = groups.get(key) ?? { wattSeconds: 0, samples: 0, downlinkBits: 0, uplinkBits: 0 };
+    const group = groups.get(key) ?? {
+      wattSeconds: 0,
+      samples: 0,
+      downlinkBits: 0,
+      uplinkBits: 0,
+      trafficSeconds: 0,
+    };
+    const validTraffic = bucket.downlinkBits != null || bucket.uplinkBits != null;
+    const recordedTraffic = validTraffic ? Math.min(60, Math.max(0, bucket.samples)) : 0;
+    trafficSeconds += recordedTraffic;
+    group.trafficSeconds += recordedTraffic;
     group.wattSeconds += bucket.wattSeconds;
     group.samples += bucket.samples;
     group.downlinkBits += bucket.downlinkBits ?? 0;
@@ -150,6 +167,11 @@ export function summarizeEnergy(buckets: MinuteBucket[], range: Range, now: Date
     totalKWh: totalWattSeconds / 3_600_000,
     totalDownGB: totalDownlinkBits / BITS_PER_GB,
     totalUpGB: totalUplinkBits / BITS_PER_GB,
+    trafficCoverage: {
+      sampledSeconds: trafficSeconds,
+      expectedSeconds,
+      fraction: Math.min(1, trafficSeconds / expectedSeconds),
+    },
     coverage: {
       sampledSeconds,
       expectedSeconds,
@@ -171,8 +193,8 @@ export function summarizeEnergy(buckets: MinuteBucket[], range: Range, now: Date
       return {
         t,
         kWh: group.wattSeconds / 3_600_000,
-        downGB: group.downlinkBits / BITS_PER_GB,
-        upGB: group.uplinkBits / BITS_PER_GB,
+        downGB: group.trafficSeconds ? group.downlinkBits / BITS_PER_GB : null,
+        upGB: group.trafficSeconds ? group.uplinkBits / BITS_PER_GB : null,
         sampledSeconds: group.samples,
         expectedSeconds,
       };

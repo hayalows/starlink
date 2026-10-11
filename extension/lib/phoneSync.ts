@@ -9,6 +9,7 @@ import { IndexedDbHistory } from "./history";
 const ENDPOINT = "https://starlink-ghana.vercel.app/api/monitor";
 const STORAGE_KEY = "ghanaPhonePair";
 const STATUS_KEY = "ghanaPhoneLastSync";
+const ERROR_KEY = "ghanaPhoneSyncError";
 const PERIOD_MINUTES = 10;
 type Pair = { monitorId: string; viewToken: string; writeToken: string; pairedAt: number };
 type SyncResult = { paired: boolean; url?: string; lastSync?: number; error?: string };
@@ -64,10 +65,10 @@ export async function syncPhoneNow(): Promise<void> {
       )
         ? prefs?.tariff
         : "residential") as GhanaTariff,
-      customRate: num(prefs?.customRate),
+      customRate: prefs?.customRate === undefined ? 2.037509 : num(prefs.customRate),
       homeKwh: num(prefs?.homeKwh),
-      watts: num(prefs?.watts),
-      hours: num(prefs?.hours),
+      watts: Math.min(500, prefs?.watts === undefined ? 50 : num(prefs.watts)),
+      hours: Math.min(24, prefs?.hours === undefined ? 24 : num(prefs.hours)),
       model: (typeof prefs?.model === "string" ? prefs.model : "auto") as
         "auto" | "mini" | "standard4" | "standard5" | "custom",
       detectedModel: String(prefs?.detectedModel ?? "unknown"),
@@ -75,113 +76,132 @@ export async function syncPhoneNow(): Promise<void> {
       bundleGb: num(prefs?.bundleGb),
     };
     const db = await IndexedDbHistory.open();
-    const rows = await db.readMinutes(now.getTime() / 1000 - 95 * 86400, now.getTime() / 1000);
-    const insights = buildInsights(rows, now, settings.billingDay);
-    const lastDrain = (await browser.storage.local.get("lastDrain")).lastDrain as
-      { ok: boolean; at: number } | undefined;
-    const periods = Object.fromEntries(
-      (["today", "week", "month", "cycle"] as const).map((id) => {
-        const item = insights.periods[id];
-        const current = item.current;
-        const costs = analyzePeriodCost({
-          current,
-          window: item.window,
-          period: id,
-          inputs: settings,
-          watts: modeledWatts(settings.model, settings.detectedModel, settings.watts),
-        });
-        return [
-          id,
-          {
-            gb: current.gb,
-            kWh: current.kWh,
-            coverage: current.coverage,
-            trafficCoverage: current.trafficCoverage,
-            latest: current.latest,
-            cost: costs.total,
-            electricityCost: costs.electricity,
-            planAllocation: costs.planAllocation,
-            projectedCost: costs.projectedTotal,
-            forecastGb:
-              id === "month" ? forecastUsage(current.gb, current.trafficSeconds, costs.days) : null,
-            forecastCoverageEligible: current.trafficSeconds >= 86400,
-            projectedElectricity: costs.projectedElectricity,
-            modeledKwh: costs.modeledKwh,
-            // Null means no observation, not zero use.
-            buckets: current.buckets.map((b) => ({
-              t: b.t,
-              gb: b.downGB == null ? null : b.downGB + (b.upGB ?? 0),
-              downGB: b.downGB,
-              upGB: b.upGB,
-              kWh: b.kWh,
-            })),
-            window: { start: item.window.start, end: item.window.end },
+    try {
+      const rows = await db.readMinutes(now.getTime() / 1000 - 95 * 86400, now.getTime() / 1000);
+      const insights = buildInsights(rows, now, settings.billingDay);
+      const lastDrain = (await browser.storage.local.get("lastDrain")).lastDrain as
+        { ok: boolean; at: number } | undefined;
+      const periods = Object.fromEntries(
+        (["today", "week", "month", "cycle"] as const).map((id) => {
+          const item = insights.periods[id];
+          const current = item.current;
+          const costs = analyzePeriodCost({
+            current,
+            window: item.window,
+            period: id,
+            inputs: settings,
+            watts: modeledWatts(settings.model, settings.detectedModel, settings.watts),
+          });
+          return [
+            id,
+            {
+              gb: current.gb,
+              kWh: current.kWh,
+              coverage: current.coverage,
+              trafficCoverage: current.trafficCoverage,
+              trafficSeconds: current.trafficSeconds,
+              sampledSeconds: current.sampledSeconds,
+              latest: current.latest,
+              cost: costs.total,
+              electricityCost: costs.electricity,
+              planAllocation: costs.planAllocation,
+              projectedCost: costs.projectedTotal,
+              forecastGb:
+                id === "month"
+                  ? forecastUsage(current.gb, current.trafficSeconds, costs.days)
+                  : null,
+              forecastCoverageEligible: current.trafficSeconds >= 86400,
+              projectedElectricity: costs.projectedElectricity,
+              modeledKwh: costs.modeledKwh,
+              // Null means no observation, not zero use.
+              buckets: current.buckets.map((b) => ({
+                t: b.t,
+                gb: b.downGB == null ? null : b.downGB + (b.upGB ?? 0),
+                downGB: b.downGB,
+                upGB: b.upGB,
+                kWh: b.kWh,
+              })),
+              window: { start: item.window.start, end: item.window.end },
+            },
+          ];
+        }),
+      );
+      // Router device totals and dish WAN usage are different meters. Upload a
+      // ranked *subset* of monthly device totals without MACs or client IDs.
+      // Device names are included only when the owner explicitly paired the phone.
+      const snapshot = migrateSnapshot(await db.readTotalsSnapshot());
+      const odometer = new ClientTotalsCore();
+      if (snapshot) odometer.loadSnapshot(snapshot);
+      const profiles = stored.ghanaDeviceProfiles as
+        Record<string, { name?: string; group?: string }> | undefined;
+      const monthKey = now.getUTCFullYear() * 12 + now.getUTCMonth();
+      const all = odometer
+        .totals()
+        .filter((t) => {
+          const d = new Date(t.sinceMs);
+          return d.getUTCFullYear() * 12 + d.getUTCMonth() === monthKey;
+        })
+        .map((t) => {
+          const p = profiles?.[usageKey(t.clientId, t.macAddress)];
+          return {
+            name: (p?.name || t.name || "Unnamed device").slice(0, 60),
+            group: (p?.group || "").slice(0, 50),
+            gb: (num(t.rxBytes) + num(t.txBytes)) / 1e9,
+          };
+        })
+        .filter((t) => t.gb > 0)
+        .sort((a, b) => b.gb - a.gb);
+      const deviceTotalGb = all.reduce((sum, item) => sum + item.gb, 0);
+      const top = all.slice(0, 15).map((item) => ({
+        ...item,
+        share: deviceTotalGb > 0 ? item.gb / deviceTotalGb : 0,
+      }));
+      if (all.length > 15) {
+        const otherGb = all.slice(15).reduce((sum, item) => sum + item.gb, 0);
+        top.push({ name: "Other devices", group: "", gb: otherGb, share: otherGb / deviceTotalGb });
+      }
+      await post(
+        "push",
+        {
+          snapshot: {
+            version: 1,
+            calculationVersion: 3,
+            sourceVersion: browser.runtime.getManifest().version,
+            recorderLabel: /Windows/i.test(navigator.userAgent)
+              ? "Windows recorder"
+              : /Macintosh/i.test(navigator.userAgent)
+                ? "Mac recorder"
+                : "Computer recorder",
+            recordedAt: now.getTime(),
+            latestSampleAt: Math.max(
+              ...Object.values(insights.periods).map((p) => p.current.latest),
+              0,
+            ),
+            collectorOk: lastDrain?.ok === true,
+            lastCollectorAt: lastDrain?.at ?? null,
+            periods,
+            planFee: settings.planFee,
+            bundle: { price: settings.bundlePrice, gb: settings.bundleGb },
+            devices: top,
+            deviceTotalGb,
           },
-        ];
-      }),
-    );
-    // Router device totals and dish WAN usage are different meters. Upload a
-    // ranked *subset* of monthly device totals without MACs or client IDs.
-    // Device names are included only when the owner explicitly paired the phone.
-    const snapshot = migrateSnapshot(await db.readTotalsSnapshot());
-    const odometer = new ClientTotalsCore();
-    if (snapshot) odometer.loadSnapshot(snapshot);
-    const profiles = stored.ghanaDeviceProfiles as
-      Record<string, { name?: string; group?: string }> | undefined;
-    const monthKey = now.getUTCFullYear() * 12 + now.getUTCMonth();
-    const all = odometer
-      .totals()
-      .filter((t) => {
-        const d = new Date(t.sinceMs);
-        return d.getUTCFullYear() * 12 + d.getUTCMonth() === monthKey;
-      })
-      .map((t) => {
-        const p = profiles?.[usageKey(t.clientId, t.macAddress)];
-        return {
-          name: (p?.name || t.name || "Unnamed device").slice(0, 60),
-          group: (p?.group || "").slice(0, 50),
-          gb: (num(t.rxBytes) + num(t.txBytes)) / 1e9,
-        };
-      })
-      .filter((t) => t.gb > 0)
-      .sort((a, b) => b.gb - a.gb);
-    const deviceTotalGb = all.reduce((sum, item) => sum + item.gb, 0);
-    const top = all.slice(0, 15).map((item) => ({
-      ...item,
-      share: deviceTotalGb > 0 ? item.gb / deviceTotalGb : 0,
-    }));
-    if (all.length > 15) {
-      const otherGb = all.slice(15).reduce((sum, item) => sum + item.gb, 0);
-      top.push({ name: "Other devices", group: "", gb: otherGb, share: otherGb / deviceTotalGb });
-    }
-    db.close();
-    await post(
-      "push",
-      {
-        snapshot: {
-          version: 1,
-          calculationVersion: 2,
-          sourceVersion: "1.6.0",
-          recordedAt: now.getTime(),
-          latestSampleAt: Math.max(
-            ...Object.values(insights.periods).map((p) => p.current.latest),
-            0,
-          ),
-          collectorOk: lastDrain?.ok === true,
-          lastCollectorAt: lastDrain?.at ?? null,
-          periods,
-          planFee: settings.planFee,
-          bundle: { price: settings.bundlePrice, gb: settings.bundleGb },
-          devices: top,
-          deviceTotalGb,
         },
-      },
-      pair.writeToken,
-    );
-    await browser.storage.local.set({ [STATUS_KEY]: Date.now() });
-  })().finally(() => {
-    pending = null;
-  });
+        pair.writeToken,
+      );
+      await browser.storage.local.set({ [STATUS_KEY]: Date.now(), [ERROR_KEY]: "" });
+    } finally {
+      db.close();
+    }
+  })()
+    .catch(async (error) => {
+      await browser.storage.local.set({
+        [ERROR_KEY]: error instanceof Error ? error.message : "Sync failed",
+      });
+      throw error;
+    })
+    .finally(() => {
+      pending = null;
+    });
   return pending;
 }
 
@@ -201,17 +221,18 @@ export async function handlePhoneSync(action: string): Promise<SyncResult> {
       try {
         await syncPhoneNow();
       } catch {
-        // The pairing is valid even if there is not yet a usable history sample.
+        // Preserve the pairing and report the failed first upload.
       }
-      return { paired: true, url: readerUrl(pair.viewToken) };
+      return handlePhoneSync("status");
     }
     const pair = await readPair();
     if (action === "status") {
-      const data = await browser.storage.local.get(STATUS_KEY);
+      const data = await browser.storage.local.get([STATUS_KEY, ERROR_KEY]);
       return {
         paired: Boolean(pair),
         url: pair ? readerUrl(pair.viewToken) : undefined,
         lastSync: Number(data[STATUS_KEY] ?? 0),
+        error: typeof data[ERROR_KEY] === "string" ? data[ERROR_KEY] || undefined : undefined,
       };
     }
     if (!pair) return { paired: false, error: "Connect this monitor first." };
@@ -221,7 +242,7 @@ export async function handlePhoneSync(action: string): Promise<SyncResult> {
     }
     if (action === "disconnect") {
       await post("revoke", {}, pair.writeToken);
-      await browser.storage.local.remove([STORAGE_KEY, STATUS_KEY]);
+      await browser.storage.local.remove([STORAGE_KEY, STATUS_KEY, ERROR_KEY]);
       return { paired: false };
     }
     return { paired: true, error: "Unknown action" };

@@ -101,7 +101,11 @@ export default defineConfig(({ command }) => ({
           sequence: { groupOrder: 1 },
           browser: {
             enabled: true,
-            provider: playwright(),
+            provider: playwright({
+              launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+                ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+                : undefined,
+            }),
             headless: true,
             instances: [{ browser: "chromium" }],
           },

@@ -31,12 +31,19 @@ const emptyPeriod = () => ({
   electricityCost: 0.33,
   planAllocation: 15,
   forecastGb: 250,
+  projectedElectricity: 20,
+  modeledKwh: 9,
+  trafficSeconds: 90000,
+  sampledSeconds: 90000,
   forecastCoverageEligible: true,
   window: { start: 1000000, end: 1003600 },
   buckets: [{ t: 1000000, gb: 1.25, downGB: 1.1, upGB: 0.15, kWh: 0.42 }],
 });
 const snapshot = {
   version: 1,
+  calculationVersion: 3,
+  sourceVersion: "1.6.1",
+  recorderLabel: "Windows recorder",
   recordedAt: Date.now(),
   latestSampleAt: Math.floor(Date.now() / 1000),
   collectorOk: true,
@@ -82,6 +89,25 @@ try {
   assert.equal(c.snapshot.devices[0].name, "Living room phone");
   assert.equal(c.snapshot.devices[0].share, 0.75);
   assert.ok(c.updatedAt);
+  assert.equal(c.snapshot.calculationVersion, 3);
+  assert.equal(c.snapshot.sourceVersion, "1.6.1");
+  assert.equal(c.snapshot.recorderLabel, "Windows recorder");
+  assert.equal(c.snapshot.periods.month.trafficSeconds, 90000);
+  assert.equal(c.snapshot.periods.month.projectedElectricity, 20);
+  const stale = await request("push", {
+    method: "POST",
+    bearer: writeToken,
+    body: { snapshot: { ...snapshot, recordedAt: snapshot.recordedAt - 1000 } },
+  });
+  assert.equal(stale.status, 409, "Older upload replaced newer history");
+  const afterStale = await request("read", { bearer: viewToken });
+  assert.equal(afterStale.snapshot.recordedAt, snapshot.recordedAt);
+  const forbidden = await request("push", {
+    method: "POST",
+    bearer: viewToken,
+    body: { snapshot },
+  });
+  assert.equal(forbidden.status, 404, "Read capability must not upload");
   const fake = await request("read", { bearer: token() });
   assert.equal(fake.status, 404, "Unknown pairing must not return telemetry");
   console.log("TESTS PASSED: health, 401, create, upload, read, unknown key");
