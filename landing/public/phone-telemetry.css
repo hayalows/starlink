@@ -1,0 +1,124 @@
+/* Mobile telemetry components adapted to the existing dark monitor system.
+   Reduced motion, clear meter provenance, and readable narrow-screen metrics. */
+.phone-telemetry-panel { margin-top: 18px; }
+.phone-telemetry-panel .phone-panel-head { gap: 12px; align-items: flex-start; }
+.phone-telemetry-panel .phone-chart-unit { font-size: 10px; text-align: right; }
+.phone-measure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+  margin-top: 20px;
+}
+.phone-measure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+  padding: 17px 15px;
+  border: 1px solid #303d39;
+  border-radius: 14px;
+  background: #171e1d;
+}
+.phone-measure > span, .phone-device-overview span {
+  color: #b6c8bf;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.phone-measure > strong, .phone-device-overview strong {
+  display: block;
+  color: #f1f6f0;
+  font-family: Manrope, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(20px, 5vw, 27px);
+  font-weight: 670;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+.phone-measure small, .phone-device-overview small {
+  font-size: 11px;
+  line-height: 1.45;
+  color: #a4b5ae;
+}
+.phone-info-line {
+  margin: 16px 0 0;
+  border-left: 2px solid #668e76;
+  padding-left: 12px;
+  max-width: 65ch;
+}
+.phone-device-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.phone-device-overview > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid #33423a;
+  border-radius: 17px;
+  background: linear-gradient(150deg, #192720, #101717);
+  padding: 19px 15px;
+}
+.phone-device-overview strong { font-size: clamp(19px, 5vw, 25px); }
+.phone-device-overview small { min-height: 31px; overflow-wrap: anywhere; }
+.phone-telemetry-details {
+  margin-top: 18px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.phone-telemetry-details summary {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 0;
+  font-size: 15px;
+  font-weight: 650;
+  color: #f0f5ef;
+  cursor: pointer;
+  list-style: none;
+}
+.phone-telemetry-details summary::-webkit-details-marker { display: none; }
+.phone-telemetry-details summary > span {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #203329;
+  color: #d5edda;
+  font-size: 20px;
+  line-height: 1;
+}
+.phone-telemetry-details[open] summary > span { transform: rotate(45deg); }
+.phone-telemetry-details[open] > .phone-fine:last-child { padding-bottom: 14px; }
+.phone-measure-list { margin: 15px 0; }
+.phone-measure-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 18px;
+  padding: 12px 0;
+  border-bottom: 1px solid #2b3734;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.phone-measure-list-row span { color: #aec0b6; }
+.phone-measure-list-row strong { color: #f1f5f0; text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.phone-shell .phone-telemetry-details summary:focus-visible { outline: 2px solid #d1e4d5; outline-offset: 3px; }
+@media (max-width: 370px) {
+  .phone-measure-grid, .phone-device-overview { gap: 8px; }
+  .phone-measure, .phone-device-overview > div { padding: 14px 11px; }
+  .phone-measure > strong { font-size: 19px; }
+  .phone-measure-list-row { flex-wrap: wrap; gap: 3px; }
+}
+@media (min-width: 800px) {
+  .phone-measure-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone-telemetry-details summary > span { transition: none !important; }
+}

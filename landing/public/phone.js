@@ -17,6 +17,20 @@
           minimumFractionDigits: decimals,
         })
       : "—";
+  // Chart buckets are the only reliable download/upload split in a phone snapshot.
+  // Never turn a missing reading into a measured zero.
+  const bucketSum = (entry, key) => {
+    const observed = Array.isArray(entry?.buckets)
+      ? entry.buckets.filter((bucket) => Number.isFinite(bucket?.[key]))
+      : [];
+    return observed.length
+      ? observed.reduce((sum, bucket) => sum + bucket[key], 0)
+      : null;
+  };
+  const setMetric = (id, value) => {
+    const node = el(id);
+    if (node) node.textContent = value;
+  };
   const ago = (t) => {
     if (!t || !Number.isFinite(Number(t))) return "No reading";
     const seconds = Math.max(0, Math.floor((Date.now() - Number(t)) / 1000));
@@ -336,6 +350,33 @@
     el("plan-full").textContent = money(monthPlanEstimate(current, month));
     showLegacyWarning(current);
     chart(period, state.period);
+    const periodHours =
+      Number.isFinite(period?.trafficSeconds) && period.trafficSeconds > 0
+        ? period.trafficSeconds / 3600
+        : null;
+    const periodRate =
+      periodHours && Number.isFinite(period?.gb) ? period.gb / periodHours : null;
+    const measuredDown = bucketSum(period, "downGB");
+    const measuredUp = bucketSum(period, "upGB");
+    setMetric("measurement-period-title", {
+      today: "TODAY",
+      week: "LAST 7 DAYS",
+      month: "MONTH",
+      cycle: "BILLING CYCLE",
+    }[state.period]);
+    setMetric("measure-download", Number.isFinite(measuredDown) ? amount(measuredDown) + " GB" : "—");
+    setMetric("measure-upload", Number.isFinite(measuredUp) ? amount(measuredUp) + " GB" : "—");
+    setMetric("measure-rate", Number.isFinite(periodRate) ? amount(periodRate, 2) + " GB/h" : "—");
+    setMetric("measure-hours", periodHours !== null ? amount(periodHours, 1) + " h" : "—");
+    const trafficCoverage = Number.isFinite(period?.trafficCoverage)
+      ? Math.round(period.trafficCoverage * 100)
+      : null;
+    setMetric(
+      "measure-guidance",
+      trafficCoverage === null
+        ? "This recording has no traffic coverage measurement yet."
+        : trafficCoverage + "% of elapsed time was recorded. Download and upload are summed from available chart buckets; the total may differ slightly from the higher-resolution meter. Unrecorded time is excluded.",
+    );
     // Always show an observed-rate estimate once there is a positive amount
     // of recorded traffic. Do not hide useful arithmetic behind a coverage gate.
     // Both screens use FULL monthly forecast divided by GB recorded to date.
@@ -402,52 +443,53 @@
           " They have different coverage, portability and billing rules."
         : "A comparison needs your saved bundle and at least 24 hours of recorded data. Edit the bundle under Costs on your laptop.";
 
-    // Additional recorded detail, derived only from the paired snapshot.
-    // Missing readings remain unknown rather than being displayed as zero.
-    let details = document.getElementById("phone-recording-details");
-    if (!details) {
-      details = document.createElement("section");
-      details.id = "phone-recording-details";
-      details.className = "phone-detail-card";
-      details.style.cssText = "margin:20px 0;padding:18px;border:1px solid var(--line, #343b40);border-radius:18px;";
-      const anchor = document.getElementById("sync-copy");
-      anchor?.parentElement?.append(details);
-    }
-    details.replaceChildren();
-    const heading = document.createElement("h3");
-    heading.textContent = "Recording details";
-    heading.style.margin = "0 0 12px";
-    details.append(heading);
+    setMetric("cost-month-kwh", Number.isFinite(month?.kWh) ? amount(month.kWh, 2) + " kWh" : "—");
+    setMetric("cost-month-power", Number.isFinite(month?.projectedElectricity) ? money(month.projectedElectricity) : "—");
+    setMetric(
+      "cost-month-data",
+      month?.forecastCoverageEligible === true && Number.isFinite(month?.forecastGb)
+        ? amount(month.forecastGb, 1) + " GB"
+        : "—",
+    );
+    setMetric("cost-month-coverage", Number.isFinite(month?.trafficCoverage) ? completeness + "%" : "—");
+    setMetric(
+      "cost-forecast-guidance",
+      forecastCaution + " The data figure is based on recorded hours, not missing periods. Electricity is an estimate using the saved plan and device model.",
+    );
     const detailRows = [
-      ["Collector", current.collectorOk === true ? "Reporting OK" : "Not confirmed"],
-      ["Last collector check", current.lastCollectorAt ? ago(Number(current.lastCollectorAt)) : "Not reported"],
+      ["Collector", current.collectorOk === true ? "Reporting OK at upload" : "Not confirmed at upload"],
+      ["Collector last checked", Number.isFinite(current.lastCollectorAt) ? ago(current.lastCollectorAt) : "Not reported"],
       ["Last dish sample", ago(latest)],
       ["Last cloud upload", ago(updated)],
-      ["Recorded traffic time", Number.isFinite(today?.trafficSeconds) ? amount(today.trafficSeconds / 3600, 1) + " hours" : "Unknown"],
-      ["Sampled time", Number.isFinite(today?.sampledSeconds) ? amount(today.sampledSeconds / 3600, 1) + " hours" : "Unknown"],
+      ["Today's traffic time", Number.isFinite(today?.trafficSeconds) ? amount(today.trafficSeconds / 3600, 1) + " hours" : "Unknown"],
+      ["Today's sampled time", Number.isFinite(today?.sampledSeconds) ? amount(today.sampledSeconds / 3600, 1) + " hours" : "Unknown"],
       ["Traffic coverage", Number.isFinite(today?.trafficCoverage) ? Math.round(today.trafficCoverage * 100) + "%" : "Unknown"],
-      ["Download today", Number.isFinite(today?.buckets?.reduce((n, b) => n + (Number.isFinite(b.downGB) ? b.downGB : 0), 0)) ? amount(today.buckets.reduce((n, b) => n + (Number.isFinite(b.downGB) ? b.downGB : 0), 0)) + " GB in recorded buckets" : "Unknown"],
-      ["Upload today", Array.isArray(today?.buckets) && today.buckets.some((b) => Number.isFinite(b.upGB)) ? amount(today.buckets.reduce((n, b) => n + (Number.isFinite(b.upGB) ? b.upGB : 0), 0)) + " GB in recorded buckets" : "Unknown"],
-      ["Month-end data forecast", Number.isFinite(month?.forecastGb) ? amount(month.forecastGb) + " GB" : "Not enough data"],
-      ["Month-end electricity estimate", Number.isFinite(month?.projectedElectricity) ? money(month.projectedElectricity) : "Not available"],
-      ["Measured energy this month", Number.isFinite(month?.kWh) ? amount(month.kWh, 3) + " kWh" : "Not available"],
+      ["Download in today's buckets", Number.isFinite(bucketSum(today, "downGB")) ? amount(bucketSum(today, "downGB")) + " GB" : "Unknown"],
+      ["Upload in today's buckets", Number.isFinite(bucketSum(today, "upGB")) ? amount(bucketSum(today, "upGB")) + " GB" : "Unknown"],
+      ["Month-end data forecast", month?.forecastCoverageEligible === true && Number.isFinite(month?.forecastGb) ? amount(month.forecastGb) + " GB" : "Not enough recorded time"],
+      ["Month-end electricity", Number.isFinite(month?.projectedElectricity) ? money(month.projectedElectricity) : "Unknown"],
+      ["Modelled energy this month", Number.isFinite(month?.modeledKwh) ? amount(month.modeledKwh, 2) + " kWh" : "Unknown"],
+      ["Measured energy this month", Number.isFinite(month?.kWh) ? amount(month.kWh, 3) + " kWh" : "Unknown"],
+      ["Calculation version", Number.isFinite(current.calculationVersion) ? String(current.calculationVersion) : "Unspecified"],
+      ["Extension version", current.sourceVersion || "Unspecified"],
     ];
+    const detailList = el("phone-recording-details-list");
+    detailList.replaceChildren();
     for (const [name, value] of detailRows) {
       const row = document.createElement("div");
-      row.style.cssText = "display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--line, #343b40);font-size:13px;";
+      row.className = "phone-measure-list-row";
       const label = document.createElement("span");
       label.textContent = name;
       const number = document.createElement("strong");
-      number.style.textAlign = "right";
       number.textContent = value;
       row.append(label, number);
-      details.append(row);
+      detailList.append(row);
     }
-    const disclaimer = document.createElement("p");
-    disclaimer.style.cssText = "font-size:12px;opacity:.7;margin:12px 0 0";
-    disclaimer.textContent = "Values are from the selected recorder's last upload. Missing time is not zero usage. Device totals and dish WAN totals are different meters.";
-    details.append(disclaimer);
     const devices = Array.isArray(current.devices) ? current.devices : [];
+    setMetric("devices-total", Number.isFinite(current.deviceTotalGb) ? amount(current.deviceTotalGb) + " GB" : "—");
+    const leadingDevice = devices.find((device) => Number.isFinite(device.gb) && device.name !== "Other devices");
+    setMetric("devices-leader", leadingDevice ? amount(leadingDevice.gb) + " GB" : "—");
+    setMetric("devices-leader-note", leadingDevice ? (leadingDevice.name || "Unnamed device") + " · " + Math.round((leadingDevice.share || 0) * 100) + "% of known router totals" : "No device data uploaded");
     const holder = el("phone-device-list");
     holder.replaceChildren();
     const trackedGb = Number(current.deviceTotalGb) || 0;

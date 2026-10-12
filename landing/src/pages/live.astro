@@ -4,6 +4,7 @@ import Base from "../layouts/Base.astro";
 <Base title="My monitor — Starlink Ghana" description="Your paired Starlink internet dashboard. Usage, energy, costs, devices and connection details on your phone." path="/live/">
   <link slot="head" rel="stylesheet" href="/phone.css?v=153" />
   <link slot="head" rel="stylesheet" href="/phone-refine.css?v=153" />
+  <link slot="head" rel="stylesheet" href="/phone-telemetry.css?v=162" />
   <div class="phone-shell" id="phone-app">
     <header class="phone-top">
       <a href="/" class="phone-brand" aria-label="Starlink Ghana public website">
@@ -72,6 +73,19 @@ import Base from "../layouts/Base.astro";
             <p id="chart-insight" class="phone-fine"></p>
             <div class="phone-chart-foot"><span><i class="phone-legend-live"></i> Recorded</span><span><i class="phone-legend-gap"></i> No reading / gap</span></div>
           </section>
+          <section class="phone-panel phone-telemetry-panel" aria-labelledby="traffic-detail-title">
+            <div class="phone-panel-head">
+              <div><span class="phone-eyebrow">MEASUREMENTS · <span id="measurement-period-title">TODAY</span></span><h2 id="traffic-detail-title">Where the data went</h2></div>
+              <span class="phone-chart-unit">DOWNLOAD + UPLOAD</span>
+            </div>
+            <div class="phone-measure-grid">
+              <div class="phone-measure"><span>Downloaded</span><strong id="measure-download">—</strong><small>In recorded chart buckets</small></div>
+              <div class="phone-measure"><span>Uploaded</span><strong id="measure-upload">—</strong><small>In recorded chart buckets</small></div>
+              <div class="phone-measure"><span>Average usage</span><strong id="measure-rate">—</strong><small>GB per recorded hour</small></div>
+              <div class="phone-measure"><span>Traffic observed</span><strong id="measure-hours">—</strong><small>Hours with valid traffic</small></div>
+            </div>
+            <p id="measure-guidance" class="phone-fine phone-info-line" role="status">Measurements will appear after your recorder uploads them.</p>
+          </section>
           <section class="phone-panel phone-history">
             <div class="phone-panel-head"><div><span class="phone-eyebrow">DAILY JOURNAL</span><h2>Your recent days</h2></div><span class="phone-chart-unit">HISTORY</span></div>
             <div id="phone-day-list" class="phone-day-list"></div>
@@ -105,10 +119,24 @@ import Base from "../layouts/Base.astro";
             <p id="break-even-note" class="phone-fine"></p>
             <p id="bundle-comparison" class="phone-fine">Set a mobile bundle price and GB in your laptop's Costs settings if you want to compare.</p>
           </section>
+          <section class="phone-panel phone-telemetry-panel" aria-labelledby="power-detail-title">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">PLAN AHEAD</span><h2 id="power-detail-title">Energy and data forecast</h2></div><span class="phone-chart-unit">ESTIMATES</span></div>
+            <div class="phone-measure-grid">
+              <div class="phone-measure"><span>Measured energy</span><strong id="cost-month-kwh">—</strong><small>Recorded this month</small></div>
+              <div class="phone-measure"><span>Month-end electricity</span><strong id="cost-month-power">—</strong><small>Projected dish electricity</small></div>
+              <div class="phone-measure"><span>Month-end data</span><strong id="cost-month-data">—</strong><small>Projection from observed traffic</small></div>
+              <div class="phone-measure"><span>Traffic coverage</span><strong id="cost-month-coverage">—</strong><small>Elapsed month sampled</small></div>
+            </div>
+            <p id="cost-forecast-guidance" class="phone-fine phone-info-line">A projection is not a bill or a guarantee of future use.</p>
+          </section>
         </section>
 
         <section data-screen="devices" aria-label="Devices" class="phone-screen" hidden>
           <div class="phone-screen-heading"><div class="phone-eyebrow">CONNECTED HOUSEHOLD</div><h2>Who uses the most?</h2><p>Device shares are based on router counters—not the separate dish-wide traffic meter.</p></div>
+          <section class="phone-device-overview" aria-label="Device summary">
+            <div><span>Router-counted data</span><strong id="devices-total">—</strong><small>This month, separate meter</small></div>
+            <div><span>Largest recorded share</span><strong id="devices-leader">—</strong><small id="devices-leader-note">Waiting for device totals</small></div>
+          </section>
           <section class="phone-panel" id="device-shares">
             <div class="phone-panel-head"><div><span class="phone-eyebrow">HOUSEHOLD MIX</span><h2>Usage by device</h2></div><span class="phone-chart-unit"><span class="ui-icon ui-icon--layers-three-01" aria-hidden="true"></span> ROUTER TOTALS</span></div>
             <p class="phone-chart-summary" id="device-summary">Waiting for synced device totals.</p>
@@ -127,6 +155,12 @@ import Base from "../layouts/Base.astro";
             <div class="phone-cost-line"><span>Today's coverage</span><strong id="today-coverage">—</strong></div>
             <p class="phone-fine" id="recorder-description">Your laptop records while Chrome runs. A previous reading is not a live signal.</p>
           </section>
+          <details class="phone-panel phone-telemetry-details">
+            <summary>Advanced recorder measurements <span aria-hidden="true">+</span></summary>
+            <p class="phone-fine">These readings come from your selected computer's last upload. A missing value means unknown, not zero.</p>
+            <div id="phone-recording-details-list" class="phone-measure-list"></div>
+            <p class="phone-fine">Device counters and dish-wide usage are different meters. The PWA cannot measure live internet speed while the recorder is offline.</p>
+          </details>
           <section class="phone-panel" aria-label="Download history backup">
             <div class="phone-panel-head"><div><span class="phone-eyebrow">HISTORY SAFETY</span><h2>Your recovery copy</h2></div><span class="phone-chart-unit"><span class="ui-icon ui-icon--shield-01" aria-hidden="true"></span> VAULT</span></div>
             <p class="phone-fine">If you enable History vault in the desktop extension, your paired phone can download a complete backup of archived minute readings. Keep it outside Chrome to protect against browser storage loss.</p>
@@ -156,5 +190,5 @@ import Base from "../layouts/Base.astro";
       <button type="button" data-view="connection"><span aria-hidden="true"><span class="ui-icon ui-icon--wifi" aria-hidden="true"></span></span>Connection</button>
     </nav>
   </div>
-  <script type="module" is:inline src="/phone.js?v=161"></script>
+  <script type="module" is:inline src="/phone.js?v=162"></script>
 </Base>

@@ -49,7 +49,7 @@ async function db(method: string, query: string, data?: unknown): Promise<unknow
     signal: AbortSignal.timeout(10000),
   });
   const body = await res.text();
-  if (!res.ok) throw Error("Database request failed " + res.status + " " + body.slice(0, 100));
+  if (!res.ok) throw Error("Database request failed " + res.status);
   return body ? (JSON.parse(body) as unknown[]) : [];
 }
 type Obj = Record<string, unknown>;
@@ -77,7 +77,8 @@ function scrub(input: unknown): Obj | null {
     const rows = v.buckets;
     if (!v.window || !Array.isArray(rows) || rows.length > 40) return null;
     const w = obj(v.window);
-    if (finite(w.start) === null || finite(w.end) === null) return null;
+    if (finite(w.start) === null || finite(w.end) === null || Number(w.end) < Number(w.start))
+      return null;
     cleaned[id] = {
       gb: finite(v.gb),
       kWh: finite(v.kWh),
@@ -88,6 +89,10 @@ function scrub(input: unknown): Obj | null {
       projectedCost: finite(v.projectedCost),
       electricityCost: finite(v.electricityCost),
       planAllocation: finite(v.planAllocation),
+      sampledSeconds: finite(v.sampledSeconds),
+      trafficSeconds: finite(v.trafficSeconds),
+      projectedElectricity: finite(v.projectedElectricity),
+      modeledKwh: finite(v.modeledKwh),
       forecastGb: finite(v.forecastGb),
       forecastCoverageEligible: v.forecastCoverageEligible === true,
       window: { start: w.start, end: w.end },
@@ -107,6 +112,15 @@ function scrub(input: unknown): Obj | null {
   }
   return {
     version: 1,
+    calculationVersion: finite(data.calculationVersion),
+    sourceVersion:
+      typeof data.sourceVersion === "string"
+        ? data.sourceVersion.replace(/[^0-9.a-z-]/gi, "").slice(0, 24)
+        : null,
+    recorderLabel:
+      typeof data.recorderLabel === "string"
+        ? data.recorderLabel.replace(/[^a-z0-9 -]/gi, "").slice(0, 60)
+        : "Computer recorder",
     recordedAt: data.recordedAt,
     latestSampleAt: finite(data.latestSampleAt),
     collectorOk: data.collectorOk === true,
@@ -201,11 +215,26 @@ Deno.serve(async (req: Request) => {
     const snapshot = scrub(data.snapshot);
     if (!snapshot || JSON.stringify(snapshot).length > 75000)
       return ok({ error: "invalid_snapshot" }, 400);
-    const rows = await db("PATCH", "?write_digest=eq." + hash, {
-      payload: snapshot,
-      updated_at: new Date().toISOString(),
-    });
-    if (!rows.length) return ok({ error: "pairing_not_found" }, 404);
+    // Compare inside the UPDATE, not in a read-then-write race. A delayed
+    // upload must not replace a newer snapshot from this pairing.
+    const rows = await db(
+      "PATCH",
+      "?write_digest=eq." +
+        hash +
+        "&or=(payload->recordedAt.is.null,payload->recordedAt.lte." +
+        snapshot.recordedAt +
+        ")",
+      {
+        payload: snapshot,
+        updated_at: new Date().toISOString(),
+      },
+    );
+    if (!rows.length) {
+      const existing = await db("GET", "?select=monitor_id&write_digest=eq." + hash + "&limit=1");
+      return existing.length
+        ? ok({ error: "newer_snapshot_already_saved" }, 409)
+        : ok({ error: "pairing_not_found" }, 404);
+    }
     return ok({ ok: true });
   } catch (error) {
     console.error("Phone monitor sync failed:", error instanceof Error ? error.message : "unknown");

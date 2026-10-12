@@ -57,6 +57,11 @@ assert.ok(
   "Service worker is caching a different phone script version",
 );
 assert.match(phone, /id="download-vault"/, "Phone recovery download is unavailable");
+for (const metricId of ["measure-download", "measure-upload", "measure-rate", "measure-hours", "cost-month-kwh", "cost-month-power", "cost-month-data", "devices-leader", "phone-recording-details-list"]) {
+  assert.ok(phone.includes('id="' + metricId + '"'), "Missing phone measurement: " + metricId);
+}
+assert.ok(sw.includes('"/phone-telemetry.css?v=162"'), "New mobile telemetry styling is not pre-cached");
+assert.ok(existsSync(resolve(root, "dist/phone-telemetry.css")), "Telemetry CSS missing from published PWA");
 assert.ok(
   phone.includes(`/phone.js?v=${shellVersion}`),
   "Phone page is loading a different script version than the recovery shell",
