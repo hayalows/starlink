@@ -402,6 +402,51 @@
           " They have different coverage, portability and billing rules."
         : "A comparison needs your saved bundle and at least 24 hours of recorded data. Edit the bundle under Costs on your laptop.";
 
+    // Additional recorded detail, derived only from the paired snapshot.
+    // Missing readings remain unknown rather than being displayed as zero.
+    let details = document.getElementById("phone-recording-details");
+    if (!details) {
+      details = document.createElement("section");
+      details.id = "phone-recording-details";
+      details.className = "phone-detail-card";
+      details.style.cssText = "margin:20px 0;padding:18px;border:1px solid var(--line, #343b40);border-radius:18px;";
+      const anchor = document.getElementById("sync-copy");
+      anchor?.parentElement?.append(details);
+    }
+    details.replaceChildren();
+    const heading = document.createElement("h3");
+    heading.textContent = "Recording details";
+    heading.style.margin = "0 0 12px";
+    details.append(heading);
+    const detailRows = [
+      ["Collector", current.collectorOk === true ? "Reporting OK" : "Not confirmed"],
+      ["Last collector check", current.lastCollectorAt ? ago(Number(current.lastCollectorAt)) : "Not reported"],
+      ["Last dish sample", ago(latest)],
+      ["Last cloud upload", ago(updated)],
+      ["Recorded traffic time", Number.isFinite(today?.trafficSeconds) ? amount(today.trafficSeconds / 3600, 1) + " hours" : "Unknown"],
+      ["Sampled time", Number.isFinite(today?.sampledSeconds) ? amount(today.sampledSeconds / 3600, 1) + " hours" : "Unknown"],
+      ["Traffic coverage", Number.isFinite(today?.trafficCoverage) ? Math.round(today.trafficCoverage * 100) + "%" : "Unknown"],
+      ["Download today", Number.isFinite(today?.buckets?.reduce((n, b) => n + (Number.isFinite(b.downGB) ? b.downGB : 0), 0)) ? amount(today.buckets.reduce((n, b) => n + (Number.isFinite(b.downGB) ? b.downGB : 0), 0)) + " GB in recorded buckets" : "Unknown"],
+      ["Upload today", Array.isArray(today?.buckets) && today.buckets.some((b) => Number.isFinite(b.upGB)) ? amount(today.buckets.reduce((n, b) => n + (Number.isFinite(b.upGB) ? b.upGB : 0), 0)) + " GB in recorded buckets" : "Unknown"],
+      ["Month-end data forecast", Number.isFinite(month?.forecastGb) ? amount(month.forecastGb) + " GB" : "Not enough data"],
+      ["Month-end electricity estimate", Number.isFinite(month?.projectedElectricity) ? money(month.projectedElectricity) : "Not available"],
+      ["Measured energy this month", Number.isFinite(month?.kWh) ? amount(month.kWh, 3) + " kWh" : "Not available"],
+    ];
+    for (const [name, value] of detailRows) {
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--line, #343b40);font-size:13px;";
+      const label = document.createElement("span");
+      label.textContent = name;
+      const number = document.createElement("strong");
+      number.style.textAlign = "right";
+      number.textContent = value;
+      row.append(label, number);
+      details.append(row);
+    }
+    const disclaimer = document.createElement("p");
+    disclaimer.style.cssText = "font-size:12px;opacity:.7;margin:12px 0 0";
+    disclaimer.textContent = "Values are from the selected recorder's last upload. Missing time is not zero usage. Device totals and dish WAN totals are different meters.";
+    details.append(disclaimer);
     const devices = Array.isArray(current.devices) ? current.devices : [];
     const holder = el("phone-device-list");
     holder.replaceChildren();
