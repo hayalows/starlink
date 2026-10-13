@@ -5,6 +5,7 @@ import Base from "../layouts/Base.astro";
   <link slot="head" rel="stylesheet" href="/phone.css?v=153" />
   <link slot="head" rel="stylesheet" href="/phone-refine.css?v=153" />
   <link slot="head" rel="stylesheet" href="/phone-telemetry.css?v=162" />
+  <link slot="head" rel="stylesheet" href="/phone-analytics.css?v=163" />
   <div class="phone-shell" id="phone-app">
     <header class="phone-top">
       <a href="/" class="phone-brand" aria-label="Starlink Ghana public website">
@@ -42,6 +43,7 @@ import Base from "../layouts/Base.astro";
         <div id="legacy-notice" class="phone-legacy-notice" role="status" hidden></div>
         <nav class="phone-section-nav" aria-label="Monitor sections">
           <button type="button" data-view="overview" aria-current="page"><span class="ui-icon ui-icon--home-02" aria-hidden="true"></span>Overview</button>
+          <button type="button" data-view="analytics"><span class="ui-icon ui-icon--bar-chart-02" aria-hidden="true"></span>Analytics</button>
           <button type="button" data-view="costs"><span class="ui-icon ui-icon--coins-01" aria-hidden="true"></span>Costs</button>
           <button type="button" data-view="devices"><span class="ui-icon ui-icon--layers-three-01" aria-hidden="true"></span>Devices</button>
           <button type="button" data-view="connection"><span class="ui-icon ui-icon--wifi" aria-hidden="true"></span>Connection</button>
@@ -90,6 +92,79 @@ import Base from "../layouts/Base.astro";
             <div class="phone-panel-head"><div><span class="phone-eyebrow">DAILY JOURNAL</span><h2>Your recent days</h2></div><span class="phone-chart-unit">HISTORY</span></div>
             <div id="phone-day-list" class="phone-day-list"></div>
           </section>
+        </section>
+
+
+        <section data-screen="analytics" aria-label="Analytics" class="phone-screen" hidden>
+          <div class="phone-screen-heading analytics-intro">
+            <div class="phone-eyebrow">YOUR ACTUAL RECORDINGS</div>
+            <h2>Explore your data<span class="phone-title-period">.</span></h2>
+            <p>Find your busiest times, compare download and upload, and inspect any day. Gaps are never counted as zero use.</p>
+          </div>
+          <section class="phone-panel analytics-filter-panel" aria-label="Analytics filters">
+            <div class="phone-panel-head analytics-topline">
+              <div><span class="phone-eyebrow">TIME RANGE</span><h2>When would you like to look?</h2></div>
+              <span class="phone-chart-unit">GMT · GHANA</span>
+            </div>
+            <div class="analytics-presets" role="group" aria-label="Date presets">
+              <button type="button" data-analysis-range="today">Today</button>
+              <button type="button" data-analysis-range="7d" class="is-active" aria-pressed="true">7 days</button>
+              <button type="button" data-analysis-range="30d">30 days</button>
+              <button type="button" data-analysis-range="month">This month</button>
+              <button type="button" data-analysis-range="all">All time</button>
+              <button type="button" data-analysis-range="custom">Custom dates</button>
+            </div>
+            <form class="analytics-custom" id="analytics-custom" hidden>
+              <label>From<input id="analytics-from" type="date" required /></label>
+              <label>To<input id="analytics-to" type="date" required /></label>
+              <button class="analytics-apply" type="submit">Apply range</button>
+            </form>
+            <p id="analytics-scope" class="analytics-scope" aria-live="polite">Choose a time range to explore saved measurements.</p>
+          </section>
+          <section class="analytics-summary-grid" aria-label="Selected range totals">
+            <button class="analytics-summary-tile is-active" type="button" data-analysis-metric="total" aria-pressed="true"><span>Total data</span><strong id="analytics-total">—</strong><small>Recorded GB</small></button>
+            <button class="analytics-summary-tile" type="button" data-analysis-metric="down" aria-pressed="false"><span>Downloaded</span><strong id="analytics-down">—</strong><small>Recorded GB</small></button>
+            <button class="analytics-summary-tile" type="button" data-analysis-metric="up" aria-pressed="false"><span>Uploaded</span><strong id="analytics-up">—</strong><small>Recorded GB</small></button>
+            <button class="analytics-summary-tile" type="button" data-analysis-metric="energy" aria-pressed="false"><span>Dish energy</span><strong id="analytics-energy">—</strong><small>Recorded kWh</small></button>
+          </section>
+          <section class="phone-panel analytics-graph-panel" aria-labelledby="analytics-trend-title">
+            <div class="phone-panel-head analytics-graph-header">
+              <div><span class="phone-eyebrow">USAGE OVER TIME</span><h2 id="analytics-trend-title">Recorded data trend</h2></div>
+              <span class="analytics-granularity" id="analytics-grain-label">DAILY</span>
+            </div>
+            <div id="analytics-graph-summary" class="analytics-graph-summary" aria-live="polite">Loading recorded history…</div>
+            <div id="analytics-graph" class="analytics-graph" role="group" aria-label="Interactive recorded usage trend"></div>
+            <div class="analytics-graph-legend"><span><i></i> Recorded</span><span><i></i> Missing observation</span></div>
+            <div id="analytics-point" class="analytics-point" role="status" aria-live="polite">Tap or focus a chart point to see the exact recorded usage.</div>
+            <div class="analytics-drill-tools">
+              <button type="button" id="analytics-back" hidden>← Back to date range</button>
+              <span id="analytics-chart-help">Tap a day to inspect its hourly activity.</span>
+            </div>
+          </section>
+          <section class="analytics-detail-grid" aria-label="Analysis highlights">
+            <article class="phone-panel analytics-insight">
+              <div class="phone-eyebrow">RECORDING QUALITY</div>
+              <strong id="analytics-coverage">—</strong>
+              <p id="analytics-coverage-note">Time with stored measurements in the selected range.</p>
+            </article>
+            <article class="phone-panel analytics-insight">
+              <div class="phone-eyebrow">BUSIEST RECORDED HOUR</div>
+              <strong id="analytics-peak">—</strong>
+              <p id="analytics-peak-note">Peak within this selection.</p>
+            </article>
+          </section>
+          <section class="phone-panel analytics-breakdown" aria-label="Traffic composition">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">DATA FLOW</span><h2>Download versus upload</h2></div></div>
+            <div class="analytics-mix" id="analytics-mix" role="img" aria-label="Download and upload proportions"><span class="analytics-mix-down"></span><span class="analytics-mix-up"></span></div>
+            <div class="analytics-mix-labels"><span id="analytics-down-share">Download —</span><span id="analytics-up-share">Upload —</span></div>
+            <p class="phone-fine">This is dish-wide WAN traffic, not per-device attribution. A blank period means no saved reading.</p>
+          </section>
+          <section class="phone-panel analytics-history-panel" aria-labelledby="analytics-history-title">
+            <div class="phone-panel-head"><div><span class="phone-eyebrow">DETAIL BY PERIOD</span><h2 id="analytics-history-title">Your recorded days</h2></div></div>
+            <p class="phone-fine">Select a row for the recorded data, energy and completeness. Select a day to explore each hour.</p>
+            <div id="analytics-history" class="analytics-history" role="list"></div>
+          </section>
+          <p id="analytics-message" class="analytics-message" role="status" aria-live="polite">Private history stays protected by your existing pairing code. Analytics refreshes when new readings have been uploaded.</p>
         </section>
 
         <section data-screen="costs" aria-label="Costs" class="phone-screen" hidden>
@@ -190,5 +265,6 @@ import Base from "../layouts/Base.astro";
       <button type="button" data-view="connection"><span aria-hidden="true"><span class="ui-icon ui-icon--wifi" aria-hidden="true"></span></span>Connection</button>
     </nav>
   </div>
-  <script type="module" is:inline src="/phone.js?v=162"></script>
+  <script type="module" is:inline src="/phone.js?v=163"></script>
+  <script type="module" is:inline src="/phone-analytics.js?v=163"></script>
 </Base>
