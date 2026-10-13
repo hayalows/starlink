@@ -448,7 +448,7 @@
   $("analytics-custom").addEventListener("submit", (event) => {
     event.preventDefault();
     const start = $("analytics-from").value, end = $("analytics-to").value;
-    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(start) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(end) ||
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) ||
       start > end || end > dateKey(today())) {
       setMessage("Choose a valid start and end date. The end cannot be in the future.", true);
       return;
