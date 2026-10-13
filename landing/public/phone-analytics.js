@@ -31,10 +31,6 @@
       : store.metric === "up" ? safeNumber(row.upGB) : totalGB(row);
   const unit = () => store.metric === "energy" ? "kWh" : "GB";
   const metricName = () => ({ total: "Total data", down: "Downloaded", up: "Uploaded", energy: "Dish energy" })[store.metric];
-  const grainSeconds = () => store.grain === "hour" ? 3600 : store.grain === "week" ? WEEK : DAY;
-  const startOf = (unix) => store.grain === "week"
-    ? Math.floor((unix + 259200) / WEEK) * WEEK - 259200
-    : Math.floor(unix / grainSeconds()) * grainSeconds();
   const labelFor = (unix) => store.grain === "hour" ? hourName(unix) : store.grain === "week"
     ? humanDate(unix) + " week" : humanDate(unix);
   const set = (id, value) => { const node = $(id); if (node) node.textContent = value; };
@@ -387,7 +383,7 @@
         (store.metric === "total" ? (up || 0) : 0), store.metric === "energy" ? 3 : 2) +
         " " + unit() + " recorded · " + (pct ?? 0) + "% time coverage" :
         "No stored readings within this range");
-    set("analytics-chart-help", store.grain === "day" ? "Tap a day to explore hourly data." :
+    set("analytics-chart-help", store.grain === "day" ? "Select a chart point for details, or tap a day below to inspect its hours." :
       store.grain === "hour" ? "Tap an hour to inspect its usage." :
       "Tap a week to inspect its readings.");
     set("analytics-history-title", store.grain === "hour" ? "Hourly record" :
