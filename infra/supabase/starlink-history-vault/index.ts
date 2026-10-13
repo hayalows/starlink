@@ -172,7 +172,7 @@ Deno.serve(async (request: Request) => {
       const span = to - from;
       const maxSpan = grain === "hour" ? 45 * 86400 : grain === "day" ? 366 * 86400 : 5 * 366 * 86400;
       if (!["hour", "day", "week"].includes(grain) ||
-          !/^\\d+$/.test(fromText) || !/^\\d+$/.test(toText) ||
+          !/^\d+$/.test(fromText) || !/^\d+$/.test(toText) ||
           !Number.isSafeInteger(from) || !Number.isSafeInteger(to) ||
           from < 0 || span <= 0 || span > maxSpan || to > Date.now()/1000 + 86400) {
         return respond({ error: "invalid_analytics_range" }, 400);
