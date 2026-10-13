@@ -77,6 +77,7 @@
         );
       state.token = token;
       state.payload = null;
+      window.StarlinkAnalytics?.clear();
       el("monitor-section")
         .querySelectorAll("[data-screen]")
         .forEach((section) => {
@@ -106,7 +107,7 @@
   };
 
   const showView = (next, scroll = true) => {
-    const allowed = ["overview", "costs", "devices", "connection"];
+    const allowed = ["overview", "analytics", "costs", "devices", "connection"];
     state.view = allowed.includes(next) ? next : "overview";
     document.querySelectorAll("[data-screen]").forEach((section) => {
       section.hidden = section.getAttribute("data-screen") !== state.view;
@@ -116,6 +117,7 @@
       if (active) button.setAttribute("aria-current", "page");
       else button.removeAttribute("aria-current");
     });
+    if (state.view === "analytics") window.StarlinkAnalytics?.open(state.token, state.payload?.snapshot);
     if (scroll) window.scrollTo({ top: 0, behavior: "instant" });
   };
   const monthPlanEstimate = (snapshot, month) => {
@@ -662,6 +664,7 @@
         return;
       }
       render();
+      window.StarlinkAnalytics?.refresh(state.token, data.snapshot);
       showView(state.view, false);
     } catch {
       if (token !== state.token || sequence !== refreshSequence) return;
@@ -796,6 +799,7 @@
     }
     state.token = "";
     state.payload = null;
+    window.StarlinkAnalytics?.clear();
     clearInterval(state.timer);
     state.timer = null;
     el("pair-section").hidden = false;
