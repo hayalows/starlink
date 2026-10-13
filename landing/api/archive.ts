@@ -12,7 +12,7 @@ export const OPTIONS = () => new Response(null, { status: 204, headers: HEADERS 
 async function forward(request: Request) {
   const url = new URL(request.url);
   const action = url.searchParams.get("action");
-  if (!["health", "summary", "read", "push"].includes(action ?? ""))
+  if (!["health", "summary", "read", "analytics", "push"].includes(action ?? ""))
     return Response.json({ error: "not_found" }, { status: 404, headers: HEADERS });
   if (
     (request.method === "GET" && action === "push") ||
@@ -22,8 +22,8 @@ async function forward(request: Request) {
   if (request.method === "POST" && Number(request.headers.get("content-length") ?? 0) > 90000)
     return Response.json({ error: "payload_too_large" }, { status: 413, headers: HEADERS });
   const params = new URLSearchParams({ action: action! });
-  if (action === "read") {
-    for (const key of ["before", "limit"]) {
+  if (action === "read" || action === "analytics") {
+    for (const key of action === "analytics" ? ["from", "to", "grain"] : ["before", "limit"]) {
       const v = url.searchParams.get(key);
       if (v) params.set(key, v);
     }
